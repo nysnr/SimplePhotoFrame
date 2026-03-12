@@ -1,0 +1,14 @@
+patch-package
+--- a/node_modules/expo-ads-admob/android/build.gradle
++++ b/node_modules/expo-ads-admob/android/build.gradle
+@@
+-// Creating sources with comments
+-task androidSourcesJar(type: Jar) {
+-  classifier = 'sources'
+-  from android.sourceSets.main.java.srcDirs
+-}
++// Creating sources with comments
++task androidSourcesJar(type: Jar) {
++  archiveClassifier.set('sources')
++  from android.sourceSets.main.java.srcDirs
++}
