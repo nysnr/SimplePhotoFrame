@@ -412,6 +412,8 @@ export default function App() {
   const [endCursor, setEndCursor] = useState(null);
 
   const [screenOrientation, setScreenOrientation] = useState('portrait');
+  const [showStartupSplash, setShowStartupSplash] = useState(true);
+  const [photoGridWidth, setPhotoGridWidth] = useState(width);
 
   const [showClock, setShowClock] = useState(true);
   const [showDate, setShowDate] = useState(true);
@@ -452,6 +454,25 @@ export default function App() {
 
   // 動的スタイルを生成
   const styles = getStyles(screenOrientation, clockDateSize);
+  const gridHorizontalPadding = screenOrientation === 'landscape' ? 20 : 10;
+  const gridItemMargin = 4;
+  const usablePhotoGridWidth = Math.max(
+    photoGridWidth - gridHorizontalPadding * 2,
+    screenOrientation === 'landscape' ? 480 : 320
+  );
+  const preferredPhotoCellWidth = screenOrientation === 'landscape' ? 150 : 120;
+  const photoColumns = Math.max(
+    3,
+    Math.floor(usablePhotoGridWidth / preferredPhotoCellWidth)
+  );
+  const photoItemSize = Math.floor(
+    usablePhotoGridWidth / photoColumns
+  ) - gridItemMargin
+  ;
+  const normalizedPhotoItemSize = Math.max(
+    screenOrientation === 'landscape' ? 96 : 90,
+    photoItemSize
+  );
 
   // 翻訳関数
   const t = (key, params) => {
@@ -485,6 +506,14 @@ export default function App() {
   useEffect(() => {
     // 何もしない：OSの回転に任せる
   }, [showSlideshow]);
+
+  useEffect(() => {
+    const splashTimer = setTimeout(() => {
+      setShowStartupSplash(false);
+    }, 2000);
+
+    return () => clearTimeout(splashTimer);
+  }, []);
 
   // 設定画面での回転強制を撤去（シンプル化）
   useEffect(() => {
@@ -857,7 +886,11 @@ export default function App() {
     
     return (
       <TouchableOpacity
-        style={[styles.photoItem, isSelected && styles.selectedPhoto]}
+        style={[
+          styles.photoItem,
+          { width: normalizedPhotoItemSize, height: normalizedPhotoItemSize },
+          isSelected && styles.selectedPhoto
+        ]}
         onPress={() => togglePhotoSelection(item)}
       >
         <Image 
@@ -1234,6 +1267,13 @@ export default function App() {
     const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
     const maxW = screenOrientation === 'portrait' ? screenWidth * 0.95 : screenWidth * 0.90;
     const maxH = screenOrientation === 'portrait' ? screenHeight * 0.85 : screenHeight * 0.90;
+    let frameW = maxW;
+    let frameH = maxH;
+    if (currentPhoto?.width && currentPhoto?.height) {
+      const scale = Math.min(maxW / currentPhoto.width, maxH / currentPhoto.height);
+      frameW = Math.round(currentPhoto.width * scale);
+      frameH = Math.round(currentPhoto.height * scale);
+    }
     
     return (
       <Modal 
@@ -1281,28 +1321,32 @@ export default function App() {
           />
           
           {currentPhoto && currentPhoto.uri ? (
-            <Image
-              source={{ uri: currentPhoto.uri }}
-              className="slideshow-image"
+            <View
               style={[
+                styles.slideshowImageFrame,
                 {
-                  width: maxW,
-                  height: maxH,
+                  width: frameW,
+                  height: frameH,
                 },
-
               ]}
-              resizeMode={resizeMode}
-              onError={(error) => {
-                console.error('Slideshow image error:', error);
-                // エラーが発生した場合、次の画像に進む
-                if (selectedPhotos.length > 1) {
-                  nextSlide();
-                }
-              }}
-              onLoad={() => {
-                console.log('Slideshow image loaded:', currentPhoto.id);
-              }}
-            />
+            >
+              <Image
+                source={{ uri: currentPhoto.uri }}
+                className="slideshow-image"
+                style={styles.slideshowImage}
+                resizeMode={resizeMode}
+                onError={(error) => {
+                  console.error('Slideshow image error:', error);
+                  // エラーが発生した場合、次の画像に進む
+                  if (selectedPhotos.length > 1) {
+                    nextSlide();
+                  }
+                }}
+                onLoad={() => {
+                  console.log('Slideshow image loaded:', currentPhoto.id);
+                }}
+              />
+            </View>
           ) : (
             <View style={styles.slideshowErrorContainer}>
               <Text style={styles.slideshowErrorText}>画像を読み込めませんでした</Text>
@@ -1336,6 +1380,15 @@ export default function App() {
 
 
   // 権限がない場合の表示
+  if (showStartupSplash) {
+    return (
+      <View style={styles.startupSplashContainer}>
+        <StatusBar barStyle="light-content" backgroundColor="#000" />
+        <Text style={styles.startupSplashText}>PhotoFrame</Text>
+      </View>
+    );
+  }
+
   if (hasPermission === false) {
     return (
       <LinearGradient colors={matteGradients[matteColor]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
@@ -1368,7 +1421,7 @@ export default function App() {
           
           {/* ヘッダー */}
           <View style={styles.header}>
-            <Text style={styles.title}>{t('app.title')}</Text>
+            <Text style={styles.title}>{t('Gallery')}</Text>
             <View style={styles.headerButtons}>
               <TouchableOpacity
                 style={styles.headerButton}
@@ -1416,11 +1469,15 @@ export default function App() {
             </View>
           ) : (
             <FlatList
+              key={`photo-grid-${photoColumns}`}
               data={photos}
               renderItem={renderPhotoItem}
               keyExtractor={(item) => item.id}
-              numColumns={3}
+              numColumns={photoColumns}
               style={styles.photoGrid}
+              onLayout={(event) => {
+                setPhotoGridWidth(event.nativeEvent.layout.width);
+              }}
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
@@ -1481,6 +1538,18 @@ export default function App() {
       minHeight: '100%',
       minWidth: '100%',
     },
+    startupSplashContainer: {
+      flex: 1,
+      backgroundColor: '#000',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    startupSplashText: {
+      color: '#fff',
+      fontSize: 36,
+      fontWeight: '700',
+      letterSpacing: 1,
+    },
     header: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -1534,12 +1603,8 @@ export default function App() {
     paddingVertical: screenOrientation === 'landscape' ? 10 : 5,
   },
   photoItem: {
-    flex: 1,
     margin: 2,
-    aspectRatio: 1,
     position: 'relative',
-    minWidth: screenOrientation === 'landscape' ? 80 : 100,
-    maxWidth: screenOrientation === 'landscape' ? 120 : 150,
   },
   selectedPhoto: {
     borderWidth: 3,
@@ -1759,6 +1824,11 @@ export default function App() {
   slideshowImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 24,
+  },
+  slideshowImageFrame: {
+    borderRadius: 24,
+    overflow: 'hidden',
   },
   slideshowImagePortrait: {
     maxWidth: '95%',
