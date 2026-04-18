@@ -105,7 +105,7 @@ export default function AdBanner({
           key={reloadKey}
           unitId={BANNER_AD_UNIT_ID}
           size={sizeConst}
-          requestOptions={{ requestNonPersonalizedAdsOnly: false }}
+          requestOptions={{ requestNonPersonalizedAdsOnly: true }}
           onAdFailedToLoad={handleFail}
         />
       )}
