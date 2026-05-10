@@ -114,7 +114,7 @@ const translations = {
     'help.termsOfService': 'Terms of Service',
     'help.back': 'Back',
     'help.viewOnline': 'View details online',
-    'help.privacyPolicyContent': 'We prioritize your privacy above all. This app operates entirely locally on your device to display your photos. Your photos are never uploaded to any server or shared with third parties.\n\nTo keep this app free, we use Google AdMob for advertising. AdMob may use anonymous identifiers to serve relevant ads. By using this app, you agree to this standard practice.',
+    'help.privacyPolicyContent': 'This app operates locally on your device to display your photos. Your photos are never uploaded to our servers.\n\nTo keep this app free, we use Google AdMob. AdMob may collect device identifiers (e.g., Advertising ID/IDFA), IP address, and app interaction/diagnostic data for ad delivery and measurement, and may share data with Google and its partners. You can limit ad personalization in your device settings.',
     'help.termsOfServiceContent': 'Thank you for using PhotoFrame. This app is provided "as available" to help you enjoy your photos. While we strive for perfection, the developer cannot be held liable for any issues arising from its use. Please use responsibly.'
   },
   ja: {
@@ -194,7 +194,7 @@ const translations = {
     'help.termsOfService': '利用規約',
     'help.back': '戻る',
     'help.viewOnline': 'オンラインで詳細を見る',
-    'help.privacyPolicyContent': 'このアプリは、ユーザーの個人データを収集しません。アプリ内で写真を表示するためにのみ、デバイスの写真ライブラリにアクセスします。写真がいかなるサーバーにもアップロードされることはありません。\n\nただし、広告表示のためにAdMob（Google）を使用しています。AdMobは、広告のパーソナライズのためにデータを収集し、Cookie/識別子を使用する場合があります。このアプリを使用することで、このデータ使用に同意したものとみなされます。',
+    'help.privacyPolicyContent': '本アプリは、端末内で写真を表示するためにローカルで動作し、写真データを当社サーバーへアップロードしません。\n\nただし、無料提供のために Google AdMob を利用します。AdMob は、広告配信および効果測定のために、端末識別子（Advertising ID/IDFA 等）、IPアドレス、アプリ利用状況/診断情報等を取得し、Google および提携先と共有する場合があります。広告のパーソナライズは端末設定で制限できます。',
     'help.termsOfServiceContent': 'このアプリは現在の状態で提供され、動作の完全性を保証するものではありません。開発者は、このアプリの使用から生じるいかなる損害についても責任を負いません。お客様は、適用されるすべての法律に従い、責任を持ってアプリを使用することに同意するものとします。'
   },
   zh: {
@@ -274,7 +274,7 @@ const translations = {
     'help.termsOfService': '服务条款',
     'help.back': '返回',
     'help.viewOnline': '在线查看详情',
-    'help.privacyPolicyContent': '我们将您的隐私视为重中之重。此应用程序完全在您的设备本地运行以显示您的照片。您的照片绝不会上传到任何服务器或与第三方共享。\n\n为了保持此应用程序免费，我们使用 Google AdMob 进行广告宣传。AdMob 可能会使用匿名标识符来展示相关广告。使用此应用程序即表示您同意此标准做法。',
+    'help.privacyPolicyContent': '本应用在您的设备本地运行以显示照片，您的照片不会上传到我们的服务器。\n\n为了免费提供服务，我们使用 Google AdMob。AdMob 可能会收集设备标识符（如 Advertising ID/IDFA）、IP 地址以及应用交互/诊断数据用于广告投放与效果衡量，并可能与 Google 及其合作伙伴共享。您可在设备设置中限制广告个性化。',
     'help.termsOfServiceContent': '感谢您使用 PhotoFrame。本应用程序按“现状”提供，以帮助您欣赏照片。虽然我们力求完美，但开发者不对因使用本应用程序而产生的任何问题负责。请负责任地使用。'
   },
   es: {
@@ -354,7 +354,7 @@ const translations = {
     'help.termsOfService': 'Términos de Uso',
     'help.back': 'Volver',
     'help.viewOnline': 'Ver detalles en línea',
-    'help.privacyPolicyContent': 'Valoramos su privacidad por encima de todo. Esta aplicación funciona completamente de forma local en su dispositivo para mostrar sus fotos. Sus fotos nunca se suben a ningún servidor ni se comparten con terceros.\n\nPara mantener esta aplicación gratuita, utilizamos Google AdMob para la publicidad. AdMob puede utilizar identificadores anónimos para ofrecer anuncios relevantes. Al utilizar esta aplicación, usted acepta esta práctica estándar.',
+    'help.privacyPolicyContent': 'Esta aplicación funciona localmente en su dispositivo para mostrar sus fotos. Sus fotos nunca se suben a nuestros servidores.\n\nPara mantener la app gratuita, utilizamos Google AdMob. AdMob puede recopilar identificadores del dispositivo (p. ej., Advertising ID/IDFA), la dirección IP y datos de interacción/diagnóstico para la entrega y medición de anuncios, y puede compartir datos con Google y sus socios. Puede limitar la personalización de anuncios en los ajustes del dispositivo.',
     'help.termsOfServiceContent': 'Gracias por usar PhotoFrame. Esta aplicación se proporciona "tal como está" para ayudarle a disfrutar de sus fotos. Aunque nos esforzamos por la perfección, el desarrollador no se hace responsable de ningún problema derivado de su uso. Por favor, utilícela responsablemente.'
   }
 };
