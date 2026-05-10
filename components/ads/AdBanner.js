@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Platform, InteractionManager } from 'react-native';
+import { View, Text, Platform, InteractionManager } from 'react-native';
 import Constants from 'expo-constants';
 import { ENABLE_ADS, BANNER_AD_UNIT_ID } from '../../config/adsConfig';
 
@@ -24,6 +24,21 @@ export default function AdBanner({
   const [BannerAdComp, setBannerAdComp] = useState(null);
   const [BannerAdSize, setBannerAdSize] = useState(null);
   const isExpoGo = Constants?.executionEnvironment === 'storeClient';
+  const shouldShowPlaceholder = DEV && (
+    Platform.OS === 'web'
+    || isExpoGo
+    || !ENABLE_ADS
+    || !BANNER_AD_UNIT_ID
+    || !BannerAdComp
+  );
+
+  const placeholderText = (() => {
+    if (Platform.OS === 'web') return 'Ad Placeholder (web)';
+    if (isExpoGo) return 'Ad Placeholder (Expo Go)';
+    if (!ENABLE_ADS) return 'Ad Placeholder (disabled)';
+    if (!BANNER_AD_UNIT_ID) return 'Ad Placeholder (missing unit id)';
+    return 'Ad Placeholder';
+  })();
 
   // Avoid importing native module on web entirely
   useEffect(() => {
@@ -66,6 +81,16 @@ export default function AdBanner({
     const backoff = Math.min(8000, 1000 * Math.pow(2, next - 1)); // 1s, 2s, 4s
     setTimeout(() => setReloadKey((k) => k + 1), backoff);
   };
+
+  if (shouldShowPlaceholder) {
+    return (
+      <View style={[{ height, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.25)', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.25)' }, style]}>
+        <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: '600' }}>
+          {placeholderText}
+        </Text>
+      </View>
+    );
+  }
 
   // Keep space even if ads disabled
   if (!ENABLE_ADS) {

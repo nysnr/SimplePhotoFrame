@@ -898,7 +898,7 @@ export default function App() {
             </TouchableOpacity>
           </View>
           
-          <ScrollView style={styles.settingsScroll}>
+          <ScrollView style={styles.settingsScroll} contentContainerStyle={{ paddingBottom: 70 }}>
             {/* 言語設定 */}
             <View style={styles.settingSection}>
               <Text style={styles.settingLabel}>{t('settings.language')}</Text>
@@ -1039,13 +1039,14 @@ export default function App() {
               </View>
             </View>
 
-            {/* Banner Ad - settings screen */}
-            <AdBanner style={{ marginTop: 10 }} />
           </ScrollView>
+          
+          <AdBanner style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
         </SafeAreaView>
       </LinearGradient>
     </Modal>
   );
+
 
   // ヘルプ画面のレンダリング
   const renderHelp = () => (
@@ -1077,7 +1078,7 @@ export default function App() {
             )}
           </View>
           
-          <ScrollView style={styles.settingsScroll}>
+          <ScrollView style={styles.settingsScroll} contentContainerStyle={{ paddingBottom: 70 }}>
             {helpSection === 'main' ? (
               <>
                 {/* 使い方ガイド */}
@@ -1150,9 +1151,9 @@ export default function App() {
               </View>
             )}
             
-            {/* Banner Ad - help screen */}
-            <AdBanner style={{ marginTop: 10 }} />
           </ScrollView>
+          
+          <AdBanner style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
         </SafeAreaView>
       </LinearGradient>
     </Modal>
@@ -1433,6 +1434,7 @@ export default function App() {
               keyExtractor={(item) => item.id}
               numColumns={photoColumns}
               style={styles.photoGrid}
+              contentContainerStyle={{ paddingBottom: 70 }}
               onLayout={(event) => {
                 setPhotoGridWidth(event.nativeEvent.layout.width);
               }}
@@ -1477,7 +1479,7 @@ export default function App() {
           )}
           
           {/* Banner Ad - gallery/selection screen */}
-          <AdBanner />
+          <AdBanner style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
           
           {renderSettings()}
           {renderHelp()}
@@ -1814,7 +1816,7 @@ export default function App() {
   },
   slideshowIndicator: {
     position: 'absolute',
-    bottom: screenOrientation === 'landscape' ? 20 : 50,
+    bottom: screenOrientation === 'landscape' ? 70 : 50,
     backgroundColor: 'rgba(0,0,0,0.5)',
     paddingHorizontal: 15,
     paddingVertical: 8,
@@ -1844,7 +1846,7 @@ export default function App() {
   // 時計・日付オーバーレイのスタイル
   clockOverlay: {
     position: 'absolute',
-    bottom: screenOrientation === 'landscape' ? 20 : 50,
+    bottom: screenOrientation === 'landscape' ? 70 : 50,
     left: 0,
     right: 0,
     backgroundColor: 'transparent',
