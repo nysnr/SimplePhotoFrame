@@ -27,6 +27,13 @@ import { AdBanner } from './components/ads';
 import Constants from 'expo-constants';
 
 const { width, height } = Dimensions.get('window');
+const DEV = typeof __DEV__ !== 'undefined' && __DEV__;
+const devLog = (...args) => {
+  if (DEV) console.log(...args);
+};
+const devWarn = (...args) => {
+  if (DEV) console.warn(...args);
+};
 
 // 翻訳データ
 const translations = {
@@ -390,7 +397,7 @@ export default function App() {
         }
       }
     } catch (e) {
-      console.warn('Failed to get device locale', e);
+      devWarn('Failed to get device locale', e);
     }
     // デフォルトまたはサポート外の場合は英語
     return 'en';
@@ -558,7 +565,7 @@ export default function App() {
       }
       
       const result = await MediaLibrary.getAssetsAsync(options);
-      console.log('Loaded photos:', result.assets.length);
+      devLog('Loaded photos:', result.assets.length);
       
       // 画像の詳細情報を取得
       const photosWithInfo = await Promise.all(
@@ -572,7 +579,7 @@ export default function App() {
               height: assetInfo.height
             };
           } catch (error) {
-            console.warn('Failed to get asset info for:', asset.id, error);
+            devWarn('Failed to get asset info for:', asset.id, error);
             return asset;
           }
         })
@@ -592,7 +599,7 @@ export default function App() {
       setHasNextPage(false);
       
       // デモ用のサンプル画像を追加（Expo Goでテスト用）
-      if (photos.length === 0) {
+      if (DEV && photos.length === 0) {
         const samplePhotos = [
           {
             id: 'sample1',
@@ -639,93 +646,58 @@ export default function App() {
 
   // スライドショーの開始
   const startSlideshow = async () => {
-    console.log('=== SLIDESHOW FUNCTION CALLED ===');
-    console.log('Function startSlideshow is being executed');
-    
     try {
-      console.log('=== SLIDESHOW START DEBUG ===');
-      console.log('Starting slideshow...');
-      console.log('Checking dependencies...');
-      console.log('selectedPhotos available:', !!selectedPhotos);
-      console.log('t function available:', !!t);
-      console.log('Alert available:', !!Alert);
-      console.log('Selected photos count:', selectedPhotos.length);
-      console.log('Selected photos:', selectedPhotos.map(p => ({ id: p.id, uri: p.uri })));
-      
       if (selectedPhotos.length === 0) {
-        console.log('No photos selected, showing alert');
         Alert.alert(t('alert.selectPhotos.title'), t('alert.selectPhotos.message'));
         return;
       }
       
       // 選択された写真が有効なURIを持っているか確認
       const validPhotos = selectedPhotos.filter(photo => photo.uri && photo.uri.length > 0);
-      console.log('Valid photos count:', validPhotos.length);
-      console.log('Valid photos URIs:', validPhotos.map(p => p.uri));
       
       if (validPhotos.length === 0) {
-        console.log('No valid photos found, showing error alert');
         Alert.alert('エラー', '選択された写真を読み込めませんでした。別の写真を選択してください。');
         return;
       }
       
-      console.log(`Valid photos: ${validPhotos.length}`);
-      
       // 既存のタイマーをクリア
       if (slideshowTimer.current) {
-        console.log('Clearing existing slideshow timer');
         clearInterval(slideshowTimer.current);
         slideshowTimer.current = null;
       }
       
       // スライドショー状態を設定
-      console.log('Setting slideshow state...');
       setCurrentSlideIndex(0);
       setShowSlideshow(true);
       setShowCloseButton(true);
-      console.log('Slideshow state set: showSlideshow=true, currentSlideIndex=0');
       
       // 終了ボタンの自動非表示タイマーを設定
       closeButtonTimer.current = setTimeout(() => {
         setShowCloseButton(false);
-        console.log('Close button auto-hidden after 5 seconds');
       }, 5000);
       
       // スライドショータイマーを設定（複数の写真がある場合のみ）
       if (validPhotos.length > 1) {
-        console.log('Multiple photos detected, setting up slideshow timer...');
-        console.log(`Timer interval: ${slideshowInterval}ms`);
-        
         // 少し遅延させてから開始（状態更新を確実にするため）
         slideshowStartTimeout.current = setTimeout(() => {
-          console.log('Starting slideshow interval timer...');
           slideshowTimer.current = setInterval(() => {
-            console.log('Timer tick - advancing to next slide');
             setCurrentSlideIndex(prev => {
               const nextIndex = (prev + 1) % validPhotos.length;
-              console.log(`Slideshow advancing from ${prev} to ${nextIndex}`);
               return nextIndex;
             });
           }, slideshowInterval);
-          console.log('Slideshow timer started successfully');
         }, 1000); // 1秒の遅延で確実に開始
-      } else {
-        console.log('Only one photo selected, no timer needed');
       }
-      
-      console.log('=== SLIDESHOW START COMPLETED ===');
-      
     } catch (error) {
-      console.error('=== SLIDESHOW START ERROR ===');
-      console.error('Error starting slideshow:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('Error details:', JSON.stringify(error, null, 2));
+      if (DEV) {
+        console.error('Error starting slideshow:', error);
+      } else {
+        console.error('Error starting slideshow');
+      }
       
       Alert.alert('エラー', 'スライドショーの開始に失敗しました。もう一度お試しください。');
       
       // エラー時のクリーンアップ
-      console.log('Performing error cleanup...');
       setShowSlideshow(false);
       if (slideshowTimer.current) {
         clearInterval(slideshowTimer.current);
@@ -735,45 +707,40 @@ export default function App() {
         clearTimeout(slideshowStartTimeout.current);
         slideshowStartTimeout.current = null;
       }
-      console.log('=== SLIDESHOW START ERROR CLEANUP COMPLETED ===');
     }
   };
 
   // スライドショーの停止
   const stopSlideshow = async () => {
     try {
-      console.log('Stopping slideshow...');
-      
       setShowSlideshow(false);
       
       // タイマーをクリア
       if (slideshowTimer.current) {
         clearInterval(slideshowTimer.current);
         slideshowTimer.current = null;
-        console.log('Slideshow interval timer cleared');
       }
       
       // 遅延開始タイマーもクリア
       if (slideshowStartTimeout.current) {
         clearTimeout(slideshowStartTimeout.current);
         slideshowStartTimeout.current = null;
-        console.log('Slideshow start timeout cleared');
       }
       
       // 終了ボタンタイマーもクリア
       if (closeButtonTimer.current) {
         clearTimeout(closeButtonTimer.current);
         closeButtonTimer.current = null;
-        console.log('Close button timer cleared');
       }
       
       // 終了ボタンの表示状態をリセット
       setShowCloseButton(true);
-      
-      console.log('Slideshow stopped successfully');
-      
     } catch (error) {
-      console.error('Error stopping slideshow:', error);
+      if (DEV) {
+        console.error('Error stopping slideshow:', error);
+      } else {
+        console.error('Error stopping slideshow');
+      }
       // エラーが発生してもスライドショーは確実に停止
       setShowSlideshow(false);
       if (slideshowTimer.current) {
@@ -799,7 +766,6 @@ export default function App() {
   const handleSlideshowTouch = () => {
     if (!showCloseButton) {
       setShowCloseButton(true);
-      console.log('Close button shown on touch');
       
       // 既存のタイマーをクリア
       if (closeButtonTimer.current) {
@@ -810,7 +776,6 @@ export default function App() {
       // 新しいタイマーを設定
       closeButtonTimer.current = setTimeout(() => {
         setShowCloseButton(false);
-        console.log('Close button auto-hidden after 5 seconds');
       }, 5000);
     } else {
       // 既に表示されている場合はタイマーをリセット
@@ -819,7 +784,6 @@ export default function App() {
       }
       closeButtonTimer.current = setTimeout(() => {
         setShowCloseButton(false);
-        console.log('Close button auto-hidden after 5 seconds');
       }, 5000);
     }
   };
@@ -897,10 +861,7 @@ export default function App() {
           source={{ uri: item.uri }} 
           style={styles.photoThumbnail}
           onError={(error) => {
-            console.warn('Image load error for:', item.id, error);
-          }}
-          onLoad={() => {
-            console.log('Image loaded successfully:', item.id);
+            devWarn('Image load error for:', item.id, error);
           }}
           defaultSource={require('./assets/icon.png')}
         />
@@ -1202,7 +1163,6 @@ export default function App() {
     if (selectedPhotos.length > 1) {
       setCurrentSlideIndex(prev => {
         const nextIndex = (prev + 1) % selectedPhotos.length;
-        console.log(`Manual navigation: advancing from ${prev} to ${nextIndex}`);
         // 手動切り替え時の回転解除はiOSではスキップ
 
         return nextIndex;
@@ -1215,7 +1175,6 @@ export default function App() {
     if (selectedPhotos.length > 1) {
       setCurrentSlideIndex(prev => {
         const prevIndex = prev === 0 ? selectedPhotos.length - 1 : prev - 1;
-        console.log(`Manual navigation: going back from ${prev} to ${prevIndex}`);
         return prevIndex;
       });
     }
@@ -1230,8 +1189,6 @@ export default function App() {
     const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
     const photoAspectRatio = photo.width / photo.height;
     const screenAspectRatio = screenWidth / screenHeight;
-    
-    console.log(`Photo sizing: screen=${screenWidth}x${screenHeight} (${screenOrientation}), photo=${photo.width}x${photo.height}, ratios: screen=${screenAspectRatio.toFixed(2)}, photo=${photoAspectRatio.toFixed(2)}`);
     
     // 画面の向きと写真の向きを考慮してより適切な表示モードを選択
     if (screenOrientation === 'landscape') {
@@ -1336,14 +1293,15 @@ export default function App() {
                 style={styles.slideshowImage}
                 resizeMode={resizeMode}
                 onError={(error) => {
-                  console.error('Slideshow image error:', error);
+                  if (DEV) {
+                    console.error('Slideshow image error:', error);
+                  } else {
+                    console.error('Slideshow image error');
+                  }
                   // エラーが発生した場合、次の画像に進む
                   if (selectedPhotos.length > 1) {
                     nextSlide();
                   }
-                }}
-                onLoad={() => {
-                  console.log('Slideshow image loaded:', currentPhoto.id);
                 }}
               />
             </View>

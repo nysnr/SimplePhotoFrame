@@ -17,6 +17,7 @@ export default function AdBanner({
   delayMs = 1200,
   style,
 }) {
+  const DEV = typeof __DEV__ !== 'undefined' && __DEV__;
   const [shouldLoad, setShouldLoad] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
@@ -40,10 +41,10 @@ export default function AdBanner({
           }
         })
         .catch(err => {
-          console.log('AdMob import failed (expected in Expo Go):', err);
+          if (DEV) console.log('AdMob import failed (expected in Expo Go):', err);
         });
     } catch (e) {
-      console.log('AdMob dynamic import error:', e);
+      if (DEV) console.log('AdMob dynamic import error:', e);
     }
     return () => { mounted = false; };
   }, []);
@@ -73,6 +74,10 @@ export default function AdBanner({
 
   // Web/ExpoGo preview: keep a placeholder without attempting to load native module
   if (Platform.OS === 'web' || isExpoGo) {
+    return <View style={[{ height }, style]} />;
+  }
+
+  if (!BANNER_AD_UNIT_ID) {
     return <View style={[{ height }, style]} />;
   }
 
