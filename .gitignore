@@ -41,6 +41,9 @@ builds/
 **/._*
 Thumbs.db
 
+# Trae / local tooling
+windows_sync_bundle/
+
 # Log files
 npm-debug.log*
 yarn-debug.log*
