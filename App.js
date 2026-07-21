@@ -384,6 +384,63 @@ const matteGradients = {
   oak: ['#5E2F0D', '#B8875A']
 };
 
+const getPreviewPhotos = () => ([
+  {
+    id: 'preview-1',
+    uri: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
+    width: 1200,
+    height: 800,
+    filename: 'preview-landscape-1.jpg'
+  },
+  {
+    id: 'preview-2',
+    uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80',
+    width: 900,
+    height: 1200,
+    filename: 'preview-portrait-1.jpg'
+  },
+  {
+    id: 'preview-3',
+    uri: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80',
+    width: 1200,
+    height: 800,
+    filename: 'preview-landscape-2.jpg'
+  },
+  {
+    id: 'preview-4',
+    uri: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=900&q=80',
+    width: 900,
+    height: 1200,
+    filename: 'preview-portrait-2.jpg'
+  },
+]);
+
+const getTheme = (matteColor) => {
+  const isLight = matteColor === 'white';
+
+  return {
+    isLight,
+    textPrimary: isLight ? '#0F172A' : '#FFFFFF',
+    textSecondary: isLight ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.76)',
+    textMuted: isLight ? 'rgba(15,23,42,0.56)' : 'rgba(255,255,255,0.56)',
+    surface: isLight ? 'rgba(255,255,255,0.68)' : 'rgba(255,255,255,0.08)',
+    surfaceStrong: isLight ? 'rgba(255,255,255,0.84)' : 'rgba(255,255,255,0.14)',
+    surfaceSoft: isLight ? 'rgba(15,23,42,0.05)' : 'rgba(255,255,255,0.05)',
+    border: isLight ? 'rgba(15,23,42,0.10)' : 'rgba(255,255,255,0.12)',
+    accent: isLight ? '#2563EB' : '#7C9CFF',
+    accentStrong: isLight ? '#1D4ED8' : '#5B7CFA',
+    accentSoft: isLight ? 'rgba(37,99,235,0.14)' : 'rgba(124,156,255,0.20)',
+    iconButtonBg: isLight ? 'rgba(255,255,255,0.64)' : 'rgba(255,255,255,0.10)',
+    iconButtonBorder: isLight ? 'rgba(15,23,42,0.10)' : 'rgba(255,255,255,0.10)',
+    cardShadow: '#000000',
+    photoLabelBg: isLight ? 'rgba(255,255,255,0.82)' : 'rgba(4,10,20,0.62)',
+    closeButtonBg: isLight ? 'rgba(255,255,255,0.82)' : 'rgba(0,0,0,0.54)',
+    closeButtonText: isLight ? '#0F172A' : '#FFFFFF',
+    overlayStrong: isLight ? 'rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.34)',
+    disabled: isLight ? 'rgba(148,163,184,0.85)' : 'rgba(107,114,128,0.92)',
+  };
+};
+
 export default function App() {
   // デバイスの言語設定に基づいて初期言語を決定する関数
   const getInitialLanguage = () => {
@@ -460,7 +517,9 @@ export default function App() {
   };
 
   // 動的スタイルを生成
-  const styles = getStyles(screenOrientation, clockDateSize);
+  const theme = getTheme(matteColor);
+  const styles = getStyles(screenOrientation, clockDateSize, theme);
+  const isLandscape = screenOrientation === 'landscape';
   const gridHorizontalPadding = screenOrientation === 'landscape' ? 20 : 10;
   const gridItemMargin = 4;
   const usablePhotoGridWidth = Math.max(
@@ -537,6 +596,13 @@ export default function App() {
   // 権限の確認と写真の読み込み
   useEffect(() => {
     (async () => {
+      if (Platform.OS === 'web') {
+        setHasPermission(true);
+        setHasNextPage(false);
+        setEndCursor(null);
+        setPhotos(getPreviewPhotos());
+        return;
+      }
       const { status } = await MediaLibrary.requestPermissionsAsync();
       setHasPermission(status === 'granted');
       if (status === 'granted') {
@@ -551,6 +617,16 @@ export default function App() {
   // 写真の読み込み
   const loadPhotos = async (loadMore = false) => {
     if (loading || (!hasNextPage && loadMore)) return;
+
+    if (Platform.OS === 'web') {
+      setHasPermission(true);
+      setHasNextPage(false);
+      setEndCursor(null);
+      setPhotos(getPreviewPhotos());
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
     
     setLoading(true);
     try {
@@ -856,6 +932,7 @@ export default function App() {
           isSelected && styles.selectedPhoto
         ]}
         onPress={() => togglePhotoSelection(item)}
+        activeOpacity={0.9}
       >
         <Image 
           source={{ uri: item.uri }} 
@@ -891,7 +968,7 @@ export default function App() {
         <SafeAreaView style={styles.settingsContent}>
           <View style={styles.settingsHeader}>
             <Text style={styles.settingsTitle}>{t('Settings')}</Text>
-            <TouchableOpacity onPress={() => {
+            <TouchableOpacity style={styles.closeButtonPill} onPress={() => {
               setShowSettings(false);
             }}>
               <Text style={styles.closeButton}>{t('app.close')}</Text>
@@ -1062,7 +1139,7 @@ export default function App() {
             {helpSection === 'main' ? (
               <>
                 <Text style={styles.settingsTitle}>{t('app.help')}</Text>
-                <TouchableOpacity onPress={() => setShowHelp(false)}>
+                <TouchableOpacity style={styles.closeButtonPill} onPress={() => setShowHelp(false)}>
                   <Text style={styles.closeButton}>{t('app.close')}</Text>
                 </TouchableOpacity>
               </>
@@ -1071,7 +1148,7 @@ export default function App() {
                 <Text style={styles.settingsTitle}>
                   {helpSection === 'privacy' ? t('help.privacyPolicy') : t('help.termsOfService')}
                 </Text>
-                <TouchableOpacity onPress={() => setHelpSection('main')}>
+                <TouchableOpacity style={styles.closeButtonPill} onPress={() => setHelpSection('main')}>
                   <Text style={styles.closeButton}>{t('help.back')}</Text>
                 </TouchableOpacity>
               </>
@@ -1084,7 +1161,7 @@ export default function App() {
                 {/* 使い方ガイド */}
                 <View style={styles.settingSection}>
                   <Text style={styles.settingLabel}>{t('help.usage')}</Text>
-                  <Text style={{ color: '#fff', fontSize: 16, lineHeight: 24, paddingHorizontal: 10 }}>
+                  <Text style={styles.helpBodyText}>
                     {t('help.usageContent')}
                   </Text>
                 </View>
@@ -1092,11 +1169,11 @@ export default function App() {
                 {/* バージョン情報 */}
                 <View style={styles.settingSection}>
                   <Text style={styles.settingLabel}>{t('help.about')}</Text>
-                  <View style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: 15, borderRadius: 10 }}>
-                    <Text style={{ color: '#fff', fontSize: 16, marginBottom: 5 }}>
+                  <View style={styles.aboutCard}>
+                    <Text style={styles.aboutTitle}>
                       {t('app.title')}
                     </Text>
-                    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>
+                    <Text style={styles.aboutMeta}>
                       {t('help.version')}: 1.0.0 (Beta)
                     </Text>
                   </View>
@@ -1122,21 +1199,13 @@ export default function App() {
                 </View>
               </>
             ) : (
-              <View style={{ padding: 15 }}>
-                <Text style={{ color: '#fff', fontSize: 16, lineHeight: 24 }}>
+              <View style={styles.legalContent}>
+                <Text style={styles.helpBodyText}>
                   {helpSection === 'privacy' ? t('help.privacyPolicyContent') : t('help.termsOfServiceContent')}
                 </Text>
                 
                 <TouchableOpacity
-                  style={{ 
-                    marginTop: 20, 
-                    padding: 12, 
-                    backgroundColor: 'rgba(255,255,255,0.2)', 
-                    borderRadius: 8, 
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                    justifyContent: 'center'
-                  }}
+                  style={styles.secondaryActionButton}
                   onPress={() => {
                     const url = helpSection === 'privacy' 
                       ? 'https://nysnr.github.io/PhotoFrameNew/privacy.html' 
@@ -1144,7 +1213,7 @@ export default function App() {
                     Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
                   }}
                 >
-                  <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+                  <Text style={styles.secondaryActionButtonText}>
                     {t('help.viewOnline')} 🌐
                   </Text>
                 </TouchableOpacity>
@@ -1352,21 +1421,23 @@ export default function App() {
     return (
       <LinearGradient colors={matteGradients[matteColor]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
         <SafeAreaView style={styles.permissionContainer}>
-          <Text style={styles.permissionTitle}>{t('permission.title')}</Text>
-          <Text style={styles.permissionMessage}>{t('permission.message')}</Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={() => {
-              MediaLibrary.requestPermissionsAsync().then(({ status }) => {
-                setHasPermission(status === 'granted');
-                if (status === 'granted') {
-                  loadPhotos();
-                }
-              });
-            }}
-          >
-            <Text style={styles.retryButtonText}>{t('button.retry')}</Text>
-          </TouchableOpacity>
+          <View style={styles.permissionCard}>
+            <Text style={styles.permissionTitle}>{t('permission.title')}</Text>
+            <Text style={styles.permissionMessage}>{t('permission.message')}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={() => {
+                MediaLibrary.requestPermissionsAsync().then(({ status }) => {
+                  setHasPermission(status === 'granted');
+                  if (status === 'granted') {
+                    loadPhotos();
+                  }
+                });
+              }}
+            >
+              <Text style={styles.retryButtonText}>{t('button.retry')}</Text>
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
       </LinearGradient>
     );
@@ -1376,11 +1447,14 @@ export default function App() {
     <GestureHandlerRootView style={styles.container}>
       <LinearGradient colors={matteGradients[matteColor]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
         <SafeAreaView style={styles.container}>
-          <StatusBar barStyle="light-content" backgroundColor={matteColors[matteColor]} />
+          <StatusBar barStyle={theme.isLight ? 'dark-content' : 'light-content'} backgroundColor={matteColors[matteColor]} />
           
           {/* ヘッダー */}
           <View style={styles.header}>
-            <Text style={styles.title}>{t('Gallery')}</Text>
+            <View style={styles.headerTextGroup}>
+              <Text style={styles.headerEyebrow}>{t('app.title')}</Text>
+              <Text style={styles.title}>{t('Gallery')}</Text>
+            </View>
             <View style={styles.headerButtons}>
               <TouchableOpacity
                 style={styles.headerButton}
@@ -1403,12 +1477,18 @@ export default function App() {
           
           {/* 選択状況とスライドショーボタン */}
           <View style={styles.controlPanel}>
-            <Text style={styles.selectionText}>
-              {t('app.selectPhotos', { count: selectedPhotos.length })}
-            </Text>
+            <View style={styles.controlTextGroup}>
+              <Text style={styles.selectionLabel}>
+                {t('app.selectPhotos', { count: selectedPhotos.length })}
+              </Text>
+              <Text style={styles.selectionText}>
+                {selectedPhotos.length === 0 ? t('SelectPhoto') : t('button.startSlideshow')}
+              </Text>
+            </View>
             <TouchableOpacity
               style={[
                 styles.slideshowButton,
+                !isLandscape && styles.slideshowButtonPortrait,
                 selectedPhotos.length === 0 && styles.disabledButton
               ]}
               onPress={startSlideshow}
@@ -1423,7 +1503,7 @@ export default function App() {
           {/* 写真ギャラリー */}
           {hasPermission === null ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#fff" />
+              <ActivityIndicator size="large" color={theme.accent} />
               <Text style={styles.loadingText}>{t('loading.initializing')}</Text>
             </View>
           ) : (
@@ -1447,7 +1527,7 @@ export default function App() {
                     setHasNextPage(true);
                     loadPhotos();
                   }}
-                  tintColor="#fff"
+                  tintColor={theme.accent}
                 />
               }
               onEndReached={() => {
@@ -1459,7 +1539,7 @@ export default function App() {
               ListFooterComponent={
                 loading && hasNextPage ? (
                   <View style={styles.loadingFooter}>
-                    <ActivityIndicator size="small" color="#fff" />
+                    <ActivityIndicator size="small" color={theme.accent} />
                     <Text style={styles.loadingText}>{t('loading.morePhotos')}</Text>
                   </View>
                 ) : null
@@ -1492,7 +1572,7 @@ export default function App() {
 }
 
   // 動的スタイル生成関数
-  const getStyles = (screenOrientation, clockDateSize) => StyleSheet.create({
+  const getStyles = (screenOrientation, clockDateSize, theme) => StyleSheet.create({
     container: {
       flex: 1,
       minHeight: '100%',
@@ -1515,90 +1595,177 @@ export default function App() {
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingHorizontal: screenOrientation === 'landscape' ? 40 : 20,
-      paddingVertical: screenOrientation === 'landscape' ? 10 : 15,
+      paddingVertical: screenOrientation === 'landscape' ? 16 : 18,
       flexWrap: 'wrap',
+      marginHorizontal: screenOrientation === 'landscape' ? 18 : 14,
+      marginTop: screenOrientation === 'landscape' ? 16 : 12,
+      marginBottom: 12,
+      borderRadius: 24,
+      backgroundColor: theme.surface,
+      borderWidth: 1,
+      borderColor: theme.border,
+      shadowColor: theme.cardShadow,
+      shadowOpacity: theme.isLight ? 0.12 : 0.28,
+      shadowRadius: 24,
+      shadowOffset: { width: 0, height: 14 },
+      elevation: 10,
     },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  headerButtons: {
-    flexDirection: 'row',
-  },
-  headerButton: {
-    marginLeft: 15,
-  },
-  headerButtonText: {
-    fontSize: 20,
-    color: '#fff',
-  },
-  controlPanel: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  selectionText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  slideshowButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  disabledButton: {
-    backgroundColor: '#666',
-  },
-  slideshowButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  photoGrid: {
-    flex: 1,
-    paddingHorizontal: screenOrientation === 'landscape' ? 20 : 10,
-    paddingVertical: screenOrientation === 'landscape' ? 10 : 5,
-  },
-  photoItem: {
-    margin: 2,
-    position: 'relative',
-  },
-  selectedPhoto: {
-    borderWidth: 3,
-    borderColor: '#007AFF',
-  },
-  photoThumbnail: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 5,
-  },
-  selectedOverlay: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectedText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+    headerTextGroup: {
+      flexShrink: 1,
+      gap: 4,
+    },
+    headerEyebrow: {
+      fontSize: 12,
+      fontWeight: '700',
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+      color: theme.textMuted,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: '800',
+      color: theme.textPrimary,
+      letterSpacing: -0.5,
+    },
+    headerButtons: {
+      flexDirection: 'row',
+      gap: 10,
+    },
+    headerButton: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.iconButtonBg,
+      borderWidth: 1,
+      borderColor: theme.iconButtonBorder,
+    },
+    headerButtonText: {
+      fontSize: 20,
+      color: theme.textPrimary,
+    },
+    controlPanel: {
+      flexDirection: screenOrientation === 'landscape' ? 'row' : 'column',
+      justifyContent: 'space-between',
+      alignItems: screenOrientation === 'landscape' ? 'center' : 'stretch',
+      paddingHorizontal: screenOrientation === 'landscape' ? 24 : 18,
+      paddingVertical: 18,
+      marginHorizontal: screenOrientation === 'landscape' ? 18 : 14,
+      marginBottom: 10,
+      borderRadius: 24,
+      backgroundColor: theme.surfaceStrong,
+      borderWidth: 1,
+      borderColor: theme.border,
+      shadowColor: theme.cardShadow,
+      shadowOpacity: theme.isLight ? 0.10 : 0.22,
+      shadowRadius: 22,
+      shadowOffset: { width: 0, height: 12 },
+      elevation: 8,
+      gap: 14,
+    },
+    controlTextGroup: {
+      flexShrink: 1,
+      gap: 4,
+    },
+    selectionLabel: {
+      color: theme.textSecondary,
+      fontSize: 13,
+      fontWeight: '600',
+      letterSpacing: 0.2,
+    },
+    selectionText: {
+      color: theme.textPrimary,
+      fontSize: 20,
+      fontWeight: '800',
+      letterSpacing: -0.3,
+    },
+    slideshowButton: {
+      backgroundColor: theme.accent,
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+      borderRadius: 18,
+      minWidth: screenOrientation === 'landscape' ? 220 : 0,
+      shadowColor: theme.cardShadow,
+      shadowOpacity: theme.isLight ? 0.16 : 0.28,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 6,
+    },
+    slideshowButtonPortrait: {
+      width: '100%',
+    },
+    disabledButton: {
+      backgroundColor: theme.disabled,
+      shadowOpacity: 0,
+      elevation: 0,
+    },
+    slideshowButtonText: {
+      color: '#fff',
+      fontWeight: '700',
+      textAlign: 'center',
+      letterSpacing: 0.2,
+    },
+    photoGrid: {
+      flex: 1,
+      paddingHorizontal: screenOrientation === 'landscape' ? 16 : 10,
+      paddingVertical: screenOrientation === 'landscape' ? 6 : 4,
+    },
+    photoItem: {
+      margin: 4,
+      position: 'relative',
+      borderRadius: 22,
+      overflow: 'hidden',
+      backgroundColor: theme.surfaceSoft,
+      borderWidth: 1,
+      borderColor: theme.border,
+      shadowColor: theme.cardShadow,
+      shadowOpacity: theme.isLight ? 0.12 : 0.24,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 6,
+    },
+    selectedPhoto: {
+      borderWidth: 2,
+      borderColor: theme.accent,
+      transform: [{ scale: 0.985 }],
+      shadowOpacity: theme.isLight ? 0.18 : 0.34,
+    },
+    photoThumbnail: {
+      width: '100%',
+      height: '100%',
+      borderRadius: 22,
+    },
+    selectedOverlay: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+      backgroundColor: theme.accent,
+      borderRadius: 14,
+      width: 28,
+      height: 28,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: theme.cardShadow,
+      shadowOpacity: 0.22,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 4,
+    },
+    selectedText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '800',
+    },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 24,
   },
   loadingText: {
-    color: '#fff',
-    marginTop: 10,
+    color: theme.textSecondary,
+    marginTop: 12,
     fontSize: 16,
   },
   loadingFooter: {
@@ -1610,10 +1777,12 @@ export default function App() {
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 100,
+    paddingHorizontal: 24,
   },
   emptyText: {
-    color: '#fff',
+    color: theme.textSecondary,
     fontSize: 18,
+    textAlign: 'center',
   },
   permissionContainer: {
     flex: 1,
@@ -1621,30 +1790,46 @@ export default function App() {
     alignItems: 'center',
     paddingHorizontal: 40,
   },
+  permissionCard: {
+    width: '100%',
+    maxWidth: 480,
+    backgroundColor: theme.surfaceStrong,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: theme.border,
+    paddingHorizontal: 24,
+    paddingVertical: 28,
+    shadowColor: theme.cardShadow,
+    shadowOpacity: theme.isLight ? 0.12 : 0.28,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 16 },
+    elevation: 10,
+  },
   permissionTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '800',
+    color: theme.textPrimary,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   permissionMessage: {
     fontSize: 16,
-    color: '#fff',
+    color: theme.textSecondary,
     textAlign: 'center',
     marginBottom: 30,
     lineHeight: 24,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.accent,
     paddingHorizontal: 30,
     paddingVertical: 15,
-    borderRadius: 10,
+    borderRadius: 16,
   },
   retryButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    textAlign: 'center',
   },
   // 設定画面のスタイル
   settingsContainer: {
@@ -1652,83 +1837,109 @@ export default function App() {
   },
   settingsContent: {
     flex: 1,
+    paddingTop: 8,
   },
   settingsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: screenOrientation === 'landscape' ? 40 : 20,
-    paddingVertical: screenOrientation === 'landscape' ? 10 : 15,
+    paddingVertical: screenOrientation === 'landscape' ? 14 : 16,
     flexWrap: 'wrap',
+    marginHorizontal: screenOrientation === 'landscape' ? 18 : 14,
+    marginBottom: 12,
+    borderRadius: 24,
+    backgroundColor: theme.surfaceStrong,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   settingsTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '800',
+    color: theme.textPrimary,
+  },
+  closeButtonPill: {
+    backgroundColor: theme.iconButtonBg,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: theme.iconButtonBorder,
   },
   closeButton: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
+    fontSize: 15,
+    color: theme.accent,
+    fontWeight: '700',
   },
   settingsScroll: {
     flex: 1,
-    paddingHorizontal: screenOrientation === 'landscape' ? 40 : 20,
+    paddingHorizontal: screenOrientation === 'landscape' ? 18 : 14,
     paddingVertical: screenOrientation === 'landscape' ? 10 : 0,
   },
   settingSection: {
-    marginBottom: screenOrientation === 'landscape' ? 20 : 30,
+    marginBottom: screenOrientation === 'landscape' ? 18 : 20,
+    borderRadius: 24,
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.border,
+    padding: 18,
   },
   settingLabel: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: '700',
+    color: theme.textPrimary,
     marginBottom: 15,
   },
   languageButtons: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: screenOrientation === 'landscape' ? 'flex-start' : 'center',
-    gap: screenOrientation === 'landscape' ? 7.5 : 5,
+    gap: screenOrientation === 'landscape' ? 8 : 8,
   },
   languageButton: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 19,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginRight: 5,
-    marginBottom: 5,
-    transform: [{ scaleX: 0.95 }],
+    backgroundColor: theme.surfaceSoft,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 18,
+    marginRight: 4,
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   activeLanguageButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.accentSoft,
+    borderColor: theme.accent,
   },
   languageButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: theme.textPrimary,
+    fontWeight: '700',
   },
   activeLanguageButtonText: {
-    color: '#fff',
+    color: theme.accentStrong,
   },
   colorGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   colorButton: {
     width: ((width - 60) / 4) * 0.95,
-    height: 60,
-    margin: 2.5,
-    borderRadius: 10,
+    height: 72,
+    marginBottom: 8,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.16)',
   },
   activeColorButton: {
     borderWidth: 3,
-    borderColor: '#007AFF',
+    borderColor: theme.accent,
+    transform: [{ scale: 0.98 }],
   },
   colorButtonText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
     textAlign: 'center',
   },
   intervalButtons: {
@@ -1736,22 +1947,25 @@ export default function App() {
     flexWrap: 'wrap',
   },
   intervalButton: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 15,
-    marginRight: 10,
-    marginBottom: 10,
+    backgroundColor: theme.surfaceSoft,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   activeIntervalButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.accentSoft,
+    borderColor: theme.accent,
   },
   intervalButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: theme.textPrimary,
+    fontWeight: '700',
   },
   activeIntervalButtonText: {
-    color: '#fff',
+    color: theme.accentStrong,
   },
   // スライドショー画面のスタイル
   slideshowContainer: {
@@ -1769,17 +1983,19 @@ export default function App() {
     top: screenOrientation === 'landscape' ? 20 : 50,
     right: screenOrientation === 'landscape' ? 30 : 20,
     zIndex: 10,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    borderRadius: 40,
-    width: 80,
-    height: 80,
+    backgroundColor: theme.closeButtonBg,
+    borderRadius: 28,
+    width: 56,
+    height: 56,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   slideshowCloseText: {
-    color: '#fff',
-    fontSize: 40,
-    fontWeight: 'bold',
+    color: theme.closeButtonText,
+    fontSize: 26,
+    fontWeight: '700',
   },
   slideshowImage: {
     width: '100%',
@@ -1789,6 +2005,11 @@ export default function App() {
   slideshowImageFrame: {
     borderRadius: 24,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.26,
+    shadowRadius: 32,
+    shadowOffset: { width: 0, height: 18 },
+    elevation: 14,
   },
   slideshowImagePortrait: {
     maxWidth: '95%',
@@ -1847,18 +2068,19 @@ export default function App() {
   clockOverlay: {
     position: 'absolute',
     bottom: screenOrientation === 'landscape' ? 70 : 50,
-    left: 0,
-    right: 0,
-    backgroundColor: 'transparent',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
+    alignSelf: 'center',
+    backgroundColor: theme.overlayStrong,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 22,
     zIndex: 5,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   clockText: {
     color: '#fff',
-    fontSize: (screenOrientation === 'landscape' ? 96 : 108) * (clockDateSize === 'small' ? 0.5 : clockDateSize === 'medium' ? 0.7 : 2.0),
+    fontSize: (screenOrientation === 'landscape' ? 96 : 108) * (clockDateSize === 'small' ? 0.55 : clockDateSize === 'medium' ? 0.72 : 0.94),
     fontWeight: '700',
     letterSpacing: 1,
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', web: 'monospace' }),
@@ -1868,8 +2090,8 @@ export default function App() {
   },
   dateText: {
     color: '#fff',
-    fontSize: (screenOrientation === 'landscape' ? 54 : 60) * (clockDateSize === 'small' ? 0.5 : clockDateSize === 'medium' ? 0.8 : 2.0),
-    marginTop: 2,
+    fontSize: (screenOrientation === 'landscape' ? 54 : 60) * (clockDateSize === 'small' ? 0.52 : clockDateSize === 'medium' ? 0.68 : 0.84),
+    marginTop: 4,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
@@ -1919,35 +2141,82 @@ export default function App() {
     paddingHorizontal: 40,
   },
   slideshowErrorText: {
-    color: '#fff',
+    color: theme.textPrimary,
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 20,
   },
   slideshowNextButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.accent,
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 12,
+    borderRadius: 16,
   },
   slideshowNextButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   // 写真情報表示のスタイル
   photoInfo: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
+    bottom: 8,
+    left: 8,
+    right: 8,
+    backgroundColor: theme.photoLabelBg,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   photoInfoText: {
-    color: '#fff',
-    fontSize: 10,
+    color: theme.textPrimary,
+    fontSize: 11,
     textAlign: 'center',
+    fontWeight: '600',
+  },
+  helpBodyText: {
+    color: theme.textSecondary,
+    fontSize: 15,
+    lineHeight: 24,
+    paddingHorizontal: 2,
+  },
+  aboutCard: {
+    backgroundColor: theme.surfaceSoft,
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  aboutTitle: {
+    color: theme.textPrimary,
+    fontSize: 16,
+    marginBottom: 6,
+    fontWeight: '700',
+  },
+  aboutMeta: {
+    color: theme.textSecondary,
+    fontSize: 14,
+  },
+  legalContent: {
+    padding: 2,
+  },
+  secondaryActionButton: {
+    marginTop: 20,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    backgroundColor: theme.surfaceSoft,
+    borderRadius: 16,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  secondaryActionButtonText: {
+    color: theme.textPrimary,
+    fontSize: 15,
+    fontWeight: '700',
   },
   });
