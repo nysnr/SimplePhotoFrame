@@ -23,7 +23,10 @@ export default function AdBanner({
   const [retryCount, setRetryCount] = useState(0);
   const [BannerAdComp, setBannerAdComp] = useState(null);
   const [BannerAdSize, setBannerAdSize] = useState(null);
+  const [adLoaded, setAdLoaded] = useState(false);
+  const [debugStatus, setDebugStatus] = useState('init');
   const isExpoGo = Constants?.executionEnvironment === 'storeClient';
+  const adDebug = !!Constants?.expoConfig?.extra?.adDebug;
   const shouldShowPlaceholder = DEV && (
     Platform.OS === 'web'
     || isExpoGo
@@ -40,6 +43,26 @@ export default function AdBanner({
     return 'Ad Placeholder';
   })();
 
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      setDebugStatus('ads:web');
+      return;
+    }
+    if (isExpoGo) {
+      setDebugStatus('ads:expo-go');
+      return;
+    }
+    if (!ENABLE_ADS) {
+      setDebugStatus('ads:disabled');
+      return;
+    }
+    if (!BANNER_AD_UNIT_ID) {
+      setDebugStatus('ads:missing-unit-id');
+      return;
+    }
+    setDebugStatus('ads:waiting-sdk');
+  }, [isExpoGo]);
+
   // Avoid importing native module on web entirely
   useEffect(() => {
     if (Platform.OS === 'web') return;
@@ -53,12 +76,15 @@ export default function AdBanner({
           if (mod?.BannerAd && mod?.BannerAdSize) {
             setBannerAdComp(() => mod.BannerAd);
             setBannerAdSize(mod.BannerAdSize);
+            setDebugStatus((prev) => (prev === 'ads:missing-unit-id' ? prev : 'ads:sdk-ready'));
           }
         })
         .catch(err => {
+          setDebugStatus('ads:import-failed');
           if (DEV) console.log('AdMob import failed (expected in Expo Go):', err);
         });
     } catch (e) {
+      setDebugStatus('ads:import-error');
       if (DEV) console.log('AdMob dynamic import error:', e);
     }
     return () => { mounted = false; };
@@ -67,20 +93,40 @@ export default function AdBanner({
   useEffect(() => {
     let t;
     InteractionManager.runAfterInteractions(() => {
-      t = setTimeout(() => setShouldLoad(true), delayMs);
+      t = setTimeout(() => {
+        setShouldLoad(true);
+        if (Platform.OS === 'web' || isExpoGo) return;
+        if (!ENABLE_ADS) {
+          setDebugStatus('ads:disabled');
+          return;
+        }
+        if (!BANNER_AD_UNIT_ID) {
+          setDebugStatus('ads:missing-unit-id');
+          return;
+        }
+        setDebugStatus('ads:requesting');
+      }, delayMs);
     });
     return () => {
       if (t) clearTimeout(t);
     };
   }, [delayMs]);
 
-  const handleFail = () => {
+  const handleFail = (error) => {
+    const errorCode = error?.code ? String(error.code).toLowerCase() : 'unknown';
     if (retryCount >= 3) return;
     const next = retryCount + 1;
     setRetryCount(next);
+    setDebugStatus(`ads:failed:${errorCode}:retry-${next}`);
     const backoff = Math.min(8000, 1000 * Math.pow(2, next - 1)); // 1s, 2s, 4s
     setTimeout(() => setReloadKey((k) => k + 1), backoff);
   };
+
+  useEffect(() => {
+    if (retryCount >= 3 && !adLoaded) {
+      setDebugStatus((prev) => prev.startsWith('ads:failed:') ? `${prev}:max` : 'ads:failed:max');
+    }
+  }, [retryCount, adLoaded]);
 
   if (shouldShowPlaceholder) {
     return (
@@ -88,6 +134,11 @@ export default function AdBanner({
         <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: '600' }}>
           {placeholderText}
         </Text>
+        {adDebug && (
+          <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 10, marginTop: 4 }}>
+            {debugStatus}
+          </Text>
+        )}
       </View>
     );
   }
@@ -103,7 +154,15 @@ export default function AdBanner({
   }
 
   if (!BANNER_AD_UNIT_ID) {
-    return <View style={[{ height }, style]} />;
+    return (
+      <View style={[{ height, justifyContent: 'center', alignItems: 'center' }, style]}>
+        {adDebug && (
+          <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 10 }}>
+            {debugStatus}
+          </Text>
+        )}
+      </View>
+    );
   }
 
   // Map our bannerSize to library constants
@@ -130,12 +189,23 @@ export default function AdBanner({
 
   return (
     <View style={[{ height }, style]}>
+      {adDebug && !adLoaded && (
+        <View style={{ position: 'absolute', inset: 0, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 10 }}>
+            {debugStatus}
+          </Text>
+        </View>
+      )}
       {shouldLoad && BannerAdComp && sizeConst && (
         <BannerAdComp
           key={reloadKey}
           unitId={BANNER_AD_UNIT_ID}
           size={sizeConst}
           requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+          onAdLoaded={() => {
+            setAdLoaded(true);
+            setDebugStatus('ads:loaded');
+          }}
           onAdFailedToLoad={handleFail}
         />
       )}
