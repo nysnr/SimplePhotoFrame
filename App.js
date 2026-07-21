@@ -2080,7 +2080,7 @@ export default function App() {
   },
   clockText: {
     color: '#fff',
-    fontSize: (screenOrientation === 'landscape' ? 96 : 108) * (clockDateSize === 'small' ? 0.55 : clockDateSize === 'medium' ? 0.72 : 0.94),
+    fontSize: (screenOrientation === 'landscape' ? 96 : 108) * (clockDateSize === 'small' ? 0.55 : clockDateSize === 'medium' ? 0.72 : 1.18),
     fontWeight: '700',
     letterSpacing: 1,
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', web: 'monospace' }),
@@ -2090,7 +2090,7 @@ export default function App() {
   },
   dateText: {
     color: '#fff',
-    fontSize: (screenOrientation === 'landscape' ? 54 : 60) * (clockDateSize === 'small' ? 0.52 : clockDateSize === 'medium' ? 0.68 : 0.84),
+    fontSize: (screenOrientation === 'landscape' ? 54 : 60) * (clockDateSize === 'small' ? 0.52 : clockDateSize === 'medium' ? 0.68 : 1.05),
     marginTop: 4,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 2, height: 2 },
