@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="SimplePhotoFrame — reuse old devices as a photo frame with clock">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0b7a9c"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#c7d2fe"/>
+      <stop offset="60%" stop-color="#a7f3d0"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(72 70)">
+    <rect x="0" y="0" width="520" height="90" rx="20" fill="rgba(255,255,255,0.15)"/>
+    <text x="32" y="58" font-family="Segoe UI, Roboto, Hiragino Sans, sans-serif" font-size="44" font-weight="800" fill="#ffffff">SimplePhotoFrame</text>
+  </g>
+  <g transform="translate(72 190)">
+    <rect width="620" height="370" rx="28" fill="#ffffff" fill-opacity="0.95"/>
+    <rect x="24" y="24" width="572" height="322" rx="18" fill="url(#frame)"/>
+    <g transform="translate(60 260)">
+      <rect width="340" height="60" rx="14" fill="rgba(255,255,255,0.7)"/>
+      <text x="20" y="40" font-family="Segoe UI, Roboto, Hiragino Sans, sans-serif" font-size="22" font-weight="700" fill="#0f172a">Family memories · Always on display</text>
+    </g>
+    <g transform="translate(520 56)">
+      <rect width="84" height="36" rx="18" fill="rgba(15,23,42,0.75)"/>
+      <text x="42" y="23" text-anchor="middle" font-family="Segoe UI, Roboto, Hiragino Sans, sans-serif" font-size="18" font-weight="800" fill="#ffffff" font-variant-numeric="tabular-nums">10:24</text>
+    </g>
+  </g>
+  <g transform="translate(740 210)">
+    <text x="0" y="0" font-family="Segoe UI, Roboto, Hiragino Sans, sans-serif" font-size="40" font-weight="800" fill="#ffffff">古い端末を、</text>
+    <text x="0" y="52" font-family="Segoe UI, Roboto, Hiragino Sans, sans-serif" font-size="40" font-weight="800" fill="#ffffff">思い出のフォトフレームに。</text>
+    <text x="0" y="122" font-family="Segoe UI, Roboto, Hiragino Sans, sans-serif" font-size="24" font-weight="600" fill="#ecfeff">Reuse · Sustainable · Free on the App Store</text>
+    <g transform="translate(0 178)">
+      <rect width="340" height="64" rx="16" fill="#ffffff"/>
+      <text x="32" y="40" font-family="Segoe UI, Roboto, Hiragino Sans, sans-serif" font-size="22" font-weight="800" fill="#075985">📱 Download on the App Store</text>
+    </g>
+  </g>
+</svg>

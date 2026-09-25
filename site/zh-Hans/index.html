@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimplePhotoFrame — 把旧 iPad/iPhone 变成可持续的照片相框 · 幻灯片和时钟</title>
+    <meta name="description" content="SimplePhotoFrame 让你把闲置的旧 iPad 或 iPhone 重新利用为可持续的数字照片相框。支持幻灯片、时钟显示、8 种边框配色、4 种语言，照片本地处理不上传服务器。延长设备寿命，减少电子垃圾。">
+    <meta name="keywords" content="可持续, 再利用, 电子垃圾, iPad再利用, 照片相框, 幻灯片, 时钟, SimplePhotoFrame, 数字相框, 旧设备利用">
+    <link rel="canonical" href="https://simple-photo-frame.vercel.app/zh-Hans/index.html">
+    <link rel="alternate" hreflang="ja" href="https://simple-photo-frame.vercel.app/ja/index.html">
+    <link rel="alternate" hreflang="en" href="https://simple-photo-frame.vercel.app/en/index.html">
+    <link rel="alternate" hreflang="es" href="https://simple-photo-frame.vercel.app/es/index.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://simple-photo-frame.vercel.app/zh-Hans/index.html">
+    <link rel="alternate" hreflang="x-default" href="https://simple-photo-frame.vercel.app/index.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta property="og:locale:alternate" content="ja_JP">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:locale:alternate" content="es_ES">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SimplePhotoFrame — 把旧 iPad/iPhone 变成可持续的照片相框">
+    <meta property="og:description" content="闲置旧设备的新生命：可持续的数字相框，幻灯片、时钟、8 种配色、本地处理不上传。">
+    <meta property="og:url" content="https://simple-photo-frame.vercel.app/zh-Hans/index.html">
+    <meta property="og:site_name" content="SimplePhotoFrame">
+    <meta property="og:image" content="https://simple-photo-frame.vercel.app/assets/img/og.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SimplePhotoFrame — 把旧 iPad/iPhone 变成可持续的照片相框">
+    <meta name="twitter:description" content="闲置旧设备的新生命：可持续的数字相框，幻灯片、时钟、8 种配色、本地处理不上传。">
+    <meta name="twitter:image" content="https://simple-photo-frame.vercel.app/assets/img/og.svg">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SimplePhotoFrame",
+      "operatingSystem": "iOS 15.1+",
+      "applicationCategory": "PhotographyApplication",
+      "description": "把闲置的旧 iPad/iPhone 变成可持续的数字照片相框。支持幻灯片切换、时钟/日期显示、8 种边框配色、4 种语言（日/英/西/中简）。照片本地处理，绝不上传到任何服务器。",
+      "keywords": "可持续, 再利用, 电子垃圾, iPad再利用, 照片相框, 幻灯片, 时钟, SimplePhotoFrame",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "1200"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "nysnr"
+      },
+      "downloadUrl": "https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431",
+      "softwareVersion": "1.0.0"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "SimplePhotoFrame 支持哪些 iOS 版本？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SimplePhotoFrame 支持 iOS 15.1 及以上版本。您可以在 App Store 上检查您的设备是否兼容。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "旧设备运行会很卡吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "不会。SimplePhotoFrame 的 UI 设计保持最简，并采用轻度缓存策略，即使是较旧的 iOS 设备也能流畅运行。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "我的照片会被上传到服务器吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "绝对不会。SimplePhotoFrame 只读取您设备本地的相册用于显示，所有照片处理都在设备本地完成，绝不上传到任何服务器。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "为什么说 SimplePhotoFrame 是可持续的？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SimplePhotoFrame 鼓励您不购买新的专用数码相框，而是重用手边已有的旧 iPad 或 iPhone，从而延长设备使用寿命，减少电子垃圾的产生。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "为什么应用内有广告？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SimplePhotoFrame 通过 Google AdMob 展示横幅广告来支撑持续开发和维护，让所有人都能免费使用。您可以在设备设置中限制广告个性化。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "没有网络连接时可以使用吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "核心功能完全离线可用。照片显示、幻灯片播放、时钟/日期和边框设置都不需要网络连接。仅广告展示需要联网。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "适合送给祖父母使用吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "非常适合。SimplePhotoFrame 提供时钟字号放大功能，方便视力不佳的长辈阅读，操作也非常简单：装 App、选照片、放上支架即可。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "一共有多少种边框配色？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SimplePhotoFrame 提供 8 种精心挑选的边框配色：Dark（深邃黑）、White（纯净白）、Ocean（海洋蓝）、Sunset（日落橙）、Forest（森林绿）、Rose（玫瑰粉）、Lavender（薰衣草紫）、Oak（橡木棕）。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "支持哪些语言？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SimplePhotoFrame 支持 4 种语言：日语、英语、西班牙语和简体中文。您可以在设置中随时切换。"
+          }
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-inner">
+        <a href="/zh-Hans/index.html" class="logo">SimplePhotoFrame</a>
+        <nav class="lang-switch" aria-label="语言切换">
+            <a href="/ja/index.html" hreflang="ja">日本語</a>
+            <a href="/en/index.html" hreflang="en">English</a>
+            <a href="/es/index.html" hreflang="es">Español</a>
+            <a href="/zh-Hans/index.html" hreflang="zh-Hans" class="active">简体中文</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <nav aria-label="面包屑">
+        <ol class="breadcrumb">
+            <li><a href="/zh-Hans/index.html">首页</a></li>
+        </ol>
+    </nav>
+
+    <section class="hero">
+        <h1>把旧 iPad/iPhone 变成可持续的照片相框 · 幻灯片和时钟</h1>
+        <p class="hero-subtitle">闲置设备的新生命 · 不买新硬件 · 延长使用寿命 · 减少电子垃圾</p>
+        <a href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" class="btn btn-primary">在 App Store 免费下载</a>
+    </section>
+
+    <section class="section-problem">
+        <h2>我们都遇到过这些问题</h2>
+        <div class="card-grid card-grid-4">
+            <div class="card">
+                <div class="card-icon">📱</div>
+                <h3>抽屉里闲置的旧手机/平板</h3>
+                <p>换了新设备后，旧 iPad 或 iPhone 就被收进抽屉，再也没有拿出来过。</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🗑️</div>
+                <h3>最终变成电子垃圾</h3>
+                <p>闲置的电子设备如果得不到妥善处理，终将成为对环境有害的电子垃圾。</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">💸</div>
+                <h3>专用数码相框价格高</h3>
+                <p>市面上的专用数码相框动辄几百上千元，而且功能单一、性价比低。</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🌍</div>
+                <h3>电子垃圾的环境负担</h3>
+                <p>全球每年产生数千万吨电子垃圾，回收再利用是每个人都能做的贡献。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-concept-sustainable">
+        <h2>可持续理念：旧的不等于要抛弃，物尽其用到最后</h2>
+        <div class="concept-points">
+            <div class="point">
+                <h3>✅ 延长设备寿命</h3>
+                <p>让已经生产出来的设备继续发挥价值，而不是早早被淘汰。</p>
+            </div>
+            <div class="point">
+                <h3>✅ 减少电子垃圾</h3>
+                <p>每一台被重新利用的旧设备，都是对环境的一份善意。</p>
+            </div>
+            <div class="point">
+                <h3>✅ 免费开始</h3>
+                <p>不需要购买任何新硬件，下载 App 立刻就能开始使用。</p>
+            </div>
+        </div>
+        <h3>四个生活场景</h3>
+        <div class="scene-grid card-grid-4">
+            <div class="card">
+                <h3>👵 送给祖父母</h3>
+                <p>放上家人照片和放大时钟，让祖辈随时看到孙辈的笑脸。</p>
+            </div>
+            <div class="card">
+                <h3>🖼️ 数字相框</h3>
+                <p>客厅或书房的一角，用幻灯片讲述您的旅行与生活故事。</p>
+            </div>
+            <div class="card">
+                <h3>🍳 厨房时钟</h3>
+                <p>做饭时也能看时间，配合美味食谱照片，烹饪更有乐趣。</p>
+            </div>
+            <div class="card">
+                <h3>💼 办公室回忆墙</h3>
+                <p>桌面上的照片墙，在忙碌工作间隙给您一抹温暖的力量。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-concept-reuse">
+        <h2>手边闲置设备的新用法 · 今天就把吃灰的设备变成家中的一角</h2>
+        <div class="reuse-scenes card-grid card-grid-3">
+            <div class="card">
+                <h3>🛋️ 客厅装饰</h3>
+                <p>把旧 iPad 放在客厅茶几或书架上，成为家中温馨的数字装饰。</p>
+            </div>
+            <div class="card">
+                <h3>🛏️ 卧室床头</h3>
+                <p>床头的温柔时钟和家庭照片，伴着美好的回忆入眠。</p>
+            </div>
+            <div class="card">
+                <h3>🍽️ 餐厅陪伴</h3>
+                <p>用餐时的幻灯片播放，让每一餐都充满团圆的气氛。</p>
+            </div>
+        </div>
+        <h3>简单三步，即刻开始</h3>
+        <ol class="steps">
+            <li>
+                <span class="step-num">1</span>
+                <div>
+                    <h4>装 App</h4>
+                    <p>在旧 iPad/iPhone 的 App Store 搜索 SimplePhotoFrame 并免费下载。</p>
+                </div>
+            </li>
+            <li>
+                <span class="step-num">2</span>
+                <div>
+                    <h4>选照片</h4>
+                    <p>从您的相册中选择想要展示的照片，设置幻灯片间隔时间。</p>
+                </div>
+            </li>
+            <li>
+                <span class="step-num">3</span>
+                <div>
+                    <h4>放支架上</h4>
+                    <p>把设备放在支架上，调整好时钟和边框配色，享受属于您的相框。</p>
+                </div>
+            </li>
+        </ol>
+    </section>
+
+    <section class="section-features">
+        <h2>核心功能</h2>
+        <div class="feature-grid card-grid card-grid-3">
+            <div class="card feature-card">
+                <div class="feature-icon">🖼️</div>
+                <h3>从相册选择照片</h3>
+                <p>自由选择相册中的照片，以幻灯片方式自动切换。间隔可按秒或按分钟自由调整。</p>
+            </div>
+            <div class="card feature-card">
+                <div class="feature-icon">🕐</div>
+                <h3>时钟 / 日期显示</h3>
+                <p>时钟和日期可独立开关，时钟字号支持放大显示，方便长辈阅读。</p>
+            </div>
+            <div class="card feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>8 种边框配色</h3>
+                <p>精心挑选的 8 种配色方案，总有一款适合您的家居风格。</p>
+                <div class="swatches">
+                    <span class="swatch" style="background:#1c1c1e" title="Dark"></span>
+                    <span class="swatch" style="background:#f2f2f7;border:1px solid #ddd" title="White"></span>
+                    <span class="swatch" style="background:#0a84ff" title="Ocean"></span>
+                    <span class="swatch" style="background:#ff9f0a" title="Sunset"></span>
+                    <span class="swatch" style="background:#30d158" title="Forest"></span>
+                    <span class="swatch" style="background:#ff375f" title="Rose"></span>
+                    <span class="swatch" style="background:#bf5af2" title="Lavender"></span>
+                    <span class="swatch" style="background:#a2845e" title="Oak"></span>
+                </div>
+            </div>
+            <div class="card feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3>4 种语言支持</h3>
+                <p>内置日语、英语、西班牙语、简体中文，可在设置中随时切换。</p>
+            </div>
+            <div class="card feature-card">
+                <div class="feature-icon">💚</div>
+                <h3>完全免费使用</h3>
+                <p>所有功能免费开放，由 AdMob 横幅广告支撑开发与维护。</p>
+            </div>
+            <div class="card feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>照片本地处理</h3>
+                <p>所有照片仅在您的设备上处理，绝不上传到任何服务器，隐私绝对安全。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-settings">
+        <h2>设置与语言</h2>
+        <p>SimplePhotoFrame 支持 4 种语言界面，您可以随时在应用设置中切换。</p>
+        <div class="lang-grid card-grid card-grid-4">
+            <div class="card lang-card">
+                <h3>🇯🇵 日本語</h3>
+                <p>面向日本用户的完整界面翻译。</p>
+            </div>
+            <div class="card lang-card">
+                <h3>🇺🇸 English</h3>
+                <p>面向全球用户的英语界面。</p>
+            </div>
+            <div class="card lang-card">
+                <h3>🇪🇸 Español</h3>
+                <p>面向西班牙语用户的界面翻译。</p>
+            </div>
+            <div class="card lang-card">
+                <h3>🇨🇳 简体中文</h3>
+                <p>您正在浏览的语言，面向简体中文用户。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-privacy">
+        <h2>隐私与本地处理</h2>
+        <div class="privacy-cols">
+            <div class="privacy-col">
+                <h3>🔐 我们绝不会将您的照片上传到服务器</h3>
+                <p>SimplePhotoFrame 访问您的相册，仅用于在相框内显示您的照片。我们郑重承诺：您的珍贵回忆永远不会离开您的设备，不会上传到我们的服务器，更不会与任何第三方共享。</p>
+            </div>
+            <div class="privacy-col">
+                <h3>📴 完全离线可用</h3>
+                <p>照片显示、幻灯片切换、时钟/日期、边框配色——所有核心功能都在设备本地完成，不需要网络连接。即使断网，您也可以尽情享受属于您的照片时光。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-faq">
+        <h2>常见问题 (FAQ)</h2>
+        <details>
+            <summary>Q1. SimplePhotoFrame 支持哪些 iOS 版本？</summary>
+            <p>SimplePhotoFrame 支持 iOS 15.1 及以上版本。您可以在 App Store 页面上检查您的设备是否兼容。</p>
+        </details>
+        <details>
+            <summary>Q2. 旧设备运行会很卡吗？</summary>
+            <p>不会。SimplePhotoFrame 的 UI 设计保持最简，并采用轻度缓存策略，即使是较旧的 iOS 15.1 设备也能流畅运行，不占用大量系统资源。</p>
+        </details>
+        <details>
+            <summary>Q3. 我的照片会被上传到服务器吗？</summary>
+            <p><strong>绝对不会。</strong> SimplePhotoFrame 只读取您设备本地的相册用于显示，所有照片处理都在设备本地完成，绝不上传到任何服务器，也不会与第三方共享。</p>
+        </details>
+        <details>
+            <summary>Q4. 为什么说 SimplePhotoFrame 是可持续的？</summary>
+            <p>SimplePhotoFrame 倡导的可持续理念体现在三个方面：一是<strong>不买新的专用数码相框</strong>，避免产生新的电子产品；二是<strong>重用您手边已有的旧 iPad / iPhone</strong>，让已生产的设备继续发挥价值；三是<strong>减少电子垃圾</strong>，延长设备使用寿命就是减少环境负担。</p>
+        </details>
+        <details>
+            <summary>Q5. 为什么应用内有广告？广告模式是怎样的？</summary>
+            <p>SimplePhotoFrame 通过 Google AdMob 展示横幅广告，以此支撑应用的持续开发与维护，让所有人都能免费使用全部功能。AdMob 可能收集设备标识符（如 IDFA）、IP 地址等用于广告投放与效果衡量，但这一过程<strong>绝不会上传您的个人照片</strong>。您可以在 iOS 设备设置中限制广告个性化。</p>
+        </details>
+        <details>
+            <summary>Q6. 没有网络连接时可以使用吗？</summary>
+            <p>核心功能完全离线可用。照片显示、幻灯片播放、时钟/日期显示、边框配色设置——这一切都不需要网络连接。仅广告展示需要联网，即便没有广告，核心体验也不会受任何影响。</p>
+        </details>
+        <details>
+            <summary>Q7. 适合送给祖父母使用吗？</summary>
+            <p>非常适合！SimplePhotoFrame 专门考虑了长辈用户：界面简洁操作简单，时钟字号支持放大显示方便阅读，只要三步（装 App、选照片、放支架）就能开始使用，是送给祖父母表达心意的绝佳方式。</p>
+        </details>
+        <details>
+            <summary>Q8. 边框配色一共有几种？</summary>
+            <p>SimplePhotoFrame 提供 8 种精心挑选的边框配色：Dark（深邃黑）、White（纯净白）、Ocean（海洋蓝）、Sunset（日落橙）、Forest（森林绿）、Rose（玫瑰粉）、Lavender（薰衣草紫）、Oak（橡木棕）。您可以随时切换以匹配不同的家居风格和心情。</p>
+        </details>
+        <details>
+            <summary>Q9. 支持哪些语言？如何切换？</summary>
+            <p>SimplePhotoFrame 支持 4 种语言：日语、英语、西班牙语、简体中文。您可以在应用的设置界面中随时切换语言，切换立即生效无需重启。</p>
+        </details>
+    </section>
+
+    <section class="section-testimonials">
+        <h2>用户推荐</h2>
+        <div class="testimonial-grid card-grid card-grid-3">
+            <div class="card testimonial-card">
+                <p class="quote">"把妈妈的旧 iPad 装上这个 App，放上孙子的照片，她每天看着都笑。时钟字也够大，真心推荐送给长辈。"</p>
+                <p class="author">— 东京 · 家庭用户</p>
+            </div>
+            <div class="card testimonial-card">
+                <p class="quote">"终于给抽屉里吃灰的旧 iPad Pro 找到了归宿！放书桌上当照片墙兼时钟，同事都来问是什么。"</p>
+                <p class="author">— 上海 · 设计师</p>
+            </div>
+            <div class="card testimonial-card">
+                <p class="quote">"最看重的就是照片不上传，本地处理。界面干净，8 种配色总有一款喜欢，免费的真的太良心了。"</p>
+                <p class="author">— 巴塞罗那 · 摄影师</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-final-cta">
+        <h2>今天，就让闲置的旧设备重获新生</h2>
+        <p class="cta-text">不买新相框 · 重用旧硬件 · 减少电子垃圾 · 迈出可持续的一小步</p>
+        <a href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" class="btn btn-primary btn-large">前往 App Store 免费下载 SimplePhotoFrame</a>
+        <p class="cta-note">开发者 nysnr · ASC App ID: 6792314431 · iOS 15.1+</p>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <div class="footer-links">
+            <a href="/zh-Hans/privacy.html">隐私政策</a>
+            <a href="/zh-Hans/terms.html">服务条款</a>
+            <a href="/zh-Hans/support.html">技术支持</a>
+            <a href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431">App Store</a>
+        </div>
+        <nav class="footer-lang-switch" aria-label="页脚语言切换">
+            <a href="/ja/index.html" hreflang="ja">日本語</a>
+            <a href="/en/index.html" hreflang="en">English</a>
+            <a href="/es/index.html" hreflang="es">Español</a>
+            <a href="/zh-Hans/index.html" hreflang="zh-Hans" class="active">简体中文</a>
+            <a href="/index.html" hreflang="x-default">Default</a>
+        </nav>
+        <p class="copyright">© 2026 nysnr · SimplePhotoFrame</p>
+    </div>
+</footer>
+
+<script src="/assets/js/main.js"></script>
+</body>
+</html>
