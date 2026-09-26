@@ -3,6 +3,12 @@ import Constants from 'expo-constants';
 
 const env = (typeof process !== 'undefined' && process.env) ? process.env : {};
 const extra = Constants?.expoConfig?.extra || Constants?.manifest?.extra || {};
+const APP_VARIANT = extra.appVariant ?? env.APP_VARIANT ?? 'production';
+const IS_PREVIEW_VARIANT = APP_VARIANT === 'preview';
+const TEST_BANNER_IDS = {
+  ios: 'ca-app-pub-3940256099942544/2934735716',
+  android: 'ca-app-pub-3940256099942544/6300978111',
+};
 
 // ENABLE_ADS: default true unless explicitly set to 'false'
 // Prefer Expo public env vars; fallback to legacy names
@@ -32,10 +38,10 @@ const getConfiguredAdUnitId = () => {
 
 const getAdUnitId = () => {
   const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
-  if (isDev) {
+  if (isDev || IS_PREVIEW_VARIANT) {
     return Platform.OS === 'ios'
-      ? 'ca-app-pub-3940256099942544/2934735716' // iOS test banner
-      : 'ca-app-pub-3940256099942544/6300978111'; // Android test banner
+      ? TEST_BANNER_IDS.ios
+      : TEST_BANNER_IDS.android;
   }
 
   const idRaw = getConfiguredAdUnitId();

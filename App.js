@@ -63,8 +63,10 @@ const translations = {
     'loading.initializing': 'Initializing...',
     'loading.photos': 'Loading photos...',
     'button.retry': 'Retry',
+    'button.openSettings': 'Open Settings',
     'button.understand': 'I understand',
     'button.startSlideshow': '🎬 Start Slideshow',
+    'button.reselectPhotos': 'Choose Photos Again',
     'hint.swipeDown': 'Swipe down to see more',
     'loading.morePhotos': 'Loading more photos...',
     'settings.matteColor': 'Color',
@@ -92,6 +94,7 @@ const translations = {
     'label.sizeSmall': 'Small',
     'label.sizeMedium': 'Medium',
     'label.sizeLarge': 'Large',
+    'label.sizeExtraLarge': 'Extra Large',
 
     'permission.title': '📷 Photo Access',
     'permission.message': 'To allow SimplePhotoFrame to access photos, enable photo permissions in your device settings.',
@@ -143,8 +146,10 @@ const translations = {
     'loading.initializing': '初期化中...',
     'loading.photos': '写真を読み込み中...',
     'button.retry': '再試行',
+    'button.openSettings': '設定に移動',
     'button.understand': '了解',
     'button.startSlideshow': '🎬 スライドショー開始',
+    'button.reselectPhotos': '写真を選び直す',
     'hint.swipeDown': 'もっと見るには下にスワイプしてください',
     'loading.morePhotos': '追加の写真を読み込み中...',
     'settings.matteColor': 'カラー',
@@ -172,6 +177,7 @@ const translations = {
     'label.sizeSmall': '小サイズ',
     'label.sizeMedium': '中サイズ',
     'label.sizeLarge': '大サイズ',
+    'label.sizeExtraLarge': '特大サイズ',
 
     'permission.title': '📷 写真へのアクセス',
     'permission.message': 'SimplePhotoFrameアプリが写真にアクセスするには、端末の設定で写真へのアクセス権限を許可してください。',
@@ -223,8 +229,10 @@ const translations = {
     'loading.initializing': '初始化中...',
     'loading.photos': '正在加载照片...',
     'button.retry': '重试',
+    'button.openSettings': '前往设置',
     'button.understand': '知道了',
     'button.startSlideshow': '🎬 开始幻灯片',
+    'button.reselectPhotos': '重新选择照片',
     'hint.swipeDown': '向下滑动查看更多',
     'loading.morePhotos': '正在加载更多照片...',
     'settings.matteColor': '颜色',
@@ -252,6 +260,7 @@ const translations = {
     'label.sizeSmall': '小',
     'label.sizeMedium': '中',
     'label.sizeLarge': '大',
+    'label.sizeExtraLarge': '特大',
 
     'permission.title': '📷 照片访问',
     'permission.message': '要允许 SimplePhotoFrame 访问照片，请在设备设置中启用照片权限。',
@@ -303,8 +312,10 @@ const translations = {
     'loading.initializing': 'Inicializando...',
     'loading.photos': 'Cargando fotos...',
     'button.retry': 'Reintentar',
+    'button.openSettings': 'Ir a Configuración',
     'button.understand': 'Entendido',
     'button.startSlideshow': '🎬 Iniciar presentación',
+    'button.reselectPhotos': 'Volver a elegir fotos',
     'hint.swipeDown': 'Desliza hacia abajo para ver más',
     'loading.morePhotos': 'Cargando más fotos...',
     'settings.matteColor': 'Color',
@@ -332,6 +343,7 @@ const translations = {
     'label.sizeSmall': 'Pequeño',
     'label.sizeMedium': 'Mediano',
     'label.sizeLarge': 'Grande',
+    'label.sizeExtraLarge': 'Extragrande',
 
     'permission.title': '📷 Acceso a fotos',
     'permission.message': 'Para permitir que SimplePhotoFrame acceda a las fotos, habilita los permisos de fotos en la configuración del dispositivo.',
@@ -483,6 +495,9 @@ export default function App() {
   const [showDate, setShowDate] = useState(true);
   const [now, setNow] = useState(new Date());
   const [showCloseButton, setShowCloseButton] = useState(true);
+  // The adaptive banner reports its real height after it loads.  Keep this
+  // separately so the slideshow content never occupies the banner's space.
+  const [slideshowAdHeight, setSlideshowAdHeight] = useState(50);
   // 時計・日付サイズ（small | medium | large）。現在の組み合わせを「medium」とする
   const [clockDateSize, setClockDateSize] = useState('medium');
   
@@ -615,8 +630,8 @@ export default function App() {
   }, []);
 
   // 写真の読み込み
-  const loadPhotos = async (loadMore = false) => {
-    if (loading || (!hasNextPage && loadMore)) return;
+  const loadPhotos = async (loadMore = false, forceReload = false) => {
+    if (!forceReload && (loading || (!hasNextPage && loadMore))) return;
 
     if (Platform.OS === 'web') {
       setHasPermission(true);
@@ -635,7 +650,12 @@ export default function App() {
         mediaType: 'photo',
         sortBy: 'creationTime',
       };
-      
+
+      if (!loadMore) {
+        setEndCursor(null);
+        setHasNextPage(true);
+      }
+
       if (loadMore && endCursor) {
         options.after = endCursor;
       }
@@ -718,6 +738,57 @@ export default function App() {
       }
     });
 
+  };
+
+  const reselectPhotos = async () => {
+    try {
+      if (Platform.OS === 'web') {
+        setSelectedPhotos([]);
+        setCurrentSlideIndex(0);
+        setRefreshing(true);
+        await loadPhotos(false, true);
+        return;
+      }
+
+      let permission = await MediaLibrary.getPermissionsAsync();
+
+      if (permission.status !== 'granted') {
+        permission = await MediaLibrary.requestPermissionsAsync();
+      }
+
+      const granted = permission.status === 'granted';
+      setHasPermission(granted);
+      if (!granted) {
+        return;
+      }
+
+      if (typeof MediaLibrary.presentPermissionsPickerAsync === 'function') {
+        try {
+          await MediaLibrary.presentPermissionsPickerAsync();
+        } catch (pickerError) {
+          devWarn('Failed to present permissions picker', pickerError);
+        }
+      }
+
+      setSelectedPhotos([]);
+      setPhotos([]);
+      setCurrentSlideIndex(0);
+      setRefreshing(true);
+      setEndCursor(null);
+      setHasNextPage(true);
+      await loadPhotos(false, true);
+    } catch (error) {
+      console.error('Error reloading photos:', error);
+      setRefreshing(false);
+    }
+  };
+
+  const openAppSettings = async () => {
+    try {
+      await Linking.openSettings();
+    } catch (error) {
+      console.error('Error opening settings:', error);
+    }
   };
 
   // スライドショーの開始
@@ -957,8 +1028,10 @@ export default function App() {
   };
 
   // 設定画面のレンダリング
-  const renderSettings = () => (
-    <Modal visible={showSettings} animationType="slide" supportedOrientations={['portrait','portrait-upside-down','landscape','landscape-left','landscape-right']}>
+  const renderSettings = () => {
+    if (!showSettings) return null;
+    return (
+    <Modal visible animationType="slide" supportedOrientations={['portrait','portrait-upside-down','landscape','landscape-left','landscape-right']}>
       <LinearGradient
         colors={matteGradients[matteColor]}
         start={{ x: 0, y: 0 }}
@@ -975,7 +1048,7 @@ export default function App() {
             </TouchableOpacity>
           </View>
           
-          <ScrollView style={styles.settingsScroll} contentContainerStyle={{ paddingBottom: 70 }}>
+          <ScrollView style={styles.settingsScroll} contentContainerStyle={{ paddingBottom: 110 }}>
             {/* 言語設定 */}
             <View style={styles.settingSection}>
               <Text style={styles.settingLabel}>{t('settings.language')}</Text>
@@ -1095,7 +1168,7 @@ export default function App() {
             <View style={styles.settingSection}>
               <Text style={styles.settingLabel}>{t('settings.clockDateSize')}</Text>
               <View style={styles.languageButtons}>
-                {['small', 'medium', 'large'].map(sz => (
+                {['small', 'medium', 'large', 'extraLarge'].map(sz => (
                   <TouchableOpacity
                     key={sz}
                     style={[
@@ -1109,7 +1182,13 @@ export default function App() {
                       styles.languageButtonText,
                       clockDateSize === sz && styles.activeLanguageButtonText
                     ]}>
-                      {sz === 'small' ? t('label.sizeSmall') : sz === 'medium' ? t('label.sizeMedium') : t('label.sizeLarge')}
+                      {sz === 'small'
+                        ? t('label.sizeSmall')
+                        : sz === 'medium'
+                          ? t('label.sizeMedium')
+                          : sz === 'large'
+                            ? t('label.sizeLarge')
+                            : t('label.sizeExtraLarge')}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -1118,16 +1197,19 @@ export default function App() {
 
           </ScrollView>
           
-          <AdBanner style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
+          <AdBanner screenName="settings" style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
         </SafeAreaView>
       </LinearGradient>
     </Modal>
-  );
+    );
+  };
 
 
   // ヘルプ画面のレンダリング
-  const renderHelp = () => (
-    <Modal visible={showHelp} animationType="slide" supportedOrientations={['portrait','portrait-upside-down','landscape','landscape-left','landscape-right']}>
+  const renderHelp = () => {
+    if (!showHelp) return null;
+    return (
+    <Modal visible animationType="slide" supportedOrientations={['portrait','portrait-upside-down','landscape','landscape-left','landscape-right']}>
       <LinearGradient
         colors={matteGradients[matteColor]}
         start={{ x: 0, y: 0 }}
@@ -1155,7 +1237,7 @@ export default function App() {
             )}
           </View>
           
-          <ScrollView style={styles.settingsScroll} contentContainerStyle={{ paddingBottom: 70 }}>
+          <ScrollView style={styles.settingsScroll} contentContainerStyle={{ paddingBottom: 110 }}>
             {helpSection === 'main' ? (
               <>
                 {/* 使い方ガイド */}
@@ -1207,9 +1289,9 @@ export default function App() {
                 <TouchableOpacity
                   style={styles.secondaryActionButton}
                   onPress={() => {
-                    const url = helpSection === 'privacy' 
-                      ? 'https://nysnr.github.io/PhotoFrameNew/privacy.html' 
-                      : 'https://nysnr.github.io/PhotoFrameNew/terms.html';
+                    const url = helpSection === 'privacy'
+                      ? 'https://nysnr.github.io/SimplePhotoFrame/privacy.html'
+                      : 'https://nysnr.github.io/SimplePhotoFrame/terms.html';
                     Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
                   }}
                 >
@@ -1222,11 +1304,12 @@ export default function App() {
             
           </ScrollView>
           
-          <AdBanner style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
+          <AdBanner screenName="help" style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
         </SafeAreaView>
       </LinearGradient>
     </Modal>
-  );
+    );
+  };
 
   // 次のスライドに進む関数
   const nextSlide = () => {
@@ -1293,7 +1376,10 @@ export default function App() {
     const resizeMode = 'contain';
     const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
     const maxW = screenOrientation === 'portrait' ? screenWidth * 0.95 : screenWidth * 0.90;
-    const maxH = screenOrientation === 'portrait' ? screenHeight * 0.85 : screenHeight * 0.90;
+    const slideshowContentHeight = Math.max(1, screenHeight - slideshowAdHeight);
+    const maxH = screenOrientation === 'portrait'
+      ? slideshowContentHeight * 0.92
+      : slideshowContentHeight * 0.96;
     let frameW = maxW;
     let frameH = maxH;
     if (currentPhoto?.width && currentPhoto?.height) {
@@ -1310,11 +1396,6 @@ export default function App() {
         onRequestClose={stopSlideshow}
         supportedOrientations={['portrait','portrait-upside-down','landscape','landscape-left','landscape-right']}
       >
-        <TouchableOpacity
-          style={styles.slideshowTouchArea}
-          onPress={handleSlideshowTouch}
-          activeOpacity={1}
-        >
           <LinearGradient
              colors={matteGradients[matteColor]}
              start={{ x: 0, y: 0 }}
@@ -1322,6 +1403,11 @@ export default function App() {
              style={styles.slideshowContainer}
              className="slideshow-container"
            >
+            <TouchableOpacity
+              style={styles.slideshowTouchArea}
+              onPress={handleSlideshowTouch}
+              activeOpacity={1}
+            >
             {showCloseButton && (
               <TouchableOpacity
                 style={styles.slideshowCloseButton}
@@ -1396,11 +1482,18 @@ export default function App() {
               {showDate && <Text style={styles.dateText}>{formatDate()}</Text>}
             </View>
           )}
+            </TouchableOpacity>
 
-          {/* Banner Ad - slideshow screen */}
-          <AdBanner style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
+            {/* Dedicated ad footer: the slideshow never extends behind it. */}
+            <View style={[styles.slideshowAdSlot, { height: slideshowAdHeight }]}>
+              <AdBanner
+                screenName="slideshow"
+                onHeightChange={(nextHeight) => {
+                  if (nextHeight > 0) setSlideshowAdHeight(nextHeight);
+                }}
+              />
+            </View>
         </LinearGradient>
-        </TouchableOpacity>
         </Modal>
     );
   };
@@ -1426,16 +1519,9 @@ export default function App() {
             <Text style={styles.permissionMessage}>{t('permission.message')}</Text>
             <TouchableOpacity
               style={styles.retryButton}
-              onPress={() => {
-                MediaLibrary.requestPermissionsAsync().then(({ status }) => {
-                  setHasPermission(status === 'granted');
-                  if (status === 'granted') {
-                    loadPhotos();
-                  }
-                });
-              }}
+              onPress={openAppSettings}
             >
-              <Text style={styles.retryButtonText}>{t('button.retry')}</Text>
+              <Text style={styles.retryButtonText}>{t('button.openSettings')}</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -1485,19 +1571,32 @@ export default function App() {
                 {selectedPhotos.length === 0 ? t('SelectPhoto') : t('button.startSlideshow')}
               </Text>
             </View>
-            <TouchableOpacity
-              style={[
-                styles.slideshowButton,
-                !isLandscape && styles.slideshowButtonPortrait,
-                selectedPhotos.length === 0 && styles.disabledButton
-              ]}
-              onPress={startSlideshow}
-              disabled={selectedPhotos.length === 0}
-            >
-              <Text style={styles.slideshowButtonText}>
-                {t('button.startSlideshow')}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.controlActions}>
+              <TouchableOpacity
+                style={[
+                  styles.secondaryControlButton,
+                  !isLandscape && styles.secondaryControlButtonPortrait
+                ]}
+                onPress={reselectPhotos}
+              >
+                <Text style={styles.secondaryControlButtonText}>
+                  {t('button.reselectPhotos')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.slideshowButton,
+                  !isLandscape && styles.slideshowButtonPortrait,
+                  selectedPhotos.length === 0 && styles.disabledButton
+                ]}
+                onPress={startSlideshow}
+                disabled={selectedPhotos.length === 0}
+              >
+                <Text style={styles.slideshowButtonText}>
+                  {t('button.startSlideshow')}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
           
           {/* 写真ギャラリー */}
@@ -1514,7 +1613,7 @@ export default function App() {
               keyExtractor={(item) => item.id}
               numColumns={photoColumns}
               style={styles.photoGrid}
-              contentContainerStyle={{ paddingBottom: 70 }}
+              contentContainerStyle={{ paddingBottom: 110 }}
               onLayout={(event) => {
                 setPhotoGridWidth(event.nativeEvent.layout.width);
               }}
@@ -1559,7 +1658,9 @@ export default function App() {
           )}
           
           {/* Banner Ad - gallery/selection screen */}
-          <AdBanner style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
+          {!showSettings && !showHelp && !showSlideshow && (
+            <AdBanner screenName="gallery" style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
+          )}
           
           {renderSettings()}
           {renderHelp()}
@@ -1668,6 +1769,12 @@ export default function App() {
       flexShrink: 1,
       gap: 4,
     },
+    controlActions: {
+      flexDirection: screenOrientation === 'landscape' ? 'row' : 'column',
+      gap: 10,
+      alignItems: screenOrientation === 'landscape' ? 'center' : 'stretch',
+      width: screenOrientation === 'landscape' ? 'auto' : '100%',
+    },
     selectionLabel: {
       color: theme.textSecondary,
       fontSize: 13,
@@ -1694,6 +1801,24 @@ export default function App() {
     },
     slideshowButtonPortrait: {
       width: '100%',
+    },
+    secondaryControlButton: {
+      paddingHorizontal: 18,
+      paddingVertical: 14,
+      borderRadius: 18,
+      backgroundColor: theme.surfaceSoft,
+      borderWidth: 1,
+      borderColor: theme.border,
+      minWidth: screenOrientation === 'landscape' ? 200 : 0,
+    },
+    secondaryControlButtonPortrait: {
+      width: '100%',
+    },
+    secondaryControlButtonText: {
+      color: theme.textPrimary,
+      fontWeight: '700',
+      textAlign: 'center',
+      letterSpacing: 0.2,
     },
     disabledButton: {
       backgroundColor: theme.disabled,
@@ -1970,13 +2095,20 @@ export default function App() {
   // スライドショー画面のスタイル
   slideshowContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   slideshowTouchArea: {
     flex: 1,
     width: '100%',
-    height: '100%',
+    minHeight: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  slideshowAdSlot: {
+    width: '100%',
+    flexShrink: 0,
+    backgroundColor: theme.surfaceStrong,
+    borderTopWidth: 1,
+    borderTopColor: theme.border,
   },
   slideshowCloseButton: {
     position: 'absolute',
@@ -2067,7 +2199,7 @@ export default function App() {
   // 時計・日付オーバーレイのスタイル
   clockOverlay: {
     position: 'absolute',
-    bottom: screenOrientation === 'landscape' ? 70 : 50,
+    bottom: 16,
     alignSelf: 'center',
     backgroundColor: theme.overlayStrong,
     paddingHorizontal: 18,
@@ -2080,7 +2212,7 @@ export default function App() {
   },
   clockText: {
     color: '#fff',
-    fontSize: (screenOrientation === 'landscape' ? 96 : 108) * (clockDateSize === 'small' ? 0.55 : clockDateSize === 'medium' ? 0.72 : 1.18),
+    fontSize: (screenOrientation === 'landscape' ? 96 : 108) * (clockDateSize === 'small' ? 0.55 : clockDateSize === 'medium' ? 0.72 : clockDateSize === 'large' ? 1.18 : 1.42),
     fontWeight: '700',
     letterSpacing: 1,
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', web: 'monospace' }),
@@ -2090,7 +2222,7 @@ export default function App() {
   },
   dateText: {
     color: '#fff',
-    fontSize: (screenOrientation === 'landscape' ? 54 : 60) * (clockDateSize === 'small' ? 0.52 : clockDateSize === 'medium' ? 0.68 : 1.05),
+    fontSize: (screenOrientation === 'landscape' ? 54 : 60) * (clockDateSize === 'small' ? 0.52 : clockDateSize === 'medium' ? 0.68 : clockDateSize === 'large' ? 1.05 : 1.30),
     marginTop: 4,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 2, height: 2 },

@@ -1,0 +1,4 @@
+{
+  "CFBundleDisplayName": "SimplePhotoFrame",
+  "NSPhotoLibraryUsageDescription": "SimplePhotoFrame needs access to your photo library so you can choose photos and display them in a slideshow. For example, you can select family or travel photos to show in the app with an optional clock overlay."
+}

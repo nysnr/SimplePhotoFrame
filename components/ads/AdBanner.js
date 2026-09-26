@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Platform, InteractionManager } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, Text, Platform, InteractionManager, AppState, useWindowDimensions } from 'react-native';
 import Constants from 'expo-constants';
 import { ENABLE_ADS, BANNER_AD_UNIT_ID } from '../../config/adsConfig';
 
@@ -12,21 +12,48 @@ import { ENABLE_ADS, BANNER_AD_UNIT_ID } from '../../config/adsConfig';
  * - Web-safe: avoids importing native module on web
  */
 export default function AdBanner({
-  height = 50,
-  bannerSize = Platform.OS === 'ios' ? 'adaptive' : 'adaptive',
+  height,
+  bannerSize = 'adaptive',
   delayMs = 1200,
   style,
+  screenName = 'unknown',
+  onHeightChange,
 }) {
   const DEV = typeof __DEV__ !== 'undefined' && __DEV__;
+  const bannerRef = useRef(null);
+  const previousLayoutKeyRef = useRef(null);
+  const retryTimeoutRef = useRef(null);
+  const { width: windowWidth } = useWindowDimensions();
+  const [containerWidth, setContainerWidth] = useState(0);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
   const [BannerAdComp, setBannerAdComp] = useState(null);
   const [BannerAdSize, setBannerAdSize] = useState(null);
   const [adLoaded, setAdLoaded] = useState(false);
+  const [adHeight, setAdHeight] = useState(null);
   const [debugStatus, setDebugStatus] = useState('init');
   const isExpoGo = Constants?.executionEnvironment === 'storeClient';
   const adDebug = !!Constants?.expoConfig?.extra?.adDebug;
+  const effectiveBannerSize = useMemo(() => {
+    if (bannerSize !== 'adaptive') return bannerSize;
+    // Google Mobile Ads calculates an anchored adaptive size from the actual
+    // available width.  Do not force LEADERBOARD on iPad: it is 728px wide and
+    // can fail in Split View or when a modal's available width changes.
+    return 'adaptive';
+  }, [bannerSize]);
+  const layoutKey = `${effectiveBannerSize}:${Math.round(containerWidth || windowWidth)}`;
+  const resolvedHeight = useMemo(() => {
+    if (typeof height === 'number') return height;
+    if (typeof adHeight === 'number' && adHeight > 0) return adHeight;
+    if (effectiveBannerSize === 'leaderboard') return 90;
+    if (effectiveBannerSize === 'largeBanner') return 100;
+    if (effectiveBannerSize === 'mediumRectangle') return 250;
+    // Reserve a standard banner's height until the SDK reports the adaptive
+    // height. This avoids a layout jump while never clipping a loaded ad.
+    if (effectiveBannerSize === 'fullBanner') return 60;
+    return 50;
+  }, [adHeight, effectiveBannerSize, height]);
   const shouldShowPlaceholder = DEV && (
     Platform.OS === 'web'
     || isExpoGo
@@ -35,6 +62,10 @@ export default function AdBanner({
     || !BannerAdComp
   );
 
+  useEffect(() => {
+    onHeightChange?.(resolvedHeight);
+  }, [onHeightChange, resolvedHeight]);
+
   const placeholderText = (() => {
     if (Platform.OS === 'web') return 'Ad Placeholder (web)';
     if (isExpoGo) return 'Ad Placeholder (Expo Go)';
@@ -42,6 +73,15 @@ export default function AdBanner({
     if (!BANNER_AD_UNIT_ID) return 'Ad Placeholder (missing unit id)';
     return 'Ad Placeholder';
   })();
+
+  useEffect(() => {
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -112,25 +152,78 @@ export default function AdBanner({
     };
   }, [delayMs]);
 
+  useEffect(() => {
+    if (Platform.OS !== 'ios' || isExpoGo || !ENABLE_ADS) return undefined;
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState !== 'active' || !shouldLoad) return;
+      setAdLoaded(false);
+      setDebugStatus('ads:foreground-reload');
+      if (typeof bannerRef.current?.load === 'function') {
+        bannerRef.current.load();
+        return;
+      }
+      setReloadKey((k) => k + 1);
+    });
+    return () => subscription.remove();
+  }, [isExpoGo, shouldLoad]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || isExpoGo || !ENABLE_ADS || !BANNER_AD_UNIT_ID || !shouldLoad || !BannerAdComp) {
+      previousLayoutKeyRef.current = layoutKey;
+      return undefined;
+    }
+    if (previousLayoutKeyRef.current == null) {
+      previousLayoutKeyRef.current = layoutKey;
+      return undefined;
+    }
+    if (previousLayoutKeyRef.current === layoutKey) {
+      return undefined;
+    }
+    previousLayoutKeyRef.current = layoutKey;
+    setAdLoaded(false);
+    setAdHeight(null);
+    setRetryCount(0);
+    setDebugStatus(`ads:layout-change:${layoutKey}`);
+    const timeout = setTimeout(() => {
+      if (typeof bannerRef.current?.load === 'function') {
+        bannerRef.current.load();
+        return;
+      }
+      setReloadKey((k) => k + 1);
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [BANNER_AD_UNIT_ID, BannerAdComp, isExpoGo, layoutKey, shouldLoad]);
+
   const handleFail = (error) => {
     const errorCode = error?.code ? String(error.code).toLowerCase() : 'unknown';
-    if (retryCount >= 3) return;
+    setAdLoaded(false);
     const next = retryCount + 1;
     setRetryCount(next);
     setDebugStatus(`ads:failed:${errorCode}:retry-${next}`);
-    const backoff = Math.min(8000, 1000 * Math.pow(2, next - 1)); // 1s, 2s, 4s
-    setTimeout(() => setReloadKey((k) => k + 1), backoff);
+    if (DEV || adDebug) {
+      console.warn(`[ads][${screenName}] failed to load (${errorCode}); retry ${next}`, error);
+    }
+    const backoff = next <= 3
+      ? Math.min(8000, 1000 * Math.pow(2, next - 1))
+      : 30000;
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
+    }
+    retryTimeoutRef.current = setTimeout(() => {
+      retryTimeoutRef.current = null;
+      setReloadKey((k) => k + 1);
+    }, backoff);
   };
 
   useEffect(() => {
     if (retryCount >= 3 && !adLoaded) {
-      setDebugStatus((prev) => prev.startsWith('ads:failed:') ? `${prev}:max` : 'ads:failed:max');
+      setDebugStatus((prev) => prev.startsWith('ads:failed:') ? `${prev}:slow-retry` : 'ads:failed:slow-retry');
     }
   }, [retryCount, adLoaded]);
 
   if (shouldShowPlaceholder) {
     return (
-      <View style={[{ height, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.25)', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.25)' }, style]}>
+      <View style={[{ height: resolvedHeight, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.25)', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.25)' }, style]}>
         <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: '600' }}>
           {placeholderText}
         </Text>
@@ -145,17 +238,17 @@ export default function AdBanner({
 
   // Keep space even if ads disabled
   if (!ENABLE_ADS) {
-    return <View style={[{ height }, style]} />;
+    return <View style={[{ height: resolvedHeight }, style]} />;
   }
 
   // Web/ExpoGo preview: keep a placeholder without attempting to load native module
   if (Platform.OS === 'web' || isExpoGo) {
-    return <View style={[{ height }, style]} />;
+    return <View style={[{ height: resolvedHeight }, style]} />;
   }
 
   if (!BANNER_AD_UNIT_ID) {
     return (
-      <View style={[{ height, justifyContent: 'center', alignItems: 'center' }, style]}>
+      <View style={[{ height: resolvedHeight, justifyContent: 'center', alignItems: 'center' }, style]}>
         {adDebug && (
           <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 10 }}>
             {debugStatus}
@@ -168,7 +261,7 @@ export default function AdBanner({
   // Map our bannerSize to library constants
   const mapSize = () => {
     if (!BannerAdSize) return null;
-    switch (bannerSize) {
+    switch (effectiveBannerSize) {
       case 'banner':
         return BannerAdSize.BANNER;
       case 'largeBanner':
@@ -188,7 +281,15 @@ export default function AdBanner({
   const sizeConst = mapSize();
 
   return (
-    <View style={[{ height }, style]}>
+    <View
+      onLayout={(event) => {
+        const nextWidth = Math.floor(event.nativeEvent.layout.width);
+        if (nextWidth > 0 && nextWidth !== containerWidth) {
+          setContainerWidth(nextWidth);
+        }
+      }}
+      style={[{ height: resolvedHeight, width: '100%', justifyContent: 'center' }, style]}
+    >
       {adDebug && !adLoaded && (
         <View style={{ position: 'absolute', inset: 0, justifyContent: 'center', alignItems: 'center' }}>
           <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 10 }}>
@@ -197,17 +298,30 @@ export default function AdBanner({
         </View>
       )}
       {shouldLoad && BannerAdComp && sizeConst && (
-        <BannerAdComp
-          key={reloadKey}
-          unitId={BANNER_AD_UNIT_ID}
-          size={sizeConst}
-          requestOptions={{ requestNonPersonalizedAdsOnly: true }}
-          onAdLoaded={() => {
-            setAdLoaded(true);
-            setDebugStatus('ads:loaded');
-          }}
-          onAdFailedToLoad={handleFail}
-        />
+        <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+          <BannerAdComp
+            ref={bannerRef}
+            key={reloadKey}
+            unitId={BANNER_AD_UNIT_ID}
+            size={sizeConst}
+            width={Math.floor(containerWidth || windowWidth)}
+            requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+            onAdLoaded={(dimensions) => {
+              if (retryTimeoutRef.current) {
+                clearTimeout(retryTimeoutRef.current);
+                retryTimeoutRef.current = null;
+              }
+              setRetryCount(0);
+              setAdLoaded(true);
+              if (dimensions?.height > 0) setAdHeight(dimensions.height);
+              setDebugStatus(`ads:loaded:${layoutKey}`);
+            }}
+            onSizeChange={(dimensions) => {
+              if (dimensions?.height > 0) setAdHeight(dimensions.height);
+            }}
+            onAdFailedToLoad={handleFail}
+          />
+        </View>
       )}
     </View>
   );
