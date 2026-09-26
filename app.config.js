@@ -118,7 +118,7 @@ module.exports = ({ config }) => {
       infoPlist: {
         ...(base.expo?.ios?.infoPlist || {}),
         CFBundleAllowMixedLocalizations: true,
-        CFBundleDevelopmentRegion: 'ja',
+        CFBundleDevelopmentRegion: 'en',
         CFBundleLocalizations: supportedLocalizations,
         ...(isPreviewBuild ? { CFBundleDisplayName: previewAppName } : {}),
       },
