@@ -130,231 +130,323 @@
 <body>
 <header class="site-header">
   <div class="container header-inner">
-    <a href="/en/index.html" class="brand">SimplePhotoFrame</a>
+    <a href="/en/index.html" class="brand" aria-label="SimplePhotoFrame home">
+      <span class="brand-badge">SP</span><span>SimplePhotoFrame</span>
+    </a>
     <nav class="lang-switch" aria-label="Language switcher">
       <ul>
         <li><a href="/ja/index.html" hreflang="ja">日本語</a></li>
-        <li><a href="/en/index.html" hreflang="en" aria-current="page" class="active">EN</a></li>
+        <li><a href="/en/index.html" hreflang="en" aria-current="page" class="is-active">English</a></li>
         <li><a href="/es/index.html" hreflang="es">Español</a></li>
         <li><a href="/zh-Hans/index.html" hreflang="zh-Hans">简体中文</a></li>
+        <li><a href="/index.html" hreflang="x-default">Top</a></li>
       </ul>
     </nav>
   </div>
 </header>
 
-<main id="main">
-  <div class="container">
+<main><div class="container">
 
-    <nav aria-label="Breadcrumb" class="breadcrumb">
-      <ol>
-        <li><a href="/en/index.html">Home</a></li>
-      </ol>
-    </nav>
+  <!-- 1 Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Breadcrumb"><ol><li><a href="/en/index.html">Home</a></li></ol></nav>
 
-    <section class="hero">
-      <div class="hero-content">
+  <!-- 2 Hero -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-kicker">🌱 Sustainable · Reuse · No Upload</span>
         <h1>Reuse your old iPad/iPhone as a sustainable photo frame with slideshow and clock</h1>
-        <p class="hero-lead">Turn unused devices sitting in your closet into a beautiful centerpiece that displays your memories — no new hardware needed.</p>
-        <div class="hero-actions">
+        <p class="hero-sub">Turn unused devices sitting in your closet into a beautiful centerpiece that displays your memories — no new hardware needed.</p>
+        <div class="hero-ctas">
           <a class="btn btn-primary" href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">Download on the App Store</a>
-          <p class="hero-note">Reusing an unused device is the first step toward a more sustainable lifestyle.</p>
+        </div>
+        <p class="hero-note">Reusing an unused device is the first step toward a more sustainable lifestyle.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="hero-frame">
+          <span class="clock">10:30</span>
+          <div class="photo-card"><strong>Family Memories</strong><span>Slideshow · Clock · Matte</span></div>
+        </div>
+        <div class="hero-legend">
+          <span><i class="dot green"></i> Sustainable</span>
+          <span><i class="dot blue"></i> Reuse Device</span>
+          <span><i class="dot amber"></i> 4 Languages</span>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="problem">
-      <h2>The Problem</h2>
-      <div class="grid grid-4">
-        <div class="card">
-          <h3>Unused iPads and iPhones stored away</h3>
-          <p>Millions of perfectly working devices are left in drawers, gathering dust instead of being loved.</p>
-        </div>
-        <div class="card">
-          <h3>Old devices heading for e-waste</h3>
-          <p>Upgrades often mean perfectly functional devices end up in landfills, leaking heavy metals into the environment.</p>
-        </div>
-        <div class="card">
-          <h3>Dedicated photo frames are costly</h3>
-          <p>Purpose-built digital frames can cost $80–$200 — yet you probably already own a perfectly good display at home.</p>
-        </div>
-        <div class="card">
-          <h3>Environmental impact of electronics waste</h3>
-          <p>E-waste is the fastest growing waste stream globally. Reusing hardware is one of the highest-impact choices we can make.</p>
+  <!-- 3 Problem 4 cards -->
+  <section class="section section-problem">
+    <h2>The Problem</h2>
+    <div class="card-grid-4">
+      <div class="card problem">
+        <div class="icon">📱♻️</div>
+        <h3>Unused iPads and iPhones stored away</h3>
+        <p>Millions of perfectly working devices are left in drawers, gathering dust instead of being loved.</p>
+      </div>
+      <div class="card problem">
+        <div class="icon">📦💤</div>
+        <h3>Old devices heading for e-waste</h3>
+        <p>Upgrades often mean perfectly functional devices end up in landfills, leaking heavy metals into the environment.</p>
+      </div>
+      <div class="card problem">
+        <div class="icon">💰😢</div>
+        <h3>Dedicated photo frames are costly</h3>
+        <p>Purpose-built digital frames can cost $80–$200 — yet you probably already own a perfectly good display at home.</p>
+      </div>
+      <div class="card problem">
+        <div class="icon">🌍⚠️</div>
+        <h3>Environmental impact of electronics waste</h3>
+        <p>E-waste is the fastest growing waste stream globally. Reusing hardware is one of the highest-impact choices we can make.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Concept① Sustainable -->
+  <section class="section section-concept-sustainable">
+    <h2>Sustainable: Don't discard — use devices until the end of life</h2>
+    <ul class="bullet-list">
+      <li>Extend device longevity by giving old hardware a second role</li>
+      <li>Reduce e-waste by skipping the purchase of a new dedicated frame</li>
+      <li>Start for free — the app is free to use with AdMob banner ads</li>
+    </ul>
+    <h3>Four everyday use cases</h3>
+    <div class="usecases card-grid-4">
+      <div class="card">
+        <h4>Grandparents gift</h4>
+        <p>A familiar tablet with large clock size, easy to set up and enjoy.</p>
+      </div>
+      <div class="card">
+        <h4>Digital photo frame</h4>
+        <p>Show family, travel, and pet photos cycling on a desk or shelf.</p>
+      </div>
+      <div class="card">
+        <h4>Kitchen clock</h4>
+        <p>Bright clock display plus recipe photos and weekend memories.</p>
+      </div>
+      <div class="card">
+        <h4>Office memory board</h4>
+        <p>Rotate team photos or customer moments in the meeting space.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Concept② Reuse -->
+  <section class="section section-concept-reuse">
+    <h2>Reuse leftover devices you already own — turn a closet item into a centerpiece today</h2>
+    <h3>Three scenarios that sound familiar?</h3>
+    <div class="scenarios card-grid-3">
+      <div class="card">
+        <div class="icon">🏠📱</div>
+        <h4>iPad in the closet</h4>
+        <p>That old iPad still boots — it just needs a new job.</p>
+      </div>
+      <div class="card">
+        <div class="icon">👶📱</div>
+        <h4>Old kid's phone</h4>
+        <p>Handed down and now idle. Perfect for a bedroom slideshow.</p>
+      </div>
+      <div class="card">
+        <div class="icon">✨📱</div>
+        <h4>Leftover phone after upgrade</h4>
+        <p>Your last-gen iPhone has a gorgeous screen. Put it back to work.</p>
+      </div>
+    </div>
+    <h3>Three steps to get started</h3>
+    <ol class="steps">
+      <li><strong>Install the app</strong> — Download SimplePhotoFrame from the App Store on your iPad or iPhone.</li>
+      <li><strong>Pick photos</strong> — Choose the memories you want to display from your photo library.</li>
+      <li><strong>Put on a stand</strong> — Prop the device on a stand or dock it and enjoy your new sustainable frame.</li>
+    </ol>
+  </section>
+
+  <!-- 6 Features -->
+  <section class="section section-features">
+    <h2>Key Features</h2>
+    <div class="card-grid-3">
+      <div class="card">
+        <div class="icon">🖼️🔄</div>
+        <h3>Photo library slideshow</h3>
+        <p>Cycle through your chosen photos with an interval set in seconds or minutes.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🕐📅</div>
+        <h3>Clock / date toggle &amp; enlarged clock size</h3>
+        <p>Independently turn clock and date on or off, and enlarge the clock for better visibility.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🎨</div>
+        <h3>8 matte colors</h3>
+        <p>Choose from: Dark, White, Ocean, Sunset, Forest, Rose, Lavender, Oak.</p>
+        <div class="matte-palette" aria-label="Matte color palette">
+          <span class="swatch" style="background:#000000" title="Dark"></span>
+          <span class="swatch" style="background:#FFFFFF;border:1px solid #ccc" title="White"></span>
+          <span class="swatch" style="background:#006994" title="Ocean"></span>
+          <span class="swatch" style="background:#FF6B35" title="Sunset"></span>
+          <span class="swatch" style="background:#2D5016" title="Forest"></span>
+          <span class="swatch" style="background:#8B4B6B" title="Rose"></span>
+          <span class="swatch" style="background:#967BB6" title="Lavender"></span>
+          <span class="swatch" style="background:#8B4513" title="Oak"></span>
         </div>
       </div>
-    </section>
-
-    <section class="section-concept-sustainable">
-      <h2>Sustainable: Don't discard — use devices until the end of life</h2>
-      <ul class="bullets">
-        <li>Extend device longevity by giving old hardware a second role</li>
-        <li>Reduce e-waste by skipping the purchase of a new dedicated frame</li>
-        <li>Start for free — the app is free to use with AdMob banner ads</li>
-      </ul>
-      <h3>Four everyday use cases</h3>
-      <div class="grid grid-4">
-        <div class="card"><h4>Grandparents gift</h4><p>A familiar tablet with large clock size, easy to set up and enjoy.</p></div>
-        <div class="card"><h4>Digital photo frame</h4><p>Show family, travel, and pet photos cycling on a desk or shelf.</p></div>
-        <div class="card"><h4>Kitchen clock</h4><p>Bright clock display plus recipe photos and weekend memories.</p></div>
-        <div class="card"><h4>Office memory board</h4><p>Rotate team photos or customer moments in the meeting space.</p></div>
+      <div class="card">
+        <div class="icon">🌏4️⃣</div>
+        <h3>4 languages</h3>
+        <p>UI and date formatting in Japanese, English, Spanish, and Chinese Simplified.</p>
       </div>
-    </section>
-
-    <section class="section-concept-reuse">
-      <h2>Reuse leftover devices you already own — turn a closet item into a centerpiece today</h2>
-      <h3>Three scenarios that sound familiar?</h3>
-      <div class="grid grid-3">
-        <div class="card"><h4>iPad in the closet</h4><p>That old iPad still boots — it just needs a new job.</p></div>
-        <div class="card"><h4>Old kid's phone</h4><p>Handed down and now idle. Perfect for a bedroom slideshow.</p></div>
-        <div class="card"><h4>Leftover phone after upgrade</h4><p>Your last-gen iPhone has a gorgeous screen. Put it back to work.</p></div>
+      <div class="card">
+        <div class="icon">🆓📣</div>
+        <h3>Free to use with AdMob banner ads</h3>
+        <p>No upfront cost. Banner ads support ongoing maintenance and future updates.</p>
       </div>
-      <h3>Three steps to get started</h3>
-      <ol class="steps">
-        <li><strong>Install the app</strong> — Download SimplePhotoFrame from the App Store on your iPad or iPhone.</li>
-        <li><strong>Pick photos</strong> — Choose the memories you want to display from your photo library.</li>
-        <li><strong>Put on a stand</strong> — Prop the device on a stand or dock it and enjoy your new sustainable frame.</li>
-      </ol>
-    </section>
+      <div class="card">
+        <div class="icon">🔒📱</div>
+        <h3>Photos processed locally</h3>
+        <p>Photos are never uploaded to a server. All processing happens on-device.</p>
+      </div>
+    </div>
+  </section>
 
-    <section class="features">
-      <h2>Key Features</h2>
-      <div class="grid grid-3">
-        <div class="card">
-          <h3>Photo library slideshow</h3>
-          <p>Cycle through your chosen photos with an interval set in seconds or minutes.</p>
-        </div>
-        <div class="card">
-          <h3>Clock / date toggle &amp; enlarged clock size</h3>
-          <p>Independently turn clock and date on or off, and enlarge the clock for better visibility.</p>
-        </div>
-        <div class="card">
-          <h3>8 matte colors</h3>
-          <p>Choose from: Dark, White, Ocean, Sunset, Forest, Rose, Lavender, Oak.</p>
-          <div class="palette" aria-label="Matte color palette">
-            <span class="swatch" style="background:#000000" title="Dark"></span>
-            <span class="swatch" style="background:#FFFFFF;border:1px solid #ccc" title="White"></span>
-            <span class="swatch" style="background:#006994" title="Ocean"></span>
-            <span class="swatch" style="background:#FF6B35" title="Sunset"></span>
-            <span class="swatch" style="background:#2D5016" title="Forest"></span>
-            <span class="swatch" style="background:#8B4B6B" title="Rose"></span>
-            <span class="swatch" style="background:#967BB6" title="Lavender"></span>
-            <span class="swatch" style="background:#8B4513" title="Oak"></span>
-          </div>
-        </div>
-        <div class="card">
-          <h3>4 languages</h3>
-          <p>UI and date formatting in Japanese, English, Spanish, and Chinese Simplified.</p>
-        </div>
-        <div class="card">
-          <h3>Free to use with AdMob banner ads</h3>
-          <p>No upfront cost. Banner ads support ongoing maintenance and future updates.</p>
-        </div>
-        <div class="card">
-          <h3>Photos processed locally</h3>
-          <p>Photos are never uploaded to a server. All processing happens on-device.</p>
+  <!-- 7 Settings & Languages -->
+  <section class="section section-settings-lang">
+    <h2>Settings &amp; Languages</h2>
+    <p class="section-lead">Every setting is visible with one tap, and every screen works in your language.</p>
+    <div class="settings-wrap">
+      <div class="settings-left">
+        <ul class="setting-list">
+          <li>Photo slideshow interval (seconds / minutes)</li>
+          <li>Clock display on / off toggle</li>
+          <li>Date display on / off toggle</li>
+          <li>Enlarged clock size option</li>
+          <li>Matte color selection</li>
+        </ul>
+        <div class="matte-palette" aria-label="Matte color palette">
+          <span class="swatch" style="background:#000000" title="Dark"></span>
+          <span class="swatch" style="background:#FFFFFF;border:1px solid #ccc" title="White"></span>
+          <span class="swatch" style="background:#006994" title="Ocean"></span>
+          <span class="swatch" style="background:#FF6B35" title="Sunset"></span>
+          <span class="swatch" style="background:#2D5016" title="Forest"></span>
+          <span class="swatch" style="background:#8B4B6B" title="Rose"></span>
+          <span class="swatch" style="background:#967BB6" title="Lavender"></span>
+          <span class="swatch" style="background:#8B4513" title="Oak"></span>
         </div>
       </div>
-    </section>
-
-    <section class="settings-languages">
-      <h2>Settings &amp; Languages</h2>
-      <p class="section-lead">Every setting is visible with one tap, and every screen works in your language.</p>
-      <div class="grid grid-4">
-        <div class="card lang-card"><h3>日本語</h3><p>Settings, help, and clock/date formatting in Japanese.</p></div>
-        <div class="card lang-card active-lang"><h3>English</h3><p>Settings, help, and clock/date formatting in English.</p></div>
-        <div class="card lang-card"><h3>Español</h3><p>Settings, help, and clock/date formatting in Spanish.</p></div>
-        <div class="card lang-card"><h3>简体中文</h3><p>Settings, help, and clock/date formatting in Chinese Simplified.</p></div>
-      </div>
-    </section>
-
-    <section class="privacy-local">
-      <h2>Privacy &amp; Local Processing</h2>
-      <div class="grid grid-2 privacy-grid">
-        <div class="card privacy-col">
-          <h3>We NEVER upload your photos to any server — all processing happens locally on-device</h3>
-          <p>SimplePhotoFrame only reads the photos you select from your photo library. The images stay on your iPad or iPhone, and no network upload ever occurs.</p>
+      <div class="langs card-grid-4">
+        <div class="card lang-card">
+          <div class="flag">🇯🇵</div>
+          <h3>日本語</h3>
+          <p>Settings, help, and clock/date formatting in Japanese.</p>
         </div>
-        <div class="card privacy-col">
-          <h3>Works fully offline</h3>
-          <p>Once the app is installed, the slideshow, clock, and all settings work completely offline. You can place the frame anywhere — no Wi-Fi required after setup.</p>
+        <div class="card lang-card is-active">
+          <div class="flag">🇺🇸🇬🇧</div>
+          <h3>English</h3>
+          <p>Settings, help, and clock/date formatting in English.</p>
+        </div>
+        <div class="card lang-card">
+          <div class="flag">🇪🇸</div>
+          <h3>Español</h3>
+          <p>Settings, help, and clock/date formatting in Spanish.</p>
+        </div>
+        <div class="card lang-card">
+          <div class="flag">🇨🇳</div>
+          <h3>简体中文</h3>
+          <p>Settings, help, and clock/date formatting in Chinese Simplified.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="faq">
-      <h2>Frequently Asked Questions</h2>
-      <details>
+  <!-- 8 Privacy & Local -->
+  <section class="section section-privacy-local">
+    <h2>Privacy &amp; Local Processing</h2>
+    <div class="privacy-box card-grid-2">
+      <div class="card">
+        <div class="icon">🔒🚫☁️</div>
+        <h3>We NEVER upload your photos to any server — all processing happens locally on-device</h3>
+        <p>SimplePhotoFrame only reads the photos you select from your photo library. The images stay on your iPad or iPhone, and no network upload ever occurs.</p>
+      </div>
+      <div class="card">
+        <div class="icon">✈️📴</div>
+        <h3>Works fully offline</h3>
+        <p>Once the app is installed, the slideshow, clock, and all settings work completely offline. You can place the frame anywhere — no Wi-Fi required after setup.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 FAQ 8問 -->
+  <section class="section section-faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq-list">
+      <details class="faq">
         <summary>Q1. What iOS version is supported?</summary>
         <p>Supported OS is iOS 15.1 and above.</p>
       </details>
-      <details>
+      <details class="faq">
         <summary>Q2. Will an older device feel slow?</summary>
         <p>UI is minimal, with light image caching, so older devices should feel smooth for photo slideshow and clock display use.</p>
       </details>
-      <details>
+      <details class="faq">
         <summary>Q3. Do you upload my photos?</summary>
         <p>Absolutely not. We only read your local photo library on-device. Your photos are never uploaded to any server.</p>
       </details>
-      <details>
+      <details class="faq">
         <summary>Q4. Why is this sustainable?</summary>
         <p>Avoids buying a new frame, reuses existing hardware, cuts e-waste, and extends the useful life of devices you already own.</p>
       </details>
-      <details>
+      <details class="faq">
         <summary>Q5. What is the ad model?</summary>
         <p>AdMob banner ads. Revenue goes to maintenance costs.</p>
       </details>
-      <details>
+      <details class="faq">
         <summary>Q6. Does it work offline?</summary>
         <p>Yes, core features work fully offline. All photo processing happens locally on your device.</p>
       </details>
-      <details>
+      <details class="faq">
         <summary>Q7. Is it good as a grandparents gift?</summary>
         <p>Yes, especially with the enlarged clock size option and simple, minimal UI.</p>
       </details>
-      <details>
+      <details class="faq">
         <summary>Q8. How many matte colors are available?</summary>
         <p>8 colors: Dark, White, Ocean, Sunset, Forest, Rose, Lavender, and Oak.</p>
       </details>
-    </section>
+    </div>
+  </section>
 
-    <section class="testimonials">
-      <h2>Why people love SimplePhotoFrame</h2>
-      <ul class="bullets testimonials-list">
-        <li>"I turned my old iPad 5 into a kitchen photo clock — it sees more use now than in the last three years combined."</li>
-        <li>"My parents don't use apps, but they understand this. The big clock and familiar photos were an instant hit."</li>
-        <li>"I feel better about keeping my previous phone instead of recycling it. Reuse beats recycling every time."</li>
-      </ul>
-    </section>
+  <!-- 10 Why -->
+  <section class="section section-why">
+    <h2>Why people love SimplePhotoFrame</h2>
+    <ul>
+      <li>"I turned my old iPad 5 into a kitchen photo clock — it sees more use now than in the last three years combined."</li>
+      <li>"My parents don't use apps, but they understand this. The big clock and familiar photos were an instant hit."</li>
+      <li>"I feel better about keeping my previous phone instead of recycling it. Reuse beats recycling every time."</li>
+    </ul>
+  </section>
 
-    <section class="final-cta">
-      <h2>Give a device a second life — start your sustainable reuse today</h2>
-      <p class="section-lead">Every old iPad or iPhone you turn into a photo frame cuts e-waste and saves a purchase. It's sustainable reuse — and it's free.</p>
-      <a class="btn btn-primary btn-lg" href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">Download on the App Store</a>
-    </section>
+  <!-- 11 Final CTA -->
+  <section class="final-cta-box">
+    <h2>Give a device a second life — start your sustainable reuse today</h2>
+    <p>Every old iPad or iPhone you turn into a photo frame cuts e-waste and saves a purchase. It's sustainable reuse — and it's free.</p>
+    <a class="btn btn-primary" href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">Download on the App Store</a>
+  </section>
 
-  </div>
-</main>
+</div></main>
 
 <footer class="site-footer">
-  <div class="container footer-inner">
-    <nav class="footer-nav" aria-label="Footer">
-      <ul>
-        <li><a href="/en/index.html">Home</a></li>
-        <li><a href="/en/privacy.html">Privacy</a></li>
-        <li><a href="/en/terms.html">Terms</a></li>
-        <li><a href="/en/support.html">Support</a></li>
-      </ul>
-    </nav>
-    <nav class="lang-switch footer-lang" aria-label="Language switcher">
-      <ul>
-        <li><a href="/ja/index.html" hreflang="ja">日本語</a></li>
-        <li><a href="/en/index.html" hreflang="en" aria-current="page" class="active">EN</a></li>
-        <li><a href="/es/index.html" hreflang="es">Español</a></li>
-        <li><a href="/zh-Hans/index.html" hreflang="zh-Hans">简体中文</a></li>
-      </ul>
-    </nav>
-    <p class="copyright">© 2026 nysnr · SimplePhotoFrame · <a href="/index.html" hreflang="x-default">x-default</a></p>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/en/index.html" class="brand"><span class="brand-badge">SP</span><span>SimplePhotoFrame</span></a>
+        <p>Turn dusty old iPads and iPhones into beautiful photo frames. Sustainable device reuse — free, local, private.</p>
+      </div>
+      <div><h3>Navigate</h3><ul><li><a href="/en/index.html">Home</a></li><li><a href="/en/support.html">Support</a></li><li><a href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">App Store</a></li></ul></div>
+      <div><h3>Legal</h3><ul><li><a href="/en/privacy.html">Privacy</a></li><li><a href="/en/terms.html">Terms</a></li></ul></div>
+      <div><h3>Languages</h3><ul><li><a href="/ja/index.html" hreflang="ja">日本語</a></li><li><a href="/en/index.html" hreflang="en">English</a></li><li><a href="/es/index.html" hreflang="es">Español</a></li><li><a href="/zh-Hans/index.html" hreflang="zh-Hans">简体中文</a></li><li><a href="/index.html" hreflang="x-default">x-default</a></li></ul></div>
+      <div><h3>Info</h3><ul><li>© 2026 nysnr</li><li>Bundle: com.nysnr.photoframenew</li><li>ASC ID: 6792314431</li><li>iOS 15.1+ Required</li></ul></div>
+    </div>
+    <p class="copyright">© 2026 nysnr · SimplePhotoFrame · Bundle ID com.nysnr.photoframenew · App Store ID 6792314431</p>
   </div>
 </footer>
+<script src="/assets/js/main.js" defer></script>
 </body>
 </html>
