@@ -540,9 +540,10 @@ strong { font-weight: 700; color: var(--spf-text); }
   border-radius: var(--r-lg);
   background: #fff;
   border: 1px solid #bfdbfe;
-  padding: 26px 22px 22px;
+  padding: 34px 22px 22px;
   position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: visible;
 }
 .usecase:hover {
   transform: translateY(-3px);
@@ -550,17 +551,21 @@ strong { font-weight: 700; color: var(--spf-text); }
 }
 .usecase .tag {
   position: absolute;
-  top: -12px; left: 18px;
+  top: -16px; left: 18px;
   background: var(--spf-primary);
   color: #fff;
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: var(--r-pill);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.03em;
   box-shadow: 0 6px 14px rgba(11, 122, 156, 0.25);
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
-.usecase h3 { margin: 8px 0 6px; }
+.usecase h3 { margin: 4px 0 6px; }
 .usecase p  { margin: 0; color: var(--spf-muted); font-size: 0.95rem; }
 
 /* Steps */
@@ -654,7 +659,7 @@ strong { font-weight: 700; color: var(--spf-text); }
 /* Language cards */
 .langs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-top: 18px;
 }
@@ -662,18 +667,55 @@ strong { font-weight: 700; color: var(--spf-text); }
   background: var(--spf-surface);
   border: 1px solid var(--spf-border);
   border-radius: var(--r-md);
-  padding: 16px 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 18px 18px 16px;
+  min-height: 164px;
+  display: block;
   transition: border-color 0.15s ease, transform 0.15s ease;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+  line-height: 1.55;
+}
+.lang-card::after {
+  content: "";
+  display: block;
+  clear: both;
 }
 .lang-card:hover {
   border-color: var(--spf-primary);
   transform: translateY(-2px);
 }
-.lang-card strong { display: block; margin-bottom: 2px; font-size: 1rem; }
-.lang-card span   { font-size: 0.85rem; color: var(--spf-muted); }
+.lang-card .flag,
+.lang-card > div.lang-main {
+  float: right;
+  font-size: 1.5rem;
+  line-height: 1;
+  margin: 0 0 8px 10px;
+}
+.lang-card > span.badge {
+  float: right;
+  clear: right;
+  margin: 0 0 6px -80px;
+}
+.lang-card strong,
+.lang-card h3,
+.lang-card h4,
+.lang-card .lang-name {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 1.02rem;
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--spf-text);
+}
+.lang-card .lang-name { font-size: 0.98rem; }
+.lang-card span,
+.lang-card p {
+  display: block;
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--spf-muted);
+  line-height: 1.55;
+}
 .badge {
   padding: 3px 10px;
   border-radius: var(--r-pill);
