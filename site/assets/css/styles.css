@@ -659,6 +659,14 @@ strong { font-weight: 700; color: var(--spf-text); }
   transition: transform 0.15s ease;
 }
 .swatch:hover { transform: translateY(-2px); }
+.matte-palette > :nth-child(1) { color: #e2e8f0 !important; }
+.matte-palette > :nth-child(2) { color: #1f2937 !important; }
+.matte-palette > :nth-child(3) { color: #ffffff !important; }
+.matte-palette > :nth-child(4) { color: #ffffff !important; }
+.matte-palette > :nth-child(5) { color: #ffffff !important; }
+.matte-palette > :nth-child(6) { color: #ffffff !important; }
+.matte-palette > :nth-child(7) { color: #ffffff !important; }
+.matte-palette > :nth-child(8) { color: #ffffff !important; }
 .swatch.dark     { background: #0f172a; color: #e2e8f0; }
 .swatch.white    { background: #ffffff; }
 .swatch.ocean    { background: #0ea5e9; color: #fff; }
