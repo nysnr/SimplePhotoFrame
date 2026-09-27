@@ -11,5 +11,4 @@
 #
 # 補足: 本ファイルは https://simple-photo-frame.vercel.app/app-ads.txt で公開されます
 
-# TODO: 実際の AdMob パブリッシャー ID に置換してください
-google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+google.com, pub-3457277467592299, DIRECT, f08c47fec0942fa0
