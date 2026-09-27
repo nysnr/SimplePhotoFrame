@@ -1,0 +1,15 @@
+# SimplePhotoFrame - Authorized Sellers for Apps (app-ads.txt)
+#
+# 設定手順:
+# 1. AdMob 管理画面 https://apps.admob.com/ にログイン
+# 2. 左メニュー「アプリ」→「すべてのアプリ」→ 本アプリを選択
+# 3. 「アプリの設定」→「app-ads.txt」タブを開く
+# 4. 画面に表示されている「google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0」
+#    の行をコピーし、下の「TODO: 実際の publisher ID に置換」の行と差し替えてください
+# 5. AdMob 管理画面の「デベロッパーサイトURL」を https://simple-photo-frame.vercel.app/ に設定
+# 6. Google のクローラが自動的にこのファイルを 24-72 時間以内にピックアップします
+#
+# 補足: 本ファイルは https://simple-photo-frame.vercel.app/app-ads.txt で公開されます
+
+# TODO: 実際の AdMob パブリッシャー ID に置換してください
+google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0

@@ -305,7 +305,7 @@ export default function AdBanner({
             unitId={BANNER_AD_UNIT_ID}
             size={sizeConst}
             width={Math.floor(containerWidth || windowWidth)}
-            requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+            requestOptions={{ requestNonPersonalizedAdsOnly: false }}
             onAdLoaded={(dimensions) => {
               if (retryTimeoutRef.current) {
                 clearTimeout(retryTimeoutRef.current);
