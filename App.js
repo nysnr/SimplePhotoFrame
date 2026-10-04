@@ -23,8 +23,9 @@ import * as MediaLibrary from 'expo-media-library';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getLocales } from 'expo-localization';
-import { AdBanner } from './components/ads';
+import { AdBanner, InterstitialManager } from './components/ads';
 import Constants from 'expo-constants';
+import { runAttFlow } from './utils/attManager';
 
 const { width, height } = Dimensions.get('window');
 const DEV = typeof __DEV__ !== 'undefined' && __DEV__;
@@ -478,8 +479,12 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsAdMountToken, setSettingsAdMountToken] = useState(0);
   const [showHelp, setShowHelp] = useState(false);
+  const [helpAdMountToken, setHelpAdMountToken] = useState(0);
   const [showSlideshow, setShowSlideshow] = useState(false);
+  const [slideshowAdMountToken, setSlideshowAdMountToken] = useState(0);
+  const [galleryAdMountToken, setGalleryAdMountToken] = useState(() => Date.now());
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [matteColor, setMatteColor] = useState('dark');
   const [slideshowInterval, setSlideshowInterval] = useState(3000);
@@ -589,12 +594,38 @@ export default function App() {
   }, [showSlideshow]);
 
   useEffect(() => {
+    let cancelled = false;
     const splashTimer = setTimeout(() => {
+      if (cancelled) return;
       setShowStartupSplash(false);
     }, 2000);
 
-    return () => clearTimeout(splashTimer);
+    return () => {
+      cancelled = true;
+      clearTimeout(splashTimer);
+    };
   }, []);
+
+  useEffect(() => {
+    if (showStartupSplash) return;
+    let disposed = false;
+    (async () => {
+      try {
+        await runAttFlow();
+      } catch (e) {
+        devWarn('[ATT] flow failed', e);
+      }
+      if (disposed) return;
+      try {
+        await InterstitialManager.preload();
+      } catch (e) {
+        devWarn('[Interstitial] preload failed', e);
+      }
+    })();
+    return () => {
+      disposed = true;
+    };
+  }, [showStartupSplash]);
 
   // 設定画面での回転強制を撤去（シンプル化）
   useEffect(() => {
@@ -815,6 +846,7 @@ export default function App() {
       
       // スライドショー状態を設定
       setCurrentSlideIndex(0);
+      setSlideshowAdMountToken((p) => p + 1);
       setShowSlideshow(true);
       setShowCloseButton(true);
       
@@ -846,6 +878,7 @@ export default function App() {
       
       // エラー時のクリーンアップ
       setShowSlideshow(false);
+      setGalleryAdMountToken((p) => p + 1);
       if (slideshowTimer.current) {
         clearInterval(slideshowTimer.current);
         slideshowTimer.current = null;
@@ -861,6 +894,7 @@ export default function App() {
   const stopSlideshow = async () => {
     try {
       setShowSlideshow(false);
+      setGalleryAdMountToken((p) => p + 1);
       
       // タイマーをクリア
       if (slideshowTimer.current) {
@@ -890,6 +924,7 @@ export default function App() {
       }
       // エラーが発生してもスライドショーは確実に停止
       setShowSlideshow(false);
+      setGalleryAdMountToken((p) => p + 1);
       if (slideshowTimer.current) {
         clearInterval(slideshowTimer.current);
         slideshowTimer.current = null;
@@ -1042,7 +1077,14 @@ export default function App() {
           <View style={styles.settingsHeader}>
             <Text style={styles.settingsTitle}>{t('Settings')}</Text>
             <TouchableOpacity style={styles.closeButtonPill} onPress={() => {
-              setShowSettings(false);
+              const beforeClose = async () => {
+                try {
+                  await InterstitialManager.showIfReady({ reason: 'settings-close' });
+                } catch (e) {
+                  devWarn('[Interstitial] settings-close show failed', e);
+                }
+              };
+              beforeClose().finally(() => { setShowSettings(false); setGalleryAdMountToken((p) => p + 1); });
             }}>
               <Text style={styles.closeButton}>{t('app.close')}</Text>
             </TouchableOpacity>
@@ -1197,7 +1239,7 @@ export default function App() {
 
           </ScrollView>
           
-          <AdBanner screenName="settings" style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
+          <AdBanner screenName="settings" mountToken={settingsAdMountToken} style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
         </SafeAreaView>
       </LinearGradient>
     </Modal>
@@ -1221,7 +1263,7 @@ export default function App() {
             {helpSection === 'main' ? (
               <>
                 <Text style={styles.settingsTitle}>{t('app.help')}</Text>
-                <TouchableOpacity style={styles.closeButtonPill} onPress={() => setShowHelp(false)}>
+                <TouchableOpacity style={styles.closeButtonPill} onPress={() => { setShowHelp(false); setGalleryAdMountToken((p) => p + 1); }}>
                   <Text style={styles.closeButton}>{t('app.close')}</Text>
                 </TouchableOpacity>
               </>
@@ -1290,8 +1332,8 @@ export default function App() {
                   style={styles.secondaryActionButton}
                   onPress={() => {
                     const url = helpSection === 'privacy'
-                      ? 'https://nysnr.github.io/SimplePhotoFrame/privacy.html'
-                      : 'https://nysnr.github.io/SimplePhotoFrame/terms.html';
+                      ? 'https://simple-photo-frame.vercel.app/en/privacy'
+                      : 'https://simple-photo-frame.vercel.app/en/terms';
                     Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
                   }}
                 >
@@ -1304,7 +1346,7 @@ export default function App() {
             
           </ScrollView>
           
-          <AdBanner screenName="help" style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
+          <AdBanner screenName="help" mountToken={helpAdMountToken} style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
         </SafeAreaView>
       </LinearGradient>
     </Modal>
@@ -1488,6 +1530,7 @@ export default function App() {
             <View style={[styles.slideshowAdSlot, { height: slideshowAdHeight }]}>
               <AdBanner
                 screenName="slideshow"
+                mountToken={slideshowAdMountToken}
                 onHeightChange={(nextHeight) => {
                   if (nextHeight > 0) setSlideshowAdHeight(nextHeight);
                 }}
@@ -1545,6 +1588,7 @@ export default function App() {
               <TouchableOpacity
                 style={styles.headerButton}
                 onPress={() => {
+                  setHelpAdMountToken((p) => p + 1);
                   setShowHelp(true);
                 }}
               >
@@ -1553,6 +1597,7 @@ export default function App() {
               <TouchableOpacity
                 style={styles.headerButton}
                 onPress={() => {
+                  setSettingsAdMountToken((p) => p + 1);
                   setShowSettings(true);
                 }}
               >
@@ -1659,7 +1704,7 @@ export default function App() {
           
           {/* Banner Ad - gallery/selection screen */}
           {!showSettings && !showHelp && !showSlideshow && (
-            <AdBanner screenName="gallery" style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
+            <AdBanner screenName="gallery" mountToken={galleryAdMountToken} style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
           )}
           
           {renderSettings()}
@@ -2106,6 +2151,7 @@ export default function App() {
   slideshowAdSlot: {
     width: '100%',
     flexShrink: 0,
+    minHeight: 50,
     backgroundColor: theme.surfaceStrong,
     borderTopWidth: 1,
     borderTopColor: theme.border,

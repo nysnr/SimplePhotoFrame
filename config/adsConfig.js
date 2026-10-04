@@ -10,6 +10,11 @@ const TEST_BANNER_IDS = {
   android: 'ca-app-pub-3940256099942544/6300978111',
 };
 
+const TEST_INTERSTITIAL_IDS = {
+  ios: 'ca-app-pub-3940256099942544/4411468910',
+  android: 'ca-app-pub-3940256099942544/1033173712',
+};
+
 // ENABLE_ADS: default true unless explicitly set to 'false'
 // Prefer Expo public env vars; fallback to legacy names
 const ENABLE_ADS_RAW = env.EXPO_PUBLIC_ENABLE_ADS ?? extra.enableAds ?? env.ENABLE_ADS ?? 'true';
@@ -58,3 +63,46 @@ const getAdUnitId = () => {
 };
 
 export const BANNER_AD_UNIT_ID = getAdUnitId();
+
+const getConfiguredInterstitialAdUnitId = () => {
+  if (Platform.OS === 'ios') {
+    return env.EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID_IOS
+      ?? env.EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID
+      ?? extra.interstitialAdUnitIdIos
+      ?? extra.interstitialAdUnitId
+      ?? env.INTERSTITIAL_AD_UNIT_ID_IOS
+      ?? env.INTERSTITIAL_AD_UNIT_ID;
+  }
+  if (Platform.OS === 'android') {
+    return env.EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID_ANDROID
+      ?? env.EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID
+      ?? extra.interstitialAdUnitIdAndroid
+      ?? extra.interstitialAdUnitId
+      ?? env.INTERSTITIAL_AD_UNIT_ID_ANDROID
+      ?? env.INTERSTITIAL_AD_UNIT_ID;
+  }
+  return env.EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID ?? extra.interstitialAdUnitId ?? env.INTERSTITIAL_AD_UNIT_ID;
+};
+
+const getInterstitialAdUnitId = () => {
+  const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
+  if (isDev || IS_PREVIEW_VARIANT) {
+    return Platform.OS === 'ios'
+      ? TEST_INTERSTITIAL_IDS.ios
+      : TEST_INTERSTITIAL_IDS.android;
+  }
+
+  const idRaw = getConfiguredInterstitialAdUnitId();
+  if (!idRaw) return null;
+  const id = String(idRaw).trim();
+  if (!id) return null;
+  if (
+    id === TEST_INTERSTITIAL_IDS.ios ||
+    id === TEST_INTERSTITIAL_IDS.android
+  ) {
+    return null;
+  }
+  return id;
+};
+
+export const INTERSTITIAL_AD_UNIT_ID = getInterstitialAdUnitId();

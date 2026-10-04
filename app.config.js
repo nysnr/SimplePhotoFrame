@@ -69,6 +69,27 @@ module.exports = ({ config }) => {
   const androidBannerAdUnitId = isPreviewBuild
     ? TEST_ANDROID_BANNER_ID
     : (androidBannerAdUnitIdRaw ? String(androidBannerAdUnitIdRaw).trim() : undefined);
+
+  const iosInterstitialAdUnitIdRaw = env.EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID_IOS
+    ?? env.EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID
+    ?? base.expo?.extra?.interstitialAdUnitIdIos
+    ?? base.expo?.extra?.interstitialAdUnitId
+    ?? env.INTERSTITIAL_AD_UNIT_ID_IOS
+    ?? env.INTERSTITIAL_AD_UNIT_ID;
+  const androidInterstitialAdUnitIdRaw = env.EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID_ANDROID
+    ?? env.EXPO_PUBLIC_INTERSTITIAL_AD_UNIT_ID
+    ?? base.expo?.extra?.interstitialAdUnitIdAndroid
+    ?? base.expo?.extra?.interstitialAdUnitId
+    ?? env.INTERSTITIAL_AD_UNIT_ID_ANDROID
+    ?? env.INTERSTITIAL_AD_UNIT_ID;
+  const TEST_IOS_INTERSTITIAL_ID = 'ca-app-pub-3940256099942544/4411468910';
+  const TEST_ANDROID_INTERSTITIAL_ID = 'ca-app-pub-3940256099942544/1033173712';
+  const iosInterstitialAdUnitId = isPreviewBuild
+    ? TEST_IOS_INTERSTITIAL_ID
+    : (iosInterstitialAdUnitIdRaw ? String(iosInterstitialAdUnitIdRaw).trim() : undefined);
+  const androidInterstitialAdUnitId = isPreviewBuild
+    ? TEST_ANDROID_INTERSTITIAL_ID
+    : (androidInterstitialAdUnitIdRaw ? String(androidInterstitialAdUnitIdRaw).trim() : undefined);
   const photoLibraryPermissionText = 'SimplePhotoFrame needs access to your photo library so you can choose photos and display them in a slideshow. For example, you can select family or travel photos to show in the app with an optional clock overlay.';
 
   const testBannerIds = new Set([
@@ -120,6 +141,16 @@ module.exports = ({ config }) => {
         CFBundleAllowMixedLocalizations: true,
         CFBundleDevelopmentRegion: 'en',
         CFBundleLocalizations: supportedLocalizations,
+        NSUserTrackingUsageDescription:
+          'Allow tracking to receive more relevant ads and support app maintenance. Your data remains private and is never sold.',
+        NSLocalizedStrings: {
+          NSUserTrackingUsageDescription_ja:
+            'トラッキングを許可すると、より関連性の高い広告が表示され、アプリの維持に役立ちます。お客様のデータはプライベートに保たれ、販売されることは一切ありません。',
+          NSUserTrackingUsageDescription_es:
+            'Permite el seguimiento para recibir anuncios más relevantes y ayudar al mantenimiento de la app. Tus datos se mantienen privados y nunca se venden.',
+          NSUserTrackingUsageDescription_zh_Hans:
+            '允许跟踪以接收更相关的广告并支持应用维护。您的数据将保持私密，绝不会被出售。',
+        },
         ...(isPreviewBuild ? { CFBundleDisplayName: previewAppName } : {}),
       },
     },
@@ -164,6 +195,9 @@ module.exports = ({ config }) => {
       bannerAdUnitId: iosBannerAdUnitId || androidBannerAdUnitId || null,
       bannerAdUnitIdIos: iosBannerAdUnitId || null,
       bannerAdUnitIdAndroid: androidBannerAdUnitId || null,
+      interstitialAdUnitId: iosInterstitialAdUnitId || androidInterstitialAdUnitId || null,
+      interstitialAdUnitIdIos: iosInterstitialAdUnitId || null,
+      interstitialAdUnitIdAndroid: androidInterstitialAdUnitId || null,
       // preserve existing EAS metadata
       eas: base.expo?.extra?.eas,
     },

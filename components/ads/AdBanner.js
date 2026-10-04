@@ -18,6 +18,7 @@ export default function AdBanner({
   style,
   screenName = 'unknown',
   onHeightChange,
+  mountToken,
 }) {
   const DEV = typeof __DEV__ !== 'undefined' && __DEV__;
   const bannerRef = useRef(null);
@@ -151,6 +152,23 @@ export default function AdBanner({
       if (t) clearTimeout(t);
     };
   }, [delayMs]);
+
+  useEffect(() => {
+    if (mountToken == null) return undefined;
+    if (Platform.OS === 'web' || isExpoGo || !ENABLE_ADS || !BANNER_AD_UNIT_ID || !shouldLoad) return undefined;
+    setAdLoaded(false);
+    setAdHeight(null);
+    setRetryCount(0);
+    setDebugStatus('ads:mount-token-reload');
+    const t = setTimeout(() => {
+      if (typeof bannerRef.current?.load === 'function') {
+        bannerRef.current.load();
+        return;
+      }
+      setReloadKey((k) => k + 1);
+    }, 150);
+    return () => clearTimeout(t);
+  }, [mountToken, BANNER_AD_UNIT_ID, isExpoGo, shouldLoad]);
 
   useEffect(() => {
     if (Platform.OS !== 'ios' || isExpoGo || !ENABLE_ADS) return undefined;

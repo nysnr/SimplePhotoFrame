@@ -2,7 +2,7 @@
   "expo": {
     "name": "SimplePhotoFrame",
     "slug": "PhotoFrameNew",
-    "version": "1.0.4",
+    "version": "1.0.7",
     "sdkVersion": "54.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -51,7 +51,9 @@
     "extra": {
       "eas": {
         "projectId": "f21dcf70-be65-4d7a-b2e8-f3c73e29e65c"
-      }
+      },
+      "bannerAdUnitIdIos": "ca-app-pub-3457277467592299/7061250916",
+      "interstitialAdUnitIdIos": "ca-app-pub-3457277467592299/8520494517"
     }
   }
 }
