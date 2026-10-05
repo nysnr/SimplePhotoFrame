@@ -7,9 +7,11 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "test:ad-clock": "node --test scripts/ad-clock.test.cjs",
     "postinstall": "node scripts/postinstall-patches.js && node scripts/fix-exec-perms.js"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "54.0.20",
     "expo-build-properties": "~1.0.10",
     "expo-constants": "~18.0.10",
@@ -29,6 +31,7 @@
   "private": true,
   "devDependencies": {
     "patch-package": "^8.0.1",
+    "react-test-renderer": "19.1.0",
     "typescript": "~5.9.2"
   }
 }

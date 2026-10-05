@@ -26,6 +26,7 @@ import { getLocales } from 'expo-localization';
 import { AdBanner, InterstitialManager } from './components/ads';
 import Constants from 'expo-constants';
 import { runAttFlow } from './utils/attManager';
+import useClockMovement, { getClockPlacement, getClockFontScale } from './utils/useClockMovement';
 
 const { width, height } = Dimensions.get('window');
 const DEV = typeof __DEV__ !== 'undefined' && __DEV__;
@@ -84,6 +85,8 @@ const translations = {
     'settings.lavender': 'Lavender',
     'settings.oak': 'Oak',
     'settings.clockAndDateDisplay': 'Clock & Date Display',
+    'settings.moveClockPosition': 'Move clock position',
+    'settings.moveClockPositionHint': 'Move the clock and date every hour. This may reduce image retention, but cannot prevent it completely.',
 
     'label.clockOn': 'Clock On',
     'label.clockOff': 'Clock Off',
@@ -167,6 +170,8 @@ const translations = {
     'settings.lavender': 'ラベンダー',
     'settings.oak': 'オーク',
     'settings.clockAndDateDisplay': '時計・日付表示',
+    'settings.moveClockPosition': '時間表示位置を移動させる',
+    'settings.moveClockPositionHint': '時計と日付を1時間ごとに移動します。焼け付きの軽減を目的とし、完全に防ぐものではありません。',
 
     'label.clockOn': '時計オン',
     'label.clockOff': '時計オフ',
@@ -250,6 +255,8 @@ const translations = {
     'settings.lavender': '薰衣草',
     'settings.oak': '橡木',
     'settings.clockAndDateDisplay': '时钟与日期显示',
+    'settings.moveClockPosition': '移动时间显示位置',
+    'settings.moveClockPositionHint': '每小时移动时钟和日期。这有助于减轻残影，但无法完全防止。',
 
     'label.clockOn': '时钟开启',
     'label.clockOff': '时钟关闭',
@@ -333,6 +340,8 @@ const translations = {
     'settings.lavender': 'Lavanda',
     'settings.oak': 'Roble',
     'settings.clockAndDateDisplay': 'Mostrar reloj y fecha',
+    'settings.moveClockPosition': 'Mover la posición del reloj',
+    'settings.moveClockPositionHint': 'Mueve el reloj y la fecha cada hora. Puede reducir la retención de imagen, pero no evitarla por completo.',
 
     'label.clockOn': 'Reloj activado',
     'label.clockOff': 'Reloj desactivado',
@@ -499,6 +508,8 @@ export default function App() {
   const [showClock, setShowClock] = useState(true);
   const [showDate, setShowDate] = useState(true);
   const [now, setNow] = useState(new Date());
+  const clockMovement = useClockMovement(showSlideshow, now.getTime());
+  const [clockAreaHeight, setClockAreaHeight] = useState(0);
   const [showCloseButton, setShowCloseButton] = useState(true);
   // The adaptive banner reports its real height after it loads.  Keep this
   // separately so the slideshow content never occupies the banner's space.
@@ -1022,8 +1033,15 @@ export default function App() {
 
   // 時計更新タイマー
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
+    const updateNow = () => setNow(new Date());
+    const id = setInterval(updateNow, 1000);
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') updateNow();
+    });
+    return () => {
+      clearInterval(id);
+      subscription.remove();
+    };
   }, []);
 
   // 写真アイテムのレンダリング
@@ -1205,6 +1223,28 @@ export default function App() {
               </View>
             </View>
 
+
+            <View style={styles.settingSection}>
+              <TouchableOpacity
+                accessibilityRole="checkbox"
+                accessibilityLabel={t('settings.moveClockPosition')}
+                accessibilityHint={t('settings.moveClockPositionHint')}
+                accessibilityState={{ checked: clockMovement.enabled, disabled: !clockMovement.ready }}
+                aria-checked={clockMovement.enabled}
+                aria-disabled={!clockMovement.ready}
+                disabled={!clockMovement.ready}
+                onPress={clockMovement.toggle}
+                style={styles.clockMovementRow}
+              >
+                <View style={[styles.clockMovementBox, clockMovement.enabled && styles.activeIntervalButton]}>
+                  {clockMovement.enabled && <Text style={styles.activeIntervalButtonText}>{'\u2713'}</Text>}
+                </View>
+                <Text style={[styles.settingLabel, { flex: 1, marginBottom: 0 }]}>
+                  {t('settings.moveClockPosition')}
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.clockMovementHint}>{t('settings.moveClockPositionHint')}</Text>
+            </View>
 
             {/* 時計・日付の文字サイズ */}
             <View style={styles.settingSection}>
@@ -1417,6 +1457,12 @@ export default function App() {
     const currentPhoto = selectedPhotos[currentSlideIndex];
     const resizeMode = 'contain';
     const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+    const clockFontScale = getClockFontScale(
+      clockAreaHeight,
+      showClock ? styles.clockText.fontSize : 0,
+      showDate ? styles.dateText.fontSize : 0,
+      Dimensions.get('window').fontScale || 1,
+    );
     const maxW = screenOrientation === 'portrait' ? screenWidth * 0.95 : screenWidth * 0.90;
     const slideshowContentHeight = Math.max(1, screenHeight - slideshowAdHeight);
     const maxH = screenOrientation === 'portrait'
@@ -1519,10 +1565,17 @@ export default function App() {
 
 
           {(showClock || showDate) && (
-            <View style={styles.clockOverlay}>
-              {showClock && <Text style={styles.clockText}>{formatTime()}</Text>}
-              {showDate && <Text style={styles.dateText}>{formatDate()}</Text>}
-            </View>
+            <SafeAreaView pointerEvents="none" style={styles.clockSafeArea}>
+              <View
+                style={styles.clockMovementArea}
+                onLayout={(event) => setClockAreaHeight(event.nativeEvent.layout.height)}
+              >
+                <View style={[styles.clockOverlay, getClockPlacement(clockMovement.position)]}>
+                  {showClock && <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.3} style={[styles.clockText, { fontSize: styles.clockText.fontSize * clockFontScale }]}>{formatTime()}</Text>}
+                  {showDate && <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.3} style={[styles.dateText, { fontSize: styles.dateText.fontSize * clockFontScale }]}>{formatDate()}</Text>}
+                </View>
+              </View>
+            </SafeAreaView>
           )}
             </TouchableOpacity>
 
@@ -2137,6 +2190,26 @@ export default function App() {
   activeIntervalButtonText: {
     color: theme.accentStrong,
   },
+  clockMovementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 48,
+  },
+  clockMovementBox: {
+    width: 26,
+    height: 26,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: theme.accent,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  clockMovementHint: {
+    color: theme.textPrimary,
+    fontSize: 13,
+    marginTop: 8,
+  },
   // スライドショー画面のスタイル
   slideshowContainer: {
     flex: 1,
@@ -2243,10 +2316,20 @@ export default function App() {
     opacity: 0.8,
   },
   // 時計・日付オーバーレイのスタイル
+  clockSafeArea: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 5,
+  },
+  clockMovementArea: {
+    flex: 1,
+    marginHorizontal: 16,
+    // Keep top positions below the close button, even while controls are visible.
+    marginTop: screenOrientation === 'landscape' ? 64 : 96,
+    marginBottom: 16,
+  },
   clockOverlay: {
     position: 'absolute',
-    bottom: 16,
-    alignSelf: 'center',
+    maxWidth: '90%',
     backgroundColor: theme.overlayStrong,
     paddingHorizontal: 18,
     paddingVertical: 12,

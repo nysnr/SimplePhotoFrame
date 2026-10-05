@@ -23,7 +23,11 @@ export default function AdBanner({
   const DEV = typeof __DEV__ !== 'undefined' && __DEV__;
   const bannerRef = useRef(null);
   const previousLayoutKeyRef = useRef(null);
+  const previousMountTokenRef = useRef(mountToken);
   const retryTimeoutRef = useRef(null);
+  const heartbeatTimerRef = useRef(null);
+  const lastLoadTsRef = useRef(0);
+  const initialLoadDoneRef = useRef(false);
   const { width: windowWidth } = useWindowDimensions();
   const [containerWidth, setContainerWidth] = useState(0);
   const [shouldLoad, setShouldLoad] = useState(false);
@@ -36,15 +40,55 @@ export default function AdBanner({
   const [debugStatus, setDebugStatus] = useState('init');
   const isExpoGo = Constants?.executionEnvironment === 'storeClient';
   const adDebug = !!Constants?.expoConfig?.extra?.adDebug;
+
+  const HEARTBEAT_INTERVAL_MS = 600_000; // 10 minutes (600 seconds)
+  const MIN_INTERVAL_AFTER_LAST_LOAD_MS = 300_000; // 5 minutes debounce guard
+
+  const stopHeartbeat = () => {
+    if (heartbeatTimerRef.current) {
+      clearInterval(heartbeatTimerRef.current);
+      heartbeatTimerRef.current = null;
+    }
+  };
+
+  const startHeartbeat = () => {
+    stopHeartbeat();
+    heartbeatTimerRef.current = setInterval(() => {
+      if (Platform.OS === 'web' || isExpoGo || !ENABLE_ADS || !BANNER_AD_UNIT_ID || !shouldLoad) {
+        return;
+      }
+      if (retryTimeoutRef.current) return;
+      const now = Date.now();
+      if (now - lastLoadTsRef.current < MIN_INTERVAL_AFTER_LAST_LOAD_MS) return;
+      lastLoadTsRef.current = now;
+      const ref = bannerRef.current;
+      const isReady = typeof ref?.getIsReady === 'function' ? ref.getIsReady() : true;
+      setAdLoaded(false);
+      setAdHeight(null);
+      setRetryCount(0);
+      setDebugStatus(isReady ? 'ads:heartbeat-reload' : 'ads:heartbeat-swap');
+      if (isReady && typeof ref?.load === 'function') {
+        ref.load();
+      } else {
+        setReloadKey((k) => k + 1);
+      }
+    }, HEARTBEAT_INTERVAL_MS);
+  };
   const effectiveBannerSize = useMemo(() => {
+    // Use the standard phone/tablet size on iOS to compare fill stability.
+    if (Platform.OS === 'ios') return 'banner';
     if (bannerSize !== 'adaptive') return bannerSize;
     // Google Mobile Ads calculates an anchored adaptive size from the actual
     // available width.  Do not force LEADERBOARD on iPad: it is 728px wide and
     // can fail in Split View or when a modal's available width changes.
     return 'adaptive';
   }, [bannerSize]);
-  const layoutKey = `${effectiveBannerSize}:${Math.round(containerWidth || windowWidth)}`;
+  const isStandardBanner = effectiveBannerSize === 'banner';
+  const requestWidth = isStandardBanner ? 320 : Math.floor(containerWidth || windowWidth);
+  // A fixed-size ad does not need to reload when only the screen width changes.
+  const layoutKey = `${effectiveBannerSize}:${requestWidth}`;
   const resolvedHeight = useMemo(() => {
+    if (effectiveBannerSize === 'banner') return 50;
     if (typeof height === 'number') return height;
     if (typeof adHeight === 'number' && adHeight > 0) return adHeight;
     if (effectiveBannerSize === 'leaderboard') return 90;
@@ -81,8 +125,18 @@ export default function AdBanner({
         clearTimeout(retryTimeoutRef.current);
         retryTimeoutRef.current = null;
       }
+      stopHeartbeat();
     };
   }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || isExpoGo || !ENABLE_ADS || !BANNER_AD_UNIT_ID || !shouldLoad) {
+      stopHeartbeat();
+      return undefined;
+    }
+    startHeartbeat();
+    return () => stopHeartbeat();
+  }, [isExpoGo, shouldLoad, BANNER_AD_UNIT_ID, ENABLE_ADS]);
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -133,7 +187,7 @@ export default function AdBanner({
 
   useEffect(() => {
     let t;
-    InteractionManager.runAfterInteractions(() => {
+    const task = InteractionManager.runAfterInteractions(() => {
       t = setTimeout(() => {
         setShouldLoad(true);
         if (Platform.OS === 'web' || isExpoGo) return;
@@ -145,17 +199,27 @@ export default function AdBanner({
           setDebugStatus('ads:missing-unit-id');
           return;
         }
+        lastLoadTsRef.current = Date.now();
+        initialLoadDoneRef.current = true;
         setDebugStatus('ads:requesting');
       }, delayMs);
     });
     return () => {
+      task.cancel();
       if (t) clearTimeout(t);
     };
   }, [delayMs]);
 
   useEffect(() => {
-    if (mountToken == null) return undefined;
+    const changed = previousMountTokenRef.current !== mountToken;
+    previousMountTokenRef.current = mountToken;
+    // The initial mount already requests an ad; only reload on a later token.
+    if (!changed || mountToken == null) return undefined;
     if (Platform.OS === 'web' || isExpoGo || !ENABLE_ADS || !BANNER_AD_UNIT_ID || !shouldLoad) return undefined;
+    if (retryTimeoutRef.current) return undefined;
+    const now = Date.now();
+    if (now - lastLoadTsRef.current < MIN_INTERVAL_AFTER_LAST_LOAD_MS) return undefined;
+    lastLoadTsRef.current = now;
     setAdLoaded(false);
     setAdHeight(null);
     setRetryCount(0);
@@ -174,6 +238,10 @@ export default function AdBanner({
     if (Platform.OS !== 'ios' || isExpoGo || !ENABLE_ADS) return undefined;
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (nextState !== 'active' || !shouldLoad) return;
+      if (retryTimeoutRef.current) return;
+      const now = Date.now();
+      if (now - lastLoadTsRef.current < MIN_INTERVAL_AFTER_LAST_LOAD_MS) return;
+      lastLoadTsRef.current = now;
       setAdLoaded(false);
       setDebugStatus('ads:foreground-reload');
       if (typeof bannerRef.current?.load === 'function') {
@@ -197,6 +265,16 @@ export default function AdBanner({
     if (previousLayoutKeyRef.current === layoutKey) {
       return undefined;
     }
+    if (retryTimeoutRef.current) {
+      previousLayoutKeyRef.current = layoutKey;
+      return undefined;
+    }
+    const now = Date.now();
+    if (now - lastLoadTsRef.current < MIN_INTERVAL_AFTER_LAST_LOAD_MS) {
+      previousLayoutKeyRef.current = layoutKey;
+      return undefined;
+    }
+    lastLoadTsRef.current = now;
     previousLayoutKeyRef.current = layoutKey;
     setAdLoaded(false);
     setAdHeight(null);
@@ -227,9 +305,13 @@ export default function AdBanner({
     if (retryTimeoutRef.current) {
       clearTimeout(retryTimeoutRef.current);
     }
+    stopHeartbeat();
     retryTimeoutRef.current = setTimeout(() => {
       retryTimeoutRef.current = null;
       setReloadKey((k) => k + 1);
+      if (Platform.OS !== 'web' && !isExpoGo && ENABLE_ADS && BANNER_AD_UNIT_ID && shouldLoad) {
+        startHeartbeat();
+      }
     }, backoff);
   };
 
@@ -315,20 +397,21 @@ export default function AdBanner({
           </Text>
         </View>
       )}
-      {shouldLoad && BannerAdComp && sizeConst && (
-        <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+      {shouldLoad && BannerAdComp && sizeConst && (!isStandardBanner || containerWidth >= 320) && (
+        <View style={{ width: isStandardBanner ? 320 : '100%', height: isStandardBanner ? 50 : undefined, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' }}>
           <BannerAdComp
             ref={bannerRef}
             key={reloadKey}
             unitId={BANNER_AD_UNIT_ID}
             size={sizeConst}
-            width={Math.floor(containerWidth || windowWidth)}
+            width={requestWidth}
             requestOptions={{ requestNonPersonalizedAdsOnly: false }}
             onAdLoaded={(dimensions) => {
               if (retryTimeoutRef.current) {
                 clearTimeout(retryTimeoutRef.current);
                 retryTimeoutRef.current = null;
               }
+              lastLoadTsRef.current = Date.now();
               setRetryCount(0);
               setAdLoaded(true);
               if (dimensions?.height > 0) setAdHeight(dimensions.height);
