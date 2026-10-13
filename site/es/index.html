@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimplePhotoFrame — Marco de fotos sostenible: reutiliza tu iPad/iPhone viejo</title>
+    <meta name="description" content="Reutiliza tu viejo iPad o iPhone como marco de fotos sostenible con presentación de fotos y reloj. iOS 15.1+, 8 colores de mate, 4 idiomas, procesamiento local.">
+    <meta name="keywords" content="sostenible, reutilizar, residuo electrónico, marco de fotos, presentación, reloj, iPad, SimplePhotoFrame, iPhone, eco, e-waste">
+    <link rel="canonical" href="https://simple-photo-frame.vercel.app/es/index.html">
+    <link rel="alternate" hreflang="ja" href="https://simple-photo-frame.vercel.app/ja/index.html">
+    <link rel="alternate" hreflang="en" href="https://simple-photo-frame.vercel.app/en/index.html">
+    <link rel="alternate" hreflang="es" href="https://simple-photo-frame.vercel.app/es/index.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://simple-photo-frame.vercel.app/zh-Hans/index.html">
+    <link rel="alternate" hreflang="x-default" href="https://simple-photo-frame.vercel.app/index.html">
+    <meta property="og:title" content="SimplePhotoFrame — Marco de fotos sostenible">
+    <meta property="og:description" content="Reutiliza tu viejo iPad/iPhone como marco de fotos sostenible con presentación y reloj.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://simple-photo-frame.vercel.app/es/index.html">
+    <meta property="og:image" content="https://simple-photo-frame.vercel.app/assets/img/og.svg">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:locale:alternate" content="ja_JP">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:locale:alternate" content="zh_CN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SimplePhotoFrame — Marco de fotos sostenible">
+    <meta name="twitter:description" content="Reutiliza tu viejo iPad/iPhone como marco de fotos sostenible con presentación y reloj.">
+    <meta name="twitter:image" content="https://simple-photo-frame.vercel.app/assets/img/og.svg">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SimplePhotoFrame",
+      "operatingSystem": "iOS 15.1 o superior",
+      "applicationCategory": "PhotographyApplication",
+      "description": "Reutiliza tu viejo iPad o iPhone como marco de fotos sostenible con presentación de fotos y reloj. iOS 15.1+, 8 colores de mate, 4 idiomas, procesamiento local.",
+      "keywords": "sostenible, reutilizar, residuo electrónico, marco de fotos, presentación, reloj, iPad, SimplePhotoFrame, iPhone, eco, e-waste",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "128"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "nysnr"
+      },
+      "softwareVersion": "1.0.0",
+      "downloadUrl": "https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Qué versión de iOS es compatible?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SimplePhotoFrame es compatible con iOS 15.1 o superior. Funciona tanto en iPad como en iPhone, incluyendo modelos antiguos que ya no reciben actualizaciones principales."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Va lento en dispositivos viejos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. La app está diseñada con una interfaz mínima y un sistema de caché ligero para funcionar sin problemas incluso en dispositivos antiguos con iOS 15.1+. No hay procesos pesados en segundo plano."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Subís mis fotos a vuestros servidores?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutamente no. SimplePhotoFrame solo lee tu biblioteca de fotos localmente en tu dispositivo. Nunca subimos, almacenamos ni compartimos ninguna de tus fotos con terceros."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Por qué es sostenible esta app?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Porque no necesitas comprar un marco digital nuevo. Reutilizas un dispositivo que ya tienes (iPad o iPhone viejo), alargas su vida útil y reduces la generación de residuos electrónicos. Es una alternativa económica y ecológica."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo funciona el modelo de anuncios?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "La app es gratuita y muestra anuncios de Google AdMob. Esto nos permite mantener el desarrollo y ofrecer actualizaciones gratuitas. Puedes limitar la personalización de anuncios en los ajustes de tu dispositivo."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Funciona sin conexión a internet?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Las funciones básicas (presentación de fotos, reloj, fecha, mates de colores) funcionan completamente sin conexión. Solo se necesita internet para mostrar los anuncios de AdMob."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Es un buen regalo para los abuelos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "¡Totalmente! El reloj grande es fácil de ver, la interfaz es muy sencilla y no requiere configuración complicada. Solo hay que cargar el soporte y listo. Perfecto para que disfruten de los recuerdos familiares."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cuántos colores de mate hay disponibles?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Hay 8 colores de mate para elegir: Dark (negro elegante), White (blanco puro), Ocean (azul marino), Sunset (atardecer cálido), Forest (verde bosque), Rose (rosa suave), Lavender (lavanda) y Oak (roble madera)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Qué pasa con los dispositivos olvidados en el cajón?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Les damos una segunda vida. En lugar de que acumulen polvo o acaben en la basura, con SimplePhotoFrame tu iPad o iPhone viejo se convierte en un marco digital útil y decorativo."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Puedo cambiar el idioma de la app?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. La app está disponible en 4 idiomas: japonés, inglés, español y chino simplificado. Puedes cambiarlo en los ajustes de la app en cualquier momento."
+          }
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/es/index.html" class="brand"><span class="brand-badge">SP</span><span>SimplePhotoFrame</span></a>
+    <nav class="lang-switch" aria-label="Cambio de idioma">
+      <ul>
+        <li><a href="/ja/index.html" hreflang="ja">日本語</a></li>
+        <li><a href="/en/index.html" hreflang="en">English</a></li>
+        <li><a href="/es/index.html" hreflang="es" class="is-active">Español</a></li>
+        <li><a href="/zh-Hans/index.html" hreflang="zh-Hans">简体中文</a></li>
+        <li><a href="/index.html" hreflang="x-default">Top</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main><div class="container">
+
+  <!-- 1 Breadcrumb (Home のみ) -->
+  <nav class="breadcrumb" aria-label="Breadcrumb"><ol><li><a href="/es/index.html">Inicio</a></li></ol></nav>
+
+  <!-- 2 Hero -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-kicker">🌱 Sostenible · Reutilizar · Sin subida</span>
+        <h1>Reutiliza tu viejo iPad/iPhone como marco de fotos sostenible con presentación y reloj</h1>
+        <p class="hero-sub">No lo tires. No compres un marco digital nuevo. Dale una segunda vida a tu dispositivo con SimplePhotoFrame: fotos, reloj y 8 colores de mate. Todo local, nada de nube.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">Descargar en App Store — Gratis</a>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="hero-frame">
+          <span class="clock">10:30</span>
+          <div class="photo-card"><strong>Recuerdos familiares</strong><span>Presentación · Reloj · Mate</span></div>
+        </div>
+        <div class="hero-legend">
+          <span><i class="dot green"></i> Sostenible</span>
+          <span><i class="dot blue"></i> Reutiliza</span>
+          <span><i class="dot amber"></i> 4 idiomas</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 Problem -->
+  <section class="section section-problem">
+    <h2>El problema que resolvemos</h2>
+    <div class="card-grid-4">
+      <div class="card problem">
+        <span class="icon">📦</span>
+        <h3>Dispositivos olvidados en el cajón</h3>
+        <p>Tienes un iPad o iPhone viejo guardado por ahí, sin usar, acumulando polvo porque ya no es tu dispositivo principal.</p>
+      </div>
+      <div class="card problem">
+        <span class="icon">♻️</span>
+        <h3>Acaban en residuos electrónicos</h3>
+        <p>Cada año millones de dispositivos electrónicos se desechan prematuramente, generando toneladas de e-waste dañino para el planeta.</p>
+      </div>
+      <div class="card problem">
+        <span class="icon">💰</span>
+        <h3>Los marcos digitales son caros</h3>
+        <p>Un marco digital decente cuesta 50–150 USD y acaba siendo otro aparato más que terminarás reemplazando.</p>
+      </div>
+      <div class="card problem">
+        <span class="icon">🌍</span>
+        <h3>Impacto ambiental</h3>
+        <p>Fabricar un dispositivo nuevo tiene una huella de carbono enorme. Reutilizar es siempre la opción más ecológica.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Concept① Sustainable -->
+  <section class="section section-concept-sustainable">
+    <h2>Sostenible: no lo tires, usa tu dispositivo hasta el final</h2>
+    <ul class="bullet-list">
+      <li><strong>Alarga la vida útil</strong> de tu iPad o iPhone incluso cuando ya no recibe actualizaciones grandes.</li>
+      <li><strong>Reduce e-waste</strong> evitando que tu dispositivo acabe en un vertedero electrónico antes de tiempo.</li>
+      <li><strong>Gratis para empezar</strong>: sin coste inicial, sin suscripciones, solo tu dispositivo y la app.</li>
+    </ul>
+    <p>Según el <a href="https://www.unep.org/resources/global-e-waste-monitor-2024" target="_blank" rel="noopener">UNEP Global E-waste Monitor 2024</a>, el mundo generó <strong>62 millones de toneladas de residuos electrónicos (e-waste) en 2022</strong> y se prevé que la cifra alcance las <strong>82 millones de toneladas para 2030</strong>. Los residuos electrónicos son el flujo de residuos de más rápido crecimiento del planeta, y solo alrededor del <strong>17%</strong> se recolecta y recicla formalmente. Reutilizar un iPad o iPhone que todavía funciona como marco de fotos digital es una de las formas más eficaces de reducir tu huella de residuos electrónicos.</p>
+    <h3>Casos de uso</h3>
+    <div class="usecases">
+      <div class="usecase">
+        <span class="tag">01</span>
+        <h4>🎁 Regalo para abuelos</h4>
+        <p>Reloj grande, fotos familiares, interfaz sencilla. El regalo perfecto para que vean a los nietos cada día.</p>
+      </div>
+      <div class="usecase">
+        <span class="tag">02</span>
+        <h4>🖼️ Marco digital en casa</h4>
+        <p>Colócalo en el salón, el dormitorio o la entrada y disfruta de tus recuerdos favoritos en rotación.</p>
+      </div>
+      <div class="usecase">
+        <span class="tag">03</span>
+        <h4>⏰ Reloj de cocina</h4>
+        <p>Recetas a la vista, fotos de platos deliciosos y la hora siempre visible mientras cocinas.</p>
+      </div>
+      <div class="usecase">
+        <span class="tag">04</span>
+        <h4>💼 Recuerdos en oficina</h4>
+        <p>Tu escritorio más agradable con fotos de viajes, familia o mascotas. Un toque personal y productivo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Concept② Reuse -->
+  <section class="section section-concept-reuse">
+    <h2>Reutiliza un dispositivo que ya tienes — hoy pasa de olvidado a pieza central</h2>
+    <div class="card-grid-3">
+      <div class="card reuse">
+        <span class="icon">📱</span>
+        <h4>Escenario 1: iPad mini en desuso</h4>
+        <p>Un iPad mini de 2019 guardado en un cajón → perfecto como marco de fotos en la mesita de noche.</p>
+      </div>
+      <div class="card reuse">
+        <span class="icon">📱</span>
+        <h4>Escenario 2: iPhone 12 reemplazado</h4>
+        <p>Tu iPhone anterior ya no es tu móvil principal → úsalo como reloj + marco en la cocina o despacho.</p>
+      </div>
+      <div class="card reuse">
+        <span class="icon">🎁</span>
+        <h4>Escenario 3: iPad Air heredado</h4>
+        <p>Un iPad que te sobra en casa → regalalo a tus padres con las fotos de los nietos ya cargadas.</p>
+      </div>
+    </div>
+    <h3>Tan simple como 1, 2, 3</h3>
+    <ol class="steps">
+      <li class="step"><strong>Instala la app</strong> desde el App Store en tu iPad o iPhone (iOS 15.1+).</li>
+      <li class="step"><strong>Elige tus fotos</strong> desde la biblioteca del dispositivo: álbumes de familia, viajes, mascotas.</li>
+      <li class="step"><strong>Colócalo en un soporte</strong>, elige tu color de mate favorito y listo: ya tienes tu marco sostenible.</li>
+    </ol>
+  </section>
+
+  <!-- 6 Features -->
+  <section class="section section-features">
+    <h2>Características principales</h2>
+    <div class="card-grid-3">
+      <div class="card">
+        <span class="icon">🖼️</span>
+        <h3>a. Presentación de fotos</h3>
+        <p>Muestra tus fotos desde la biblioteca en modo presentación. Configura el intervalo en segundos o minutos a tu gusto.</p>
+      </div>
+      <div class="card">
+        <span class="icon">⏰</span>
+        <h3>b. Reloj y fecha</h3>
+        <p>Alterna la visualización de reloj y fecha. Amplía el tamaño del reloj para verlo desde cualquier parte de la habitación.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🎨</span>
+        <h3>c. 8 colores de mate</h3>
+        <div class="matte-palette">
+          <div class="swatch dark" style="background:#1a1a1a" title="Oscuro">Oscuro</div>
+          <div class="swatch white" style="background:#f5f5f5;border:1px solid #ddd" title="Blanco">Blanco</div>
+          <div class="swatch ocean" style="background:#2b547e" title="Océano">Océano</div>
+          <div class="swatch sunset" style="background:#e8735a" title="Atardecer">Atardecer</div>
+          <div class="swatch forest" style="background:#3a6b35" title="Bosque">Bosque</div>
+          <div class="swatch rose" style="background:#d4a5a5" title="Rosa">Rosa</div>
+          <div class="swatch lavender" style="background:#9a8ec9" title="Lavanda">Lavanda</div>
+          <div class="swatch oak" style="background:#b8956c" title="Roble">Roble</div>
+        </div>
+        <small>Dark · White · Ocean · Sunset · Forest · Rose · Lavender · Oak</small>
+      </div>
+      <div class="card">
+        <span class="icon">🌐</span>
+        <h3>d. 4 idiomas</h3>
+        <p>🇯🇵 Japonés · 🇬🇧 Inglés · 🇪🇸 Español · 🇨🇳 Chino simplificado. Cambia el idioma cuando quieras desde ajustes.</p>
+      </div>
+      <div class="card">
+        <span class="icon">💯</span>
+        <h3>e. Gratis con anuncios</h3>
+        <p>100% gratuita. Los anuncios de AdMob mantienen el desarrollo y futuras actualizaciones. Sin suscripciones ocultas.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🔒</span>
+        <h3>f. Procesamiento local</h3>
+        <p>Todas las fotos se procesan en tu dispositivo. <strong>Nunca se suben a servidores</strong>, ni se comparten con nadie.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 Settings & Languages -->
+  <section class="section section-settings-lang">
+    <h2>Ajustes e idiomas</h2>
+    <p>Personaliza SimplePhotoFrame a tu gusto desde el panel de ajustes. Elige el idioma de la interfaz entre 4 opciones disponibles:</p>
+    <p>También puedes configurar el intervalo de la presentación, activar/desactivar el reloj, ajustar el tamaño del reloj y elegir el color de mate que mejor combine con tu decoración.</p>
+    <div class="settings-wrap">
+      <div>
+        <dl class="setting-list">
+          <dt>Intervalo de presentación</dt>
+          <dd>5s · 10s · 30s · 1m · 5m · personalizado</dd>
+          <dt>Reloj / Fecha</dt>
+          <dd>Activar / desactivar · tamaño ajustable · 24h / 12h</dd>
+          <dt>Modo de presentación</dt>
+          <dd>Orden aleatorio / orden de álbum · transición suave</dd>
+          <dt>Color de mate</dt>
+          <dd>
+            <div class="matte-palette">
+              <div class="swatch dark" style="background:#1a1a1a" title="Oscuro">Oscuro</div>
+              <div class="swatch white" style="background:#f5f5f5;border:1px solid #ddd" title="Blanco">Blanco</div>
+              <div class="swatch ocean" style="background:#2b547e" title="Océano">Océano</div>
+              <div class="swatch sunset" style="background:#e8735a" title="Atardecer">Atardecer</div>
+              <div class="swatch forest" style="background:#3a6b35" title="Bosque">Bosque</div>
+              <div class="swatch rose" style="background:#d4a5a5" title="Rosa">Rosa</div>
+              <div class="swatch lavender" style="background:#9a8ec9" title="Lavanda">Lavanda</div>
+              <div class="swatch oak" style="background:#b8956c" title="Roble">Roble</div>
+            </div>
+          </dd>
+          <dt>Bloqueo automático</dt>
+          <dd>Mantener pantalla activa / usar ajuste del sistema</dd>
+        </dl>
+      </div>
+      <div>
+        <h3 style="margin-bottom:12px;">4 idiomas admitidos</h3>
+        <div class="langs">
+          <div class="lang-card">
+            <div class="lang-main">🇯🇵</div>
+            <div>
+              <strong>日本語</strong>
+              <span>Interfaz, ayuda y formato de fecha/hora para Japón.</span>
+            </div>
+            <span class="badge">Japonés</span>
+          </div>
+          <div class="lang-card">
+            <div class="lang-main">🇬🇧🇺🇸</div>
+            <div>
+              <strong>English</strong>
+              <span>Global users: UI, help, and date / clock formatting.</span>
+            </div>
+            <span class="badge">Inglés</span>
+          </div>
+          <div class="lang-card is-active">
+            <div class="lang-main">🇪🇸</div>
+            <div>
+              <strong>Español</strong>
+              <span>Interfaz y formato para España, México y LATAM.</span>
+            </div>
+            <span class="badge">Seleccionado</span>
+          </div>
+          <div class="lang-card">
+            <div class="lang-main">🇨🇳</div>
+            <div>
+              <strong>简体中文</strong>
+              <span>Interfaz en chino simplificado, formato de fecha local.</span>
+            </div>
+            <span class="badge">Chino</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 Privacy & Local -->
+  <section class="section">
+    <div class="privacy-box">
+      <div class="card">
+        <span class="icon">🔒</span>
+        <h3>Nunca subimos tus fotos</h3>
+        <p>Tu privacidad es lo primero. SimplePhotoFrame accede a tu biblioteca de fotos <strong>solo para mostrarlas en la app</strong>. No enviamos ninguna imagen a nuestros servidores, no hacemos copias en la nube, no compartimos nada con terceros. Tus recuerdos se quedan en tu dispositivo, siempre.</p>
+      </div>
+      <div class="card">
+        <span class="icon">📡</span>
+        <h3>Funciona sin conexión</h3>
+        <p>Las funciones principales (presentación, reloj, fecha, mates de colores) <strong>no necesitan internet</strong>. Solo se requiere conexión para mostrar los anuncios de AdMob, que son los que mantienen el proyecto gratuito. Si estás offline, la app sigue funcionando perfectamente.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 FAQ -->
+  <section class="section">
+    <h2>Preguntas frecuentes (FAQ)</h2>
+    <div class="faq-list">
+      <details class="faq">
+        <summary>Q1. ¿Qué versión de iOS es compatible?</summary>
+        <p>SimplePhotoFrame es compatible con <strong>iOS 15.1 o superior</strong>. Funciona tanto en iPad como en iPhone, incluyendo modelos antiguos que ya no reciben actualizaciones principales. Si tu dispositivo arranca y puede abrir apps, probablemente funcione.</p>
+      </details>
+      <details class="faq">
+        <summary>Q2. ¿Va lento en dispositivos viejos?</summary>
+        <p>No, para nada. Hemos diseñado la app con una <strong>UI mínima y un sistema de caché ligero</strong> para que corra fluida incluso en hardware antiguo. No hay animaciones pesadas ni procesos en segundo plano que consuman recursos. Tu iPad viejo de 2017 se sentirá útil otra vez.</p>
+      </details>
+      <details class="faq">
+        <summary>Q3. ¿Subís mis fotos a vuestros servidores?</summary>
+        <p><strong>Absolutamente no.</strong> Esta es nuestra promesa fundamental. SimplePhotoFrame <strong>solo lee tu biblioteca local</strong> para mostrar las fotos en pantalla. Cero subidas, cero almacenamiento en nube, cero compartición. Tus fotos son tuyas y solo tuyas.</p>
+      </details>
+      <details class="faq">
+        <summary>Q4. ¿Por qué es sostenible esta app?</summary>
+        <p>Porque atacas el problema de raíz: <strong>no compras un marco digital nuevo</strong> (con su huella de fabricación, embalaje y envío), sino que <strong>reutilizas hardware que ya tienes</strong>. Alargas la vida útil de tu dispositivo y evitas que se convierta en residuo electrónico antes de tiempo. Menos e-waste = planeta más sano.</p>
+      </details>
+      <details class="faq">
+        <summary>Q5. ¿Cómo funciona el modelo de anuncios?</summary>
+        <p>La app es 100% gratuita y usa <strong>Google AdMob</strong> para mostrar anuncios. Este modelo nos permite dedicar tiempo al desarrollo, sacar actualizaciones y mantener el proyecto vivo sin cobrarte nada. Puedes limitar la personalización de anuncios en los ajustes de iOS/iPadOS.</p>
+      </details>
+      <details class="faq">
+        <summary>Q6. ¿Funciona sin conexión a internet?</summary>
+        <p><strong>Sí, completamente</strong> para las funciones básicas: presentación de fotos, reloj, fecha, selección de mate e idioma. Solo se necesita internet para mostrar los anuncios de AdMob. Si estás en una casa rural sin Wi-Fi, el marco sigue funcionando sin problema.</p>
+      </details>
+      <details class="faq">
+        <summary>Q7. ¿Es un buen regalo para los abuelos?</summary>
+        <p>¡Sin dudarlo! El <strong>reloj grande es fácil de ver</strong> incluso con problemas de vista, la interfaz no tiene botones confusos y el concepto de "solo enchufar y mirar" encaja a la perfección. Carga un álbum con fotos de los nietos y prepárate para una llamada emocionada.</p>
+      </details>
+      <details class="faq">
+        <summary>Q8. ¿Cuántos colores de mate hay disponibles?</summary>
+        <p>Hay <strong>8 colores de mate</strong> pensados para adaptarse a cualquier decoración: Dark (negro elegante), White (blanco puro), Ocean (azul marino profundo), Sunset (naranja cálido de atardecer), Forest (verde bosque), Rose (rosa suave), Lavender (lila relajante) y Oak (tono madera natural).</p>
+      </details>
+      <details class="faq">
+        <summary>¿Puedo usar un dispositivo que ya no actualiza iOS?</summary>
+        <p>Claro que sí. Mientras tu dispositivo tenga <strong>iOS 15.1 o superior</strong>, la app funcionará. De hecho, ese es uno de nuestros casos de uso estrella: darle una segunda oportunidad a ese iPad que Apple ya no actualiza pero que todavía sirve para muchísimas cosas.</p>
+      </details>
+      <details class="faq">
+        <summary>¿Tengo que configurar algo cada vez que lo enchufo?</summary>
+        <p>No. La primera vez eliges los álbumes y el mate, y ya está. Cada vez que enciendas o enchufes el dispositivo, la app recordará tus preferencias y continuará con la presentación por donde iba.</p>
+      </details>
+      <details class="faq">
+        <summary>Q11. ¿Cuál es la mejor aplicación de marco de fotos digital para iPad?</summary>
+        <p>SimplePhotoFrame es una excelente opción si buscas una aplicación gratuita de marco de fotos digital para iPad. Convierte tu iPad en una presentación de fotos con reloj, ofrece 8 colores de mate y procesa todas las imágenes en el dispositivo, así que tus fotos nunca salen de él.</p>
+      </details>
+      <details class="faq">
+        <summary>Q12. ¿Cómo convierto mi iPhone en un marco de fotos digital?</summary>
+        <p>Instala SimplePhotoFrame desde el App Store, ábrela, selecciona las fotos que quieres mostrar y configura el intervalo de la presentación. Coloca el iPhone en un soporte o base y actuará como un marco de fotos digital con reloj y fecha opcionales. Todas las fotos se quedan en el dispositivo.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- 10 Why -->
+  <section class="section section-why">
+    <h2>Por qué elegir SimplePhotoFrame</h2>
+    <ul>
+      <li><strong>🌱 Ecológico de verdad</strong>: no es marketing vacío. Reutilizar un dispositivo reduce la huella ambiental mucho más que cualquier producto nuevo "eco-empaquetado".</li>
+      <li><strong>⚡ Simplicidad extrema</strong>: sin cuentas, sin registro, sin tutoriales interminables. Abres, eliges fotos, disfrutas. Así de simple.</li>
+      <li><strong>🔒 Privacidad por diseño</strong>: el procesamiento 100% local no es una opción extra, es la base sobre la que construimos todo. Tus fotos nunca salen de tu iPad.</li>
+    </ul>
+  </section>
+
+  <!-- 11 Final CTA -->
+  <section class="section">
+    <div class="final-cta-box">
+      <h2>Tu iPad viejo merece una segunda vida. Hoy mismo.</h2>
+      <p>Sostenible por diseño. Reutiliza lo que ya tienes. Cero residuos, cero costes, 100% recuerdos.</p>
+      <a class="btn btn-primary" href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">Descargar SimplePhotoFrame — Gratis en App Store</a>
+    </div>
+  </section>
+
+</div></main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/es/index.html" class="brand"><span class="brand-badge">SP</span><span>SimplePhotoFrame</span></a>
+        <p>Reutiliza tu viejo iPad o iPhone como marco de fotos sostenible. Presentación de fotos, reloj, 8 mates de color y 4 idiomas. Procesamiento local, sin subidas.</p>
+      </div>
+      <div><h3>Navegar</h3><ul><li><a href="/es/index.html">Inicio</a></li><li><a href="/es/support.html">Soporte</a></li><li><a href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">App Store</a></li></ul></div>
+      <div><h3>Legal</h3><ul><li><a href="/es/privacy.html">Privacidad</a></li><li><a href="/es/terms.html">Términos</a></li></ul></div>
+      <div><h3>Idiomas</h3><ul><li><a href="/ja/index.html" hreflang="ja">日本語</a></li><li><a href="/en/index.html" hreflang="en">English</a></li><li><a href="/es/index.html" hreflang="es">Español</a></li><li><a href="/zh-Hans/index.html" hreflang="zh-Hans">简体中文</a></li><li><a href="/index.html" hreflang="x-default">x-default</a></li></ul></div>
+      <div><h3>Info</h3><ul><li>© 2026 nysnr</li><li>Bundle: com.nysnr.photoframenew</li><li>ASC ID: 6792314431</li><li>iOS 15.1+</li></ul></div>
+    </div>
+    <p class="copyright">© 2026 nysnr · SimplePhotoFrame · Bundle ID com.nysnr.photoframenew · App Store ID 6792314431</p>
+  </div>
+</footer>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simple-photo-frame.vercel.app/es/index.html"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "SimplePhotoFrame · Marco de fotos sostenible para tu iPad o iPhone viejo",
+  "description": "Reutiliza tu iPad o iPhone viejo como un marco de fotos digital sostenible con presentación y reloj. Gratis, local y privado: tus fotos nunca se suben. Disponible en el App Store.",
+  "inLanguage": "es",
+  "author": { "@type": "Person", "name": "nysnr" },
+  "publisher": { "@type": "Person", "name": "nysnr" },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simple-photo-frame.vercel.app/es/index.html"
+  }
+}
+</script>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SimplePhotoFrame - 古い端末を捨てず思い出のフォトフレームに | サステナブル iPad再活用</title>
+<meta name="description" content="SimplePhotoFrame は、眠ったままの古い iPad や iPhone を、スライドショー表示できるフォトフレームに生まれ変わらせる iOS アプリ。サステナブルな再活用で e-waste を削減。時計表示・8色マットカラー・4言語対応、写真は端末ローカル処理で安心。">
+<meta name="keywords" content="サステナブル, 余ったデバイス, iPad再利用, フォトフレーム, スライドショー, 時計, SimplePhotoFrame">
+
+<link rel="canonical" href="https://simple-photo-frame.vercel.app/ja/index.html">
+<link rel="alternate" hreflang="ja" href="https://simple-photo-frame.vercel.app/ja/index.html">
+<link rel="alternate" hreflang="en" href="https://simple-photo-frame.vercel.app/en/index.html">
+<link rel="alternate" hreflang="es" href="https://simple-photo-frame.vercel.app/es/index.html">
+<link rel="alternate" hreflang="zh-Hans" href="https://simple-photo-frame.vercel.app/zh-Hans/index.html">
+<link rel="alternate" hreflang="x-default" href="https://simple-photo-frame.vercel.app/index.html">
+
+<meta property="og:title" content="SimplePhotoFrame - 古い端末を捨てず思い出のフォトフレームに">
+<meta property="og:description" content="サステナブルなデバイス再活用。iPad/iPhone をフォトフレームに。スライドショー、時計表示、8色マット、4言語対応。">
+<meta property="og:image" content="https://simple-photo-frame.vercel.app/assets/img/og.svg">
+<meta property="og:url" content="https://simple-photo-frame.vercel.app/ja/index.html">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:locale:alternate" content="ja_JP">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="es_ES">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SimplePhotoFrame - 古い端末を捨てず思い出のフォトフレームに">
+<meta name="twitter:description" content="サステナブルなデバイス再活用。iPad/iPhone をフォトフレームに。スライドショー、時計表示、8色マット、4言語対応。">
+<meta name="twitter:image" content="https://simple-photo-frame.vercel.app/assets/img/og.svg">
+
+<link rel="stylesheet" href="/assets/css/styles.css">
+<script src="/assets/js/main.js" defer></script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "SimplePhotoFrame",
+      "operatingSystem": "iOS 15.1+",
+      "applicationCategory": "PhotographyApplication",
+      "description": "古い iPad や iPhone を再活用してフォトフレームにするアプリ。スライドショー、時計表示、8色マットカラー、4言語対応。サステナブルと再利用をコンセプトに、e-waste 削減に貢献します。",
+      "keywords": "サステナブル, 再利用, フォトフレーム, iPad再利用, スライドショー, 時計",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "120"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "対応OSを教えてください。",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "対応OSは iOS 15.1 以上です。古い端末はiOS15.1に上げられない場合もあります。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "古い端末だと処理が重くないですか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "必要最低限のUI/画像キャッシュ設計です。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "写真はアップロードしますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "絶対にアップロードしません。端末ローカルの写真ライブラリを読むだけです。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "なぜサステナブルなのですか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "新しいフォトフレームを買わず、既存デバイスを活用しe-waste削減。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "広告モデルは？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AdMobバナー広告。収益は開発維持費に。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "オフラインで使えますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "はい、基本機能はオフライン可。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "祖父母へのプレゼントに使えますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "はい、大きな時計表示にすることで見やすい。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "マットカラーは何種類ですか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "8種類。"
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/ja/index.html" class="brand" aria-label="SimplePhotoFrame home">
+      <span class="brand-badge">SP</span>
+      <span>SimplePhotoFrame</span>
+    </a>
+    <nav class="lang-switch" aria-label="言語切替">
+      <ul>
+        <li><a href="/ja/index.html" hreflang="ja" class="is-active">日本語</a></li>
+        <li><a href="/en/index.html" hreflang="en">English</a></li>
+        <li><a href="/es/index.html" hreflang="es">Español</a></li>
+        <li><a href="/zh-Hans/index.html" hreflang="zh-Hans">简体中文</a></li>
+        <li><a href="/index.html" hreflang="x-default">Top</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="container">
+
+  <!-- 1 Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol><li><a href="/ja/index.html">Home</a></li></ol>
+  </nav>
+
+  <!-- 2 Hero -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-kicker">🌱 Sustainable · Reuse · No Upload</span>
+        <h1>古い端末を捨てず<br>思い出のフォトフレームに</h1>
+        <p class="hero-sub">眠ったままの iPad / iPhone が、大切な写真を映すデジタルフォトフレームに生まれ変わる。</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">App Store でダウンロード</a>
+        </div>
+        <p class="hero-note">🌱 新しいモノを買わず、既存デバイスを長く使う。サステナブルな選択を、あなたの日常に。</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="hero-frame">
+          <span class="clock">10:30</span>
+          <div class="photo-card">
+            <strong>家族の思い出</strong>
+            <span>Slideshow · Clock · Matte</span>
+          </div>
+        </div>
+        <div class="hero-legend">
+          <span><i class="dot green"></i> Sustainable</span>
+          <span><i class="dot blue"></i> Reuse Device</span>
+          <span><i class="dot amber"></i> 4 Languages</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 Problem 4 cards -->
+  <section class="section section-problem">
+    <h2>こんなお悩み、ありませんか？</h2>
+    <div class="section-lead">古い端末と向き合う4つの現実。SimplePhotoFrame が解決します。</div>
+    <div class="card-grid-4">
+      <div class="card problem">
+        <div class="icon">📱♻️</div>
+        <h3>廃棄する古いiPad/iPhone</h3>
+        <p>まだ使えるのに、新しい端末を買って古い方はそのまま…。もったいないを解決します。</p>
+      </div>
+      <div class="card problem">
+        <div class="icon">📦💤</div>
+        <h3>眠ったままのスマホ</h3>
+        <p>押入れや引き出しの奥、デッドストックになっている端末を有効活用。</p>
+      </div>
+      <div class="card problem">
+        <div class="icon">💰😢</div>
+        <h3>フォトフレームは高い</h3>
+        <p>市販のデジタルフォトフレームは数千〜数万円。アプリなら無料ですぐ始められる。</p>
+      </div>
+      <div class="card problem">
+        <div class="icon">🌍⚠️</div>
+        <h3>電子廃棄物の環境負荷</h3>
+        <p>使い捨ては e-waste を増やし地球に負荷。デバイスを最後まで使い切る選択を。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 Concept① Sustainable -->
+  <section class="section section-concept-sustainable">
+    <h2>古い＝廃棄、ではなく<br>最後まで使い切る</h2>
+    <div class="section-lead">サステナブルな再活用アプローチで、e-waste を減らします。</div>
+
+    <ul class="bullet-list">
+      <li><strong>長期運用：</strong>対応OS iOS 15.1 以上の端末であれば、長期間安定して利用可能。</li>
+      <li><strong>e-waste 削減：</strong>既存のデバイスを再活用することで、電子廃棄物の削減に貢献。</li>
+      <li><strong>無料で始める：</strong>AdMob バナー広告により、どなたでも無料でご利用いただけます。</li>
+    </ul>
+
+    <p>国連環境計画（UNEP）の <a href="https://www.unep.org/resources/global-e-waste-monitor-2024" target="_blank" rel="noopener">Global E-waste Monitor 2024</a> によると、世界の電子廃棄物（e-waste）は <strong>2022 年に 6,200 万トン</strong> に達し、<strong>2030 年には 8,200 万トン</strong> に増加すると予測されています。電子廃棄物は世界で最も成長が速い廃棄物の流れであり、適切に収集・リサイクルされているのは全体のわずか <strong>約 17%</strong> です。まだ動く iPad や iPhone をデジタルフォトフレームとして再活用することは、個人の電子廃棄物削減に最も効果的な方法の一つです。</p>
+
+    <h3>4つの代表的なユースケース</h3>
+    <div class="usecases">
+      <div class="usecase">
+        <span class="tag">01</span>
+        <h3>祖父母プレゼント</h3>
+        <p>孫の写真をスライドショーさせて、離れて暮らす祖父母へのプレゼントに。</p>
+      </div>
+      <div class="usecase">
+        <span class="tag">02</span>
+        <h3>デジタル写真立て</h3>
+        <p>リビングや寝室に。家族の思い出を常にそばに感じられるインテリアに。</p>
+      </div>
+      <div class="usecase">
+        <span class="tag">03</span>
+        <h3>キッチン時計</h3>
+        <p>大きな時計表示で、キッチンでの調理中も一目で時刻を確認。</p>
+      </div>
+      <div class="usecase">
+        <span class="tag">04</span>
+        <h3>オフィス メモリーズ</h3>
+        <p>チームのイベント写真を流し、オフィスの雰囲気を明るく演出。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Concept② Reuse -->
+  <section class="section section-concept-reuse">
+    <h2>ずっとタンスの奥、<br>余ったデバイスを今日から再活用</h2>
+    <div class="section-lead">家に眠った端末を、3ステップでフォトフレームに。</div>
+
+    <h3>こんな端末、あなたの家にもありませんか？</h3>
+    <div class="card-grid-3">
+      <div class="card reuse">
+        <div class="icon">🏠📱</div>
+        <h3>押入れの iPad</h3>
+        <p>当時は高かった初代 iPad、使わないままになっていませんか？</p>
+      </div>
+      <div class="card reuse">
+        <div class="icon">👶📱</div>
+        <h3>子供の旧機種</h3>
+        <p>成長で機種変更した、前のスマホやタブレット。</p>
+      </div>
+      <div class="card reuse">
+        <div class="icon">✨📱</div>
+        <h3>機種変更で余ったスマホ</h3>
+        <p>最新機種に変えて、前の機種がお役御免に。</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:36px;">始め方はたった3ステップ</h3>
+    <ol class="steps">
+      <li class="step"><h3>アプリDL</h3><p>App Store から SimplePhotoFrame をダウンロード。</p></li>
+      <li class="step"><h3>写真選択</h3><p>端末内の写真ライブラリから、飾りたい写真を選ぶだけ。</p></li>
+      <li class="step"><h3>スタンドに置くだけ</h3><p>お気に入りのスタンドに立てて、電源をつなげば完成。</p></li>
+    </ol>
+  </section>
+
+  <!-- 6 Features 6 cards -->
+  <section class="section section-features">
+    <h2>主な機能</h2>
+    <div class="section-lead">スライドショー・時計・マットカラー・多言語・プライバシー。6つの特長。</div>
+    <div class="card-grid-3">
+      <div class="card">
+        <div class="icon">🖼️🔄</div>
+        <h3>スライドショー</h3>
+        <p>写真ライブラリから選択し、秒または分単位で切り替えるスライドショー。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🕐📅</div>
+        <h3>時計 / 日付 表示切替</h3>
+        <p>時計・日付の表示/非表示を切替可能。文字サイズも4段階で大きく表示できます。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🎨</div>
+        <h3>マットカラー 8色</h3>
+        <div class="matte-palette" aria-label="マットカラー 8色">
+          <span class="swatch dark">Dark</span>
+          <span class="swatch white">White</span>
+          <span class="swatch ocean">Ocean</span>
+          <span class="swatch sunset">Sunset</span>
+          <span class="swatch forest">Forest</span>
+          <span class="swatch rose">Rose</span>
+          <span class="swatch lavender">Lavender</span>
+          <span class="swatch oak">Oak</span>
+        </div>
+        <p>お部屋のインテリアに合わせて、8色からお好みのマットカラーを選択可能。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🌏4️⃣</div>
+        <h3>4言語対応</h3>
+        <p>日本語・英語・スペイン語・中国語（簡体）の4言語に対応。設定からいつでも切替。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🆓📣</div>
+        <h3>AdMob バナー広告 無料提供</h3>
+        <p>Google AdMob のバナー広告により、本アプリをどなたでも無料でご利用いただけます。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🔒📱</div>
+        <h3>端末ローカル処理</h3>
+        <p>写真はサーバーに一切送信しません。端末ローカルで安全に処理されます。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 Settings & Lang -->
+  <section class="section section-settings-lang">
+    <h2>設定と言語</h2>
+    <p class="section-lead">アプリ内の設定画面から、スライド間隔・マットカラー・時計表示・言語を自由にカスタマイズ。</p>
+    <div class="settings-wrap">
+      <div>
+        <dl class="setting-list">
+          <dt>スライドショー間隔</dt>
+          <dd>秒単位または分単位で切替間隔を自由に設定可能。</dd>
+          <dt>時計 / 日付 表示切替</dt>
+          <dd>時計・日付の表示/非表示を独立切替。時計サイズも大表示に対応。</dd>
+          <dt>マットカラー 8種</dt>
+          <dd>下記 8 色からお部屋に合わせて選択。</dd>
+        </dl>
+        <div class="matte-palette" aria-label="マットカラー 8色">
+          <span class="swatch dark">Dark</span>
+          <span class="swatch white">White</span>
+          <span class="swatch ocean">Ocean</span>
+          <span class="swatch sunset">Sunset</span>
+          <span class="swatch forest">Forest</span>
+          <span class="swatch rose">Rose</span>
+          <span class="swatch lavender">Lavender</span>
+          <span class="swatch oak">Oak</span>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:12px;">対応言語 4 ヶ国語</h3>
+        <div class="langs">
+          <div class="lang-card"><div class="lang-main">🇯🇵</div><div><strong>日本語</strong><span>日本国内ユーザー向け UI / 日付時計フォーマット。</span></div><span class="badge">DEFAULT</span></div>
+          <div class="lang-card"><div class="lang-main">🇺🇸🇬🇧</div><div><strong>English</strong><span>Global users: UI, help, and date / clock formatting.</span></div><span class="badge">L2</span></div>
+          <div class="lang-card"><div class="lang-main">🇪🇸</div><div><strong>Español</strong><span>メキシコ・スペインほか、スペイン語圏向け UI。</span></div><span class="badge">L3</span></div>
+          <div class="lang-card"><div class="lang-main">🇨🇳</div><div><strong>简体中文</strong><span>中国本土・シンガポールほか、簡体字ユーザー向け UI。</span></div><span class="badge">L4</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 Privacy & Local -->
+  <section class="section section-privacy-local">
+    <h2>プライバシー &amp; ローカル処理</h2>
+    <p class="section-lead">写真は端末の外に一歩も出ません。安心してお使いいただけます。</p>
+    <div class="privacy-box">
+      <div class="card">
+        <div class="icon" style="background:#d1fae5;color:#065f46;">🔒🚫☁️</div>
+        <h3>サーバーにアップロードしない</h3>
+        <p><strong>明記：</strong>本アプリは、お客様が選択した写真をサーバーにアップロードしません。端末の写真ライブラリから読み取り、端末画面に表示するだけ。プライベートな思い出は、あなたのデバイスの中にだけ存在します。</p>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:#dbeafe;color:#1e3a8a;">✈️📴</div>
+        <h3>オフライン / 飛行機内でも動作</h3>
+        <p>基本機能はネットワーク接続不要。オフライン環境や飛行機モードのままでも、フォトフレームとして安心してご利用いただけます。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 FAQ 8問 -->
+  <section class="section section-faq">
+    <h2>よくある質問 (FAQ)</h2>
+    <div class="faq-list">
+      <details class="faq">
+        <summary>Q1. 対応OSを教えてください。</summary>
+        <p>対応OSは iOS 15.1 以上です。古い端末はiOS15.1に上げられない場合もあります。</p>
+      </details>
+      <details class="faq">
+        <summary>Q2. 古い端末だと処理が重くないですか？</summary>
+        <p>必要最低限のUI/画像キャッシュ設計です。</p>
+      </details>
+      <details class="faq">
+        <summary>Q3. 写真はアップロードしますか？（最も重要）</summary>
+        <p>絶対にアップロードしません。端末ローカルの写真ライブラリを読むだけです。</p>
+      </details>
+      <details class="faq">
+        <summary>Q4. なぜサステナブルなのですか？</summary>
+        <p>新しいフォトフレームを買わず、既存デバイスを活用しe-waste削減。</p>
+      </details>
+      <details class="faq">
+        <summary>Q5. 広告モデルは？</summary>
+        <p>AdMobバナー広告。収益は開発維持費に。</p>
+      </details>
+      <details class="faq">
+        <summary>Q6. オフラインで使えますか？</summary>
+        <p>はい、基本機能はオフライン可。</p>
+      </details>
+      <details class="faq">
+        <summary>Q7. 祖父母へのプレゼントに使えますか？</summary>
+        <p>はい、大きな時計表示にすることで見やすい。</p>
+      </details>
+      <details class="faq">
+        <summary>Q8. マットカラーは何種類ですか？</summary>
+        <p>8種類。Dark, White, Ocean, Sunset, Forest, Rose, Lavender, Oak から選択できます。</p>
+      </details>
+      <details class="faq">
+        <summary>Q9. iPad をデジタルフォトフレームにするおすすめアプリは？</summary>
+        <p>SimplePhotoFrame は、iPad をデジタルフォトフレームに変える無料アプリです。スライドショーに時計・日付表示を重ねられ、マットカラーは 8 種類。写真は端末ローカルで処理されサーバーにアップロードされません。</p>
+      </details>
+      <details class="faq">
+        <summary>Q10. 古い iPad を時計付きフォトフレームにできますか？</summary>
+        <p>はい、できます。SimplePhotoFrame は古い iPad や iPhone を時計付きデジタルフォトフレームとして再活用するためのアプリです。写真ライブラリから写真を選び、マットカラーを決めてスタンドに置くだけ。新しいハードウェアは不要です。</p>
+      </details>
+      <details class="faq">
+        <summary>Q11. 無料で使える iPhone のスライドショーアプリは？</summary>
+        <p>SimplePhotoFrame は iPad・iPhone 両方で使える無料のスライドショーアプリです。iOS 15.1 以上で動作し、スライドショー間隔を秒単位から分単位まで設定可能。バナー広告により無料で提供されています。</p>
+      </details>
+      <details class="faq">
+        <summary>Q12. iPhone をデジタル写真立てとして使うには？</summary>
+        <p>App Store から SimplePhotoFrame をインストールし、表示したい写真を選んでスライドショー間隔を設定します。iPhone をスタンドやドックに置けば、時計・日付表示付きのデジタル写真立てとして使えます。写真はすべて端末内に留まります。</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- 10 Why / Testimonials -->
+  <section class="section section-why">
+    <h2>なぜ、このアプリを作ったのか</h2>
+    <p class="section-lead">作り手の想いを3つにまとめました。</p>
+    <ul>
+      <li>自分の家に眠っていた初代 iPad を「そのまま捨てるのは忍びない」と思ったのがきっかけ。</li>
+      <li>孫の写真をいつでも見られるように、祖父母へのプレゼントとしても使えるツールが欲しかった。</li>
+      <li>「新しいモノを消費する」のではなく、「手持ちの資産を活かす」選択肢を増やしたかった。</li>
+    </ul>
+  </section>
+
+  <!-- 11 Final CTA -->
+  <section class="final-cta">
+    <div class="final-cta-box">
+      <h2>🌱 サステナブルに、最後まで使い切る。<br>余ったデバイスを、今日からフォトフレームに。</h2>
+      <p>SimplePhotoFrame - 古い端末と思い出を、もう一度。</p>
+      <a class="btn" href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">App Store で今すぐダウンロード</a>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/ja/index.html" class="brand">
+          <span class="brand-badge">SP</span>
+          <span>SimplePhotoFrame</span>
+        </a>
+        <p>眠ったままの iPad / iPhone を、思い出を映すフォトフレームに。サステナブルなデバイス再活用を、もっと身近に。</p>
+      </div>
+      <div>
+        <h3>Navigate</h3>
+        <ul>
+          <li><a href="/ja/index.html">Home</a></li>
+          <li><a href="/ja/support.html">Support</a></li>
+          <li><a href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">App Store</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Legal</h3>
+        <ul>
+          <li><a href="/ja/privacy.html">Privacy</a></li>
+          <li><a href="/ja/terms.html">Terms</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Languages</h3>
+        <ul>
+          <li><a href="/ja/index.html" hreflang="ja">日本語</a></li>
+          <li><a href="/en/index.html" hreflang="en">English</a></li>
+          <li><a href="/es/index.html" hreflang="es">Español</a></li>
+          <li><a href="/zh-Hans/index.html" hreflang="zh-Hans">简体中文</a></li>
+          <li><a href="/index.html" hreflang="x-default">x-default</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Info</h3>
+        <ul>
+          <li>© 2026 nysnr</li>
+          <li>Bundle: com.nysnr.photoframenew</li>
+          <li>ASC ID: 6792314431</li>
+          <li>iOS 15.1+ Required</li>
+        </ul>
+      </div>
+    </div>
+    <p class="copyright">© 2026 nysnr · SimplePhotoFrame · Bundle ID com.nysnr.photoframenew · App Store ID 6792314431</p>
+  </div>
+</footer>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "ホーム",
+      "item": "https://simple-photo-frame.vercel.app/ja/index.html"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "SimplePhotoFrame · 古い iPad/iPhone をサステナブルなフォトフレームに",
+  "description": "眠ったままの iPad や iPhone を、スライドショーと時計付きのデジタルフォトフレームに再活用。写真は端末ローカル処理でアップロードなし。無料で App Store から。",
+  "inLanguage": "ja",
+  "author": { "@type": "Person", "name": "nysnr" },
+  "publisher": { "@type": "Person", "name": "nysnr" },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simple-photo-frame.vercel.app/ja/index.html"
+  }
+}
+</script>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

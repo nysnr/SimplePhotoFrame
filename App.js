@@ -23,10 +23,19 @@ import * as MediaLibrary from 'expo-media-library';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getLocales } from 'expo-localization';
-import { AdBanner } from './components/ads';
+import { AdBanner, InterstitialManager } from './components/ads';
 import Constants from 'expo-constants';
+import { runAttFlow } from './utils/attManager';
+import useClockMovement, { getClockPlacement, getClockFontScale } from './utils/useClockMovement';
 
 const { width, height } = Dimensions.get('window');
+const DEV = typeof __DEV__ !== 'undefined' && __DEV__;
+const devLog = (...args) => {
+  if (DEV) console.log(...args);
+};
+const devWarn = (...args) => {
+  if (DEV) console.warn(...args);
+};
 
 // 翻訳データ
 const translations = {
@@ -39,7 +48,7 @@ const translations = {
     Rose: 'Rose',
     Lavender: 'Lavender',
     Oak: 'Oak',
-    PhotoFrame: 'Photo Frame',
+    PhotoFrame: 'SimplePhotoFrame',
     Settings: 'Settings',
     Gallery: 'Gallery',
     SelectPhoto: 'Select Photo',
@@ -49,15 +58,17 @@ const translations = {
     Loading: 'Loading...',
     NoPhotos: 'No photos found',
     'app.close': 'Close',
-    'app.title': 'Photo Frame',
+    'app.title': 'SimplePhotoFrame',
     'app.settings': 'Settings',
     'app.selectPhotos': 'Selected: {{count}} photos',
     'settings.changeLanguage': 'Change Language',
     'loading.initializing': 'Initializing...',
     'loading.photos': 'Loading photos...',
     'button.retry': 'Retry',
+    'button.openSettings': 'Open Settings',
     'button.understand': 'I understand',
     'button.startSlideshow': '🎬 Start Slideshow',
+    'button.reselectPhotos': 'Choose Photos Again',
     'hint.swipeDown': 'Swipe down to see more',
     'loading.morePhotos': 'Loading more photos...',
     'settings.matteColor': 'Color',
@@ -74,6 +85,8 @@ const translations = {
     'settings.lavender': 'Lavender',
     'settings.oak': 'Oak',
     'settings.clockAndDateDisplay': 'Clock & Date Display',
+    'settings.moveClockPosition': 'Move clock position',
+    'settings.moveClockPositionHint': 'Move the clock and date every hour. This may reduce image retention, but cannot prevent it completely.',
 
     'label.clockOn': 'Clock On',
     'label.clockOff': 'Clock Off',
@@ -85,9 +98,10 @@ const translations = {
     'label.sizeSmall': 'Small',
     'label.sizeMedium': 'Medium',
     'label.sizeLarge': 'Large',
+    'label.sizeExtraLarge': 'Extra Large',
 
     'permission.title': '📷 Photo Access',
-    'permission.message': 'To allow PhotoFrame to access photos, enable photo permissions in your device settings.',
+    'permission.message': 'To allow SimplePhotoFrame to access photos, enable photo permissions in your device settings.',
     'alert.languageChanged.title': 'Language Changed',
     'alert.languageChanged.message': 'Language set to {{language}}',
     'lang.en': 'English',
@@ -107,8 +121,8 @@ const translations = {
     'help.termsOfService': 'Terms of Service',
     'help.back': 'Back',
     'help.viewOnline': 'View details online',
-    'help.privacyPolicyContent': 'We prioritize your privacy above all. This app operates entirely locally on your device to display your photos. Your photos are never uploaded to any server or shared with third parties.\n\nTo keep this app free, we use Google AdMob for advertising. AdMob may use anonymous identifiers to serve relevant ads. By using this app, you agree to this standard practice.',
-    'help.termsOfServiceContent': 'Thank you for using PhotoFrame. This app is provided "as available" to help you enjoy your photos. While we strive for perfection, the developer cannot be held liable for any issues arising from its use. Please use responsibly.'
+    'help.privacyPolicyContent': 'This app operates locally on your device to display your photos. Your photos are never uploaded to our servers.\n\nTo keep this app free, we use Google AdMob. AdMob may collect device identifiers (e.g., Advertising ID/IDFA), IP address, and app interaction/diagnostic data for ad delivery and measurement, and may share data with Google and its partners. You can limit ad personalization in your device settings.',
+    'help.termsOfServiceContent': 'Thank you for using SimplePhotoFrame. This app is provided "as available" to help you enjoy your photos. While we strive for perfection, the developer cannot be held liable for any issues arising from its use. Please use responsibly.'
   },
   ja: {
     Dark: 'ダーク',
@@ -119,7 +133,7 @@ const translations = {
     Rose: 'ローズ',
     Lavender: 'ラベンダー',
     Oak: 'オーク',
-    PhotoFrame: 'フォトフレーム',
+    PhotoFrame: 'SimplePhotoFrame',
     Settings: '設定',
     Gallery: 'ギャラリー',
     SelectPhoto: '写真を選択',
@@ -129,15 +143,17 @@ const translations = {
     Loading: '読み込み中...',
     NoPhotos: '写真が見つかりません',
     'app.close': '閉じる',
-    'app.title': 'フォトフレーム',
+    'app.title': 'SimplePhotoFrame',
     'app.settings': '設定',
     'app.selectPhotos': '選択中: {{count}}枚',
     'settings.changeLanguage': '言語を変更',
     'loading.initializing': '初期化中...',
     'loading.photos': '写真を読み込み中...',
     'button.retry': '再試行',
+    'button.openSettings': '設定に移動',
     'button.understand': '了解',
     'button.startSlideshow': '🎬 スライドショー開始',
+    'button.reselectPhotos': '写真を選び直す',
     'hint.swipeDown': 'もっと見るには下にスワイプしてください',
     'loading.morePhotos': '追加の写真を読み込み中...',
     'settings.matteColor': 'カラー',
@@ -154,6 +170,8 @@ const translations = {
     'settings.lavender': 'ラベンダー',
     'settings.oak': 'オーク',
     'settings.clockAndDateDisplay': '時計・日付表示',
+    'settings.moveClockPosition': '時間表示位置を移動させる',
+    'settings.moveClockPositionHint': '時計と日付を1時間ごとに移動します。焼け付きの軽減を目的とし、完全に防ぐものではありません。',
 
     'label.clockOn': '時計オン',
     'label.clockOff': '時計オフ',
@@ -165,9 +183,10 @@ const translations = {
     'label.sizeSmall': '小サイズ',
     'label.sizeMedium': '中サイズ',
     'label.sizeLarge': '大サイズ',
+    'label.sizeExtraLarge': '特大サイズ',
 
     'permission.title': '📷 写真へのアクセス',
-    'permission.message': 'PhotoFrameアプリが写真にアクセスするには、端末の設定で写真へのアクセス権限を許可してください。',
+    'permission.message': 'SimplePhotoFrameアプリが写真にアクセスするには、端末の設定で写真へのアクセス権限を許可してください。',
     'alert.languageChanged.title': '言語変更',
     'alert.languageChanged.message': '言語を{{language}}に設定しました',
     'lang.en': '英語',
@@ -187,7 +206,7 @@ const translations = {
     'help.termsOfService': '利用規約',
     'help.back': '戻る',
     'help.viewOnline': 'オンラインで詳細を見る',
-    'help.privacyPolicyContent': 'このアプリは、ユーザーの個人データを収集しません。アプリ内で写真を表示するためにのみ、デバイスの写真ライブラリにアクセスします。写真がいかなるサーバーにもアップロードされることはありません。\n\nただし、広告表示のためにAdMob（Google）を使用しています。AdMobは、広告のパーソナライズのためにデータを収集し、Cookie/識別子を使用する場合があります。このアプリを使用することで、このデータ使用に同意したものとみなされます。',
+    'help.privacyPolicyContent': '本アプリは、端末内で写真を表示するためにローカルで動作し、写真データを当社サーバーへアップロードしません。\n\nただし、無料提供のために Google AdMob を利用します。AdMob は、広告配信および効果測定のために、端末識別子（Advertising ID/IDFA 等）、IPアドレス、アプリ利用状況/診断情報等を取得し、Google および提携先と共有する場合があります。広告のパーソナライズは端末設定で制限できます。',
     'help.termsOfServiceContent': 'このアプリは現在の状態で提供され、動作の完全性を保証するものではありません。開発者は、このアプリの使用から生じるいかなる損害についても責任を負いません。お客様は、適用されるすべての法律に従い、責任を持ってアプリを使用することに同意するものとします。'
   },
   zh: {
@@ -199,7 +218,7 @@ const translations = {
     Rose: '玫瑰',
     Lavender: '薰衣草',
     Oak: '橡木',
-    PhotoFrame: '相框',
+    PhotoFrame: 'SimplePhotoFrame',
     Settings: '设置',
     Gallery: '图库',
     SelectPhoto: '选择照片',
@@ -209,15 +228,17 @@ const translations = {
     Loading: '加载中...',
     NoPhotos: '未找到照片',
     'app.close': '关闭',
-    'app.title': '相框',
+    'app.title': 'SimplePhotoFrame',
     'app.settings': '设置',
     'app.selectPhotos': '已选择：{{count}} 张照片',
     'settings.changeLanguage': '更改语言',
     'loading.initializing': '初始化中...',
     'loading.photos': '正在加载照片...',
     'button.retry': '重试',
+    'button.openSettings': '前往设置',
     'button.understand': '知道了',
     'button.startSlideshow': '🎬 开始幻灯片',
+    'button.reselectPhotos': '重新选择照片',
     'hint.swipeDown': '向下滑动查看更多',
     'loading.morePhotos': '正在加载更多照片...',
     'settings.matteColor': '颜色',
@@ -234,6 +255,8 @@ const translations = {
     'settings.lavender': '薰衣草',
     'settings.oak': '橡木',
     'settings.clockAndDateDisplay': '时钟与日期显示',
+    'settings.moveClockPosition': '移动时间显示位置',
+    'settings.moveClockPositionHint': '每小时移动时钟和日期。这有助于减轻残影，但无法完全防止。',
 
     'label.clockOn': '时钟开启',
     'label.clockOff': '时钟关闭',
@@ -245,9 +268,10 @@ const translations = {
     'label.sizeSmall': '小',
     'label.sizeMedium': '中',
     'label.sizeLarge': '大',
+    'label.sizeExtraLarge': '特大',
 
     'permission.title': '📷 照片访问',
-    'permission.message': '要允许 PhotoFrame 访问照片，请在设备设置中启用照片权限。',
+    'permission.message': '要允许 SimplePhotoFrame 访问照片，请在设备设置中启用照片权限。',
     'alert.languageChanged.title': '语言更改',
     'alert.languageChanged.message': '语言已设置为 {{language}}',
     'lang.en': '英语',
@@ -267,8 +291,8 @@ const translations = {
     'help.termsOfService': '服务条款',
     'help.back': '返回',
     'help.viewOnline': '在线查看详情',
-    'help.privacyPolicyContent': '我们将您的隐私视为重中之重。此应用程序完全在您的设备本地运行以显示您的照片。您的照片绝不会上传到任何服务器或与第三方共享。\n\n为了保持此应用程序免费，我们使用 Google AdMob 进行广告宣传。AdMob 可能会使用匿名标识符来展示相关广告。使用此应用程序即表示您同意此标准做法。',
-    'help.termsOfServiceContent': '感谢您使用 PhotoFrame。本应用程序按“现状”提供，以帮助您欣赏照片。虽然我们力求完美，但开发者不对因使用本应用程序而产生的任何问题负责。请负责任地使用。'
+    'help.privacyPolicyContent': '本应用在您的设备本地运行以显示照片，您的照片不会上传到我们的服务器。\n\n为了免费提供服务，我们使用 Google AdMob。AdMob 可能会收集设备标识符（如 Advertising ID/IDFA）、IP 地址以及应用交互/诊断数据用于广告投放与效果衡量，并可能与 Google 及其合作伙伴共享。您可在设备设置中限制广告个性化。',
+    'help.termsOfServiceContent': '感谢您使用 SimplePhotoFrame。本应用程序按“现状”提供，以帮助您欣赏照片。虽然我们力求完美，但开发者不对因使用本应用程序而产生的任何问题负责。请负责任地使用。'
   },
   es: {
     Dark: 'Oscuro',
@@ -279,7 +303,7 @@ const translations = {
     Rose: 'Rosa',
     Lavender: 'Lavanda',
     Oak: 'Roble',
-    PhotoFrame: 'Marco de Fotos',
+    PhotoFrame: 'SimplePhotoFrame',
     Settings: 'Ajustes',
     Gallery: 'Galería',
     SelectPhoto: 'Seleccionar foto',
@@ -289,15 +313,17 @@ const translations = {
     Loading: 'Cargando...',
     NoPhotos: 'No se encontraron fotos',
     'app.close': 'Cerrar',
-    'app.title': 'Marco de Fotos',
+    'app.title': 'SimplePhotoFrame',
     'app.settings': 'Ajustes',
     'app.selectPhotos': 'Seleccionadas: {{count}} fotos',
     'settings.changeLanguage': 'Cambiar idioma',
     'loading.initializing': 'Inicializando...',
     'loading.photos': 'Cargando fotos...',
     'button.retry': 'Reintentar',
+    'button.openSettings': 'Ir a Configuración',
     'button.understand': 'Entendido',
     'button.startSlideshow': '🎬 Iniciar presentación',
+    'button.reselectPhotos': 'Volver a elegir fotos',
     'hint.swipeDown': 'Desliza hacia abajo para ver más',
     'loading.morePhotos': 'Cargando más fotos...',
     'settings.matteColor': 'Color',
@@ -314,6 +340,8 @@ const translations = {
     'settings.lavender': 'Lavanda',
     'settings.oak': 'Roble',
     'settings.clockAndDateDisplay': 'Mostrar reloj y fecha',
+    'settings.moveClockPosition': 'Mover la posición del reloj',
+    'settings.moveClockPositionHint': 'Mueve el reloj y la fecha cada hora. Puede reducir la retención de imagen, pero no evitarla por completo.',
 
     'label.clockOn': 'Reloj activado',
     'label.clockOff': 'Reloj desactivado',
@@ -325,9 +353,10 @@ const translations = {
     'label.sizeSmall': 'Pequeño',
     'label.sizeMedium': 'Mediano',
     'label.sizeLarge': 'Grande',
+    'label.sizeExtraLarge': 'Extragrande',
 
     'permission.title': '📷 Acceso a fotos',
-    'permission.message': 'Para permitir que PhotoFrame acceda a las fotos, habilita los permisos de fotos en la configuración del dispositivo.',
+    'permission.message': 'Para permitir que SimplePhotoFrame acceda a las fotos, habilita los permisos de fotos en la configuración del dispositivo.',
     'alert.languageChanged.title': 'Idioma cambiado',
     'alert.languageChanged.message': 'Idioma establecido a {{language}}',
     'lang.en': 'Inglés',
@@ -347,8 +376,8 @@ const translations = {
     'help.termsOfService': 'Términos de Uso',
     'help.back': 'Volver',
     'help.viewOnline': 'Ver detalles en línea',
-    'help.privacyPolicyContent': 'Valoramos su privacidad por encima de todo. Esta aplicación funciona completamente de forma local en su dispositivo para mostrar sus fotos. Sus fotos nunca se suben a ningún servidor ni se comparten con terceros.\n\nPara mantener esta aplicación gratuita, utilizamos Google AdMob para la publicidad. AdMob puede utilizar identificadores anónimos para ofrecer anuncios relevantes. Al utilizar esta aplicación, usted acepta esta práctica estándar.',
-    'help.termsOfServiceContent': 'Gracias por usar PhotoFrame. Esta aplicación se proporciona "tal como está" para ayudarle a disfrutar de sus fotos. Aunque nos esforzamos por la perfección, el desarrollador no se hace responsable de ningún problema derivado de su uso. Por favor, utilícela responsablemente.'
+    'help.privacyPolicyContent': 'Esta aplicación funciona localmente en su dispositivo para mostrar sus fotos. Sus fotos nunca se suben a nuestros servidores.\n\nPara mantener la app gratuita, utilizamos Google AdMob. AdMob puede recopilar identificadores del dispositivo (p. ej., Advertising ID/IDFA), la dirección IP y datos de interacción/diagnóstico para la entrega y medición de anuncios, y puede compartir datos con Google y sus socios. Puede limitar la personalización de anuncios en los ajustes del dispositivo.',
+    'help.termsOfServiceContent': 'Gracias por usar SimplePhotoFrame. Esta aplicación se proporciona "tal como está" para ayudarle a disfrutar de sus fotos. Aunque nos esforzamos por la perfección, el desarrollador no se hace responsable de ningún problema derivado de su uso. Por favor, utilícela responsablemente.'
   }
 };
 
@@ -377,6 +406,63 @@ const matteGradients = {
   oak: ['#5E2F0D', '#B8875A']
 };
 
+const getPreviewPhotos = () => ([
+  {
+    id: 'preview-1',
+    uri: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
+    width: 1200,
+    height: 800,
+    filename: 'preview-landscape-1.jpg'
+  },
+  {
+    id: 'preview-2',
+    uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80',
+    width: 900,
+    height: 1200,
+    filename: 'preview-portrait-1.jpg'
+  },
+  {
+    id: 'preview-3',
+    uri: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80',
+    width: 1200,
+    height: 800,
+    filename: 'preview-landscape-2.jpg'
+  },
+  {
+    id: 'preview-4',
+    uri: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=900&q=80',
+    width: 900,
+    height: 1200,
+    filename: 'preview-portrait-2.jpg'
+  },
+]);
+
+const getTheme = (matteColor) => {
+  const isLight = matteColor === 'white';
+
+  return {
+    isLight,
+    textPrimary: isLight ? '#0F172A' : '#FFFFFF',
+    textSecondary: isLight ? 'rgba(15,23,42,0.72)' : 'rgba(255,255,255,0.76)',
+    textMuted: isLight ? 'rgba(15,23,42,0.56)' : 'rgba(255,255,255,0.56)',
+    surface: isLight ? 'rgba(255,255,255,0.68)' : 'rgba(255,255,255,0.08)',
+    surfaceStrong: isLight ? 'rgba(255,255,255,0.84)' : 'rgba(255,255,255,0.14)',
+    surfaceSoft: isLight ? 'rgba(15,23,42,0.05)' : 'rgba(255,255,255,0.05)',
+    border: isLight ? 'rgba(15,23,42,0.10)' : 'rgba(255,255,255,0.12)',
+    accent: isLight ? '#2563EB' : '#7C9CFF',
+    accentStrong: isLight ? '#1D4ED8' : '#5B7CFA',
+    accentSoft: isLight ? 'rgba(37,99,235,0.14)' : 'rgba(124,156,255,0.20)',
+    iconButtonBg: isLight ? 'rgba(255,255,255,0.64)' : 'rgba(255,255,255,0.10)',
+    iconButtonBorder: isLight ? 'rgba(15,23,42,0.10)' : 'rgba(255,255,255,0.10)',
+    cardShadow: '#000000',
+    photoLabelBg: isLight ? 'rgba(255,255,255,0.82)' : 'rgba(4,10,20,0.62)',
+    closeButtonBg: isLight ? 'rgba(255,255,255,0.82)' : 'rgba(0,0,0,0.54)',
+    closeButtonText: isLight ? '#0F172A' : '#FFFFFF',
+    overlayStrong: isLight ? 'rgba(15,23,42,0.08)' : 'rgba(0,0,0,0.34)',
+    disabled: isLight ? 'rgba(148,163,184,0.85)' : 'rgba(107,114,128,0.92)',
+  };
+};
+
 export default function App() {
   // デバイスの言語設定に基づいて初期言語を決定する関数
   const getInitialLanguage = () => {
@@ -390,7 +476,7 @@ export default function App() {
         }
       }
     } catch (e) {
-      console.warn('Failed to get device locale', e);
+      devWarn('Failed to get device locale', e);
     }
     // デフォルトまたはサポート外の場合は英語
     return 'en';
@@ -402,8 +488,12 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsAdMountToken, setSettingsAdMountToken] = useState(0);
   const [showHelp, setShowHelp] = useState(false);
+  const [helpAdMountToken, setHelpAdMountToken] = useState(0);
   const [showSlideshow, setShowSlideshow] = useState(false);
+  const [slideshowAdMountToken, setSlideshowAdMountToken] = useState(0);
+  const [galleryAdMountToken, setGalleryAdMountToken] = useState(() => Date.now());
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [matteColor, setMatteColor] = useState('dark');
   const [slideshowInterval, setSlideshowInterval] = useState(3000);
@@ -418,7 +508,12 @@ export default function App() {
   const [showClock, setShowClock] = useState(true);
   const [showDate, setShowDate] = useState(true);
   const [now, setNow] = useState(new Date());
+  const clockMovement = useClockMovement(showSlideshow, now.getTime());
+  const [clockAreaHeight, setClockAreaHeight] = useState(0);
   const [showCloseButton, setShowCloseButton] = useState(true);
+  // The adaptive banner reports its real height after it loads.  Keep this
+  // separately so the slideshow content never occupies the banner's space.
+  const [slideshowAdHeight, setSlideshowAdHeight] = useState(50);
   // 時計・日付サイズ（small | medium | large）。現在の組み合わせを「medium」とする
   const [clockDateSize, setClockDateSize] = useState('medium');
   
@@ -453,7 +548,9 @@ export default function App() {
   };
 
   // 動的スタイルを生成
-  const styles = getStyles(screenOrientation, clockDateSize);
+  const theme = getTheme(matteColor);
+  const styles = getStyles(screenOrientation, clockDateSize, theme);
+  const isLandscape = screenOrientation === 'landscape';
   const gridHorizontalPadding = screenOrientation === 'landscape' ? 20 : 10;
   const gridItemMargin = 4;
   const usablePhotoGridWidth = Math.max(
@@ -508,12 +605,38 @@ export default function App() {
   }, [showSlideshow]);
 
   useEffect(() => {
+    let cancelled = false;
     const splashTimer = setTimeout(() => {
+      if (cancelled) return;
       setShowStartupSplash(false);
     }, 2000);
 
-    return () => clearTimeout(splashTimer);
+    return () => {
+      cancelled = true;
+      clearTimeout(splashTimer);
+    };
   }, []);
+
+  useEffect(() => {
+    if (showStartupSplash) return;
+    let disposed = false;
+    (async () => {
+      try {
+        await runAttFlow();
+      } catch (e) {
+        devWarn('[ATT] flow failed', e);
+      }
+      if (disposed) return;
+      try {
+        await InterstitialManager.preload();
+      } catch (e) {
+        devWarn('[Interstitial] preload failed', e);
+      }
+    })();
+    return () => {
+      disposed = true;
+    };
+  }, [showStartupSplash]);
 
   // 設定画面での回転強制を撤去（シンプル化）
   useEffect(() => {
@@ -530,6 +653,13 @@ export default function App() {
   // 権限の確認と写真の読み込み
   useEffect(() => {
     (async () => {
+      if (Platform.OS === 'web') {
+        setHasPermission(true);
+        setHasNextPage(false);
+        setEndCursor(null);
+        setPhotos(getPreviewPhotos());
+        return;
+      }
       const { status } = await MediaLibrary.requestPermissionsAsync();
       setHasPermission(status === 'granted');
       if (status === 'granted') {
@@ -542,8 +672,18 @@ export default function App() {
   }, []);
 
   // 写真の読み込み
-  const loadPhotos = async (loadMore = false) => {
-    if (loading || (!hasNextPage && loadMore)) return;
+  const loadPhotos = async (loadMore = false, forceReload = false) => {
+    if (!forceReload && (loading || (!hasNextPage && loadMore))) return;
+
+    if (Platform.OS === 'web') {
+      setHasPermission(true);
+      setHasNextPage(false);
+      setEndCursor(null);
+      setPhotos(getPreviewPhotos());
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
     
     setLoading(true);
     try {
@@ -552,13 +692,18 @@ export default function App() {
         mediaType: 'photo',
         sortBy: 'creationTime',
       };
-      
+
+      if (!loadMore) {
+        setEndCursor(null);
+        setHasNextPage(true);
+      }
+
       if (loadMore && endCursor) {
         options.after = endCursor;
       }
       
       const result = await MediaLibrary.getAssetsAsync(options);
-      console.log('Loaded photos:', result.assets.length);
+      devLog('Loaded photos:', result.assets.length);
       
       // 画像の詳細情報を取得
       const photosWithInfo = await Promise.all(
@@ -572,7 +717,7 @@ export default function App() {
               height: assetInfo.height
             };
           } catch (error) {
-            console.warn('Failed to get asset info for:', asset.id, error);
+            devWarn('Failed to get asset info for:', asset.id, error);
             return asset;
           }
         })
@@ -592,7 +737,7 @@ export default function App() {
       setHasNextPage(false);
       
       // デモ用のサンプル画像を追加（Expo Goでテスト用）
-      if (photos.length === 0) {
+      if (DEV && photos.length === 0) {
         const samplePhotos = [
           {
             id: 'sample1',
@@ -637,96 +782,114 @@ export default function App() {
 
   };
 
+  const reselectPhotos = async () => {
+    try {
+      if (Platform.OS === 'web') {
+        setSelectedPhotos([]);
+        setCurrentSlideIndex(0);
+        setRefreshing(true);
+        await loadPhotos(false, true);
+        return;
+      }
+
+      let permission = await MediaLibrary.getPermissionsAsync();
+
+      if (permission.status !== 'granted') {
+        permission = await MediaLibrary.requestPermissionsAsync();
+      }
+
+      const granted = permission.status === 'granted';
+      setHasPermission(granted);
+      if (!granted) {
+        return;
+      }
+
+      if (typeof MediaLibrary.presentPermissionsPickerAsync === 'function') {
+        try {
+          await MediaLibrary.presentPermissionsPickerAsync();
+        } catch (pickerError) {
+          devWarn('Failed to present permissions picker', pickerError);
+        }
+      }
+
+      setSelectedPhotos([]);
+      setPhotos([]);
+      setCurrentSlideIndex(0);
+      setRefreshing(true);
+      setEndCursor(null);
+      setHasNextPage(true);
+      await loadPhotos(false, true);
+    } catch (error) {
+      console.error('Error reloading photos:', error);
+      setRefreshing(false);
+    }
+  };
+
+  const openAppSettings = async () => {
+    try {
+      await Linking.openSettings();
+    } catch (error) {
+      console.error('Error opening settings:', error);
+    }
+  };
+
   // スライドショーの開始
   const startSlideshow = async () => {
-    console.log('=== SLIDESHOW FUNCTION CALLED ===');
-    console.log('Function startSlideshow is being executed');
-    
     try {
-      console.log('=== SLIDESHOW START DEBUG ===');
-      console.log('Starting slideshow...');
-      console.log('Checking dependencies...');
-      console.log('selectedPhotos available:', !!selectedPhotos);
-      console.log('t function available:', !!t);
-      console.log('Alert available:', !!Alert);
-      console.log('Selected photos count:', selectedPhotos.length);
-      console.log('Selected photos:', selectedPhotos.map(p => ({ id: p.id, uri: p.uri })));
-      
       if (selectedPhotos.length === 0) {
-        console.log('No photos selected, showing alert');
         Alert.alert(t('alert.selectPhotos.title'), t('alert.selectPhotos.message'));
         return;
       }
       
       // 選択された写真が有効なURIを持っているか確認
       const validPhotos = selectedPhotos.filter(photo => photo.uri && photo.uri.length > 0);
-      console.log('Valid photos count:', validPhotos.length);
-      console.log('Valid photos URIs:', validPhotos.map(p => p.uri));
       
       if (validPhotos.length === 0) {
-        console.log('No valid photos found, showing error alert');
         Alert.alert('エラー', '選択された写真を読み込めませんでした。別の写真を選択してください。');
         return;
       }
       
-      console.log(`Valid photos: ${validPhotos.length}`);
-      
       // 既存のタイマーをクリア
       if (slideshowTimer.current) {
-        console.log('Clearing existing slideshow timer');
         clearInterval(slideshowTimer.current);
         slideshowTimer.current = null;
       }
       
       // スライドショー状態を設定
-      console.log('Setting slideshow state...');
       setCurrentSlideIndex(0);
+      setSlideshowAdMountToken((p) => p + 1);
       setShowSlideshow(true);
       setShowCloseButton(true);
-      console.log('Slideshow state set: showSlideshow=true, currentSlideIndex=0');
       
       // 終了ボタンの自動非表示タイマーを設定
       closeButtonTimer.current = setTimeout(() => {
         setShowCloseButton(false);
-        console.log('Close button auto-hidden after 5 seconds');
       }, 5000);
       
       // スライドショータイマーを設定（複数の写真がある場合のみ）
       if (validPhotos.length > 1) {
-        console.log('Multiple photos detected, setting up slideshow timer...');
-        console.log(`Timer interval: ${slideshowInterval}ms`);
-        
         // 少し遅延させてから開始（状態更新を確実にするため）
         slideshowStartTimeout.current = setTimeout(() => {
-          console.log('Starting slideshow interval timer...');
           slideshowTimer.current = setInterval(() => {
-            console.log('Timer tick - advancing to next slide');
             setCurrentSlideIndex(prev => {
               const nextIndex = (prev + 1) % validPhotos.length;
-              console.log(`Slideshow advancing from ${prev} to ${nextIndex}`);
               return nextIndex;
             });
           }, slideshowInterval);
-          console.log('Slideshow timer started successfully');
         }, 1000); // 1秒の遅延で確実に開始
-      } else {
-        console.log('Only one photo selected, no timer needed');
       }
-      
-      console.log('=== SLIDESHOW START COMPLETED ===');
-      
     } catch (error) {
-      console.error('=== SLIDESHOW START ERROR ===');
-      console.error('Error starting slideshow:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      console.error('Error details:', JSON.stringify(error, null, 2));
+      if (DEV) {
+        console.error('Error starting slideshow:', error);
+      } else {
+        console.error('Error starting slideshow');
+      }
       
       Alert.alert('エラー', 'スライドショーの開始に失敗しました。もう一度お試しください。');
       
       // エラー時のクリーンアップ
-      console.log('Performing error cleanup...');
       setShowSlideshow(false);
+      setGalleryAdMountToken((p) => p + 1);
       if (slideshowTimer.current) {
         clearInterval(slideshowTimer.current);
         slideshowTimer.current = null;
@@ -735,47 +898,44 @@ export default function App() {
         clearTimeout(slideshowStartTimeout.current);
         slideshowStartTimeout.current = null;
       }
-      console.log('=== SLIDESHOW START ERROR CLEANUP COMPLETED ===');
     }
   };
 
   // スライドショーの停止
   const stopSlideshow = async () => {
     try {
-      console.log('Stopping slideshow...');
-      
       setShowSlideshow(false);
+      setGalleryAdMountToken((p) => p + 1);
       
       // タイマーをクリア
       if (slideshowTimer.current) {
         clearInterval(slideshowTimer.current);
         slideshowTimer.current = null;
-        console.log('Slideshow interval timer cleared');
       }
       
       // 遅延開始タイマーもクリア
       if (slideshowStartTimeout.current) {
         clearTimeout(slideshowStartTimeout.current);
         slideshowStartTimeout.current = null;
-        console.log('Slideshow start timeout cleared');
       }
       
       // 終了ボタンタイマーもクリア
       if (closeButtonTimer.current) {
         clearTimeout(closeButtonTimer.current);
         closeButtonTimer.current = null;
-        console.log('Close button timer cleared');
       }
       
       // 終了ボタンの表示状態をリセット
       setShowCloseButton(true);
-      
-      console.log('Slideshow stopped successfully');
-      
     } catch (error) {
-      console.error('Error stopping slideshow:', error);
+      if (DEV) {
+        console.error('Error stopping slideshow:', error);
+      } else {
+        console.error('Error stopping slideshow');
+      }
       // エラーが発生してもスライドショーは確実に停止
       setShowSlideshow(false);
+      setGalleryAdMountToken((p) => p + 1);
       if (slideshowTimer.current) {
         clearInterval(slideshowTimer.current);
         slideshowTimer.current = null;
@@ -799,7 +959,6 @@ export default function App() {
   const handleSlideshowTouch = () => {
     if (!showCloseButton) {
       setShowCloseButton(true);
-      console.log('Close button shown on touch');
       
       // 既存のタイマーをクリア
       if (closeButtonTimer.current) {
@@ -810,7 +969,6 @@ export default function App() {
       // 新しいタイマーを設定
       closeButtonTimer.current = setTimeout(() => {
         setShowCloseButton(false);
-        console.log('Close button auto-hidden after 5 seconds');
       }, 5000);
     } else {
       // 既に表示されている場合はタイマーをリセット
@@ -819,7 +977,6 @@ export default function App() {
       }
       closeButtonTimer.current = setTimeout(() => {
         setShowCloseButton(false);
-        console.log('Close button auto-hidden after 5 seconds');
       }, 5000);
     }
   };
@@ -876,8 +1033,15 @@ export default function App() {
 
   // 時計更新タイマー
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
+    const updateNow = () => setNow(new Date());
+    const id = setInterval(updateNow, 1000);
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') updateNow();
+    });
+    return () => {
+      clearInterval(id);
+      subscription.remove();
+    };
   }, []);
 
   // 写真アイテムのレンダリング
@@ -892,15 +1056,13 @@ export default function App() {
           isSelected && styles.selectedPhoto
         ]}
         onPress={() => togglePhotoSelection(item)}
+        activeOpacity={0.9}
       >
         <Image 
           source={{ uri: item.uri }} 
           style={styles.photoThumbnail}
           onError={(error) => {
-            console.warn('Image load error for:', item.id, error);
-          }}
-          onLoad={() => {
-            console.log('Image loaded successfully:', item.id);
+            devWarn('Image load error for:', item.id, error);
           }}
           defaultSource={require('./assets/icon.png')}
         />
@@ -919,8 +1081,10 @@ export default function App() {
   };
 
   // 設定画面のレンダリング
-  const renderSettings = () => (
-    <Modal visible={showSettings} animationType="slide" supportedOrientations={['portrait','portrait-upside-down','landscape','landscape-left','landscape-right']}>
+  const renderSettings = () => {
+    if (!showSettings) return null;
+    return (
+    <Modal visible animationType="slide" supportedOrientations={['portrait','portrait-upside-down','landscape','landscape-left','landscape-right']}>
       <LinearGradient
         colors={matteGradients[matteColor]}
         start={{ x: 0, y: 0 }}
@@ -930,14 +1094,21 @@ export default function App() {
         <SafeAreaView style={styles.settingsContent}>
           <View style={styles.settingsHeader}>
             <Text style={styles.settingsTitle}>{t('Settings')}</Text>
-            <TouchableOpacity onPress={() => {
-              setShowSettings(false);
+            <TouchableOpacity style={styles.closeButtonPill} onPress={() => {
+              const beforeClose = async () => {
+                try {
+                  await InterstitialManager.showIfReady({ reason: 'settings-close' });
+                } catch (e) {
+                  devWarn('[Interstitial] settings-close show failed', e);
+                }
+              };
+              beforeClose().finally(() => { setShowSettings(false); setGalleryAdMountToken((p) => p + 1); });
             }}>
               <Text style={styles.closeButton}>{t('app.close')}</Text>
             </TouchableOpacity>
           </View>
           
-          <ScrollView style={styles.settingsScroll}>
+          <ScrollView style={styles.settingsScroll} contentContainerStyle={{ paddingBottom: 110 }}>
             {/* 言語設定 */}
             <View style={styles.settingSection}>
               <Text style={styles.settingLabel}>{t('settings.language')}</Text>
@@ -1053,11 +1224,33 @@ export default function App() {
             </View>
 
 
+            <View style={styles.settingSection}>
+              <TouchableOpacity
+                accessibilityRole="checkbox"
+                accessibilityLabel={t('settings.moveClockPosition')}
+                accessibilityHint={t('settings.moveClockPositionHint')}
+                accessibilityState={{ checked: clockMovement.enabled, disabled: !clockMovement.ready }}
+                aria-checked={clockMovement.enabled}
+                aria-disabled={!clockMovement.ready}
+                disabled={!clockMovement.ready}
+                onPress={clockMovement.toggle}
+                style={styles.clockMovementRow}
+              >
+                <View style={[styles.clockMovementBox, clockMovement.enabled && styles.activeIntervalButton]}>
+                  {clockMovement.enabled && <Text style={styles.activeIntervalButtonText}>{'\u2713'}</Text>}
+                </View>
+                <Text style={[styles.settingLabel, { flex: 1, marginBottom: 0 }]}>
+                  {t('settings.moveClockPosition')}
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.clockMovementHint}>{t('settings.moveClockPositionHint')}</Text>
+            </View>
+
             {/* 時計・日付の文字サイズ */}
             <View style={styles.settingSection}>
               <Text style={styles.settingLabel}>{t('settings.clockDateSize')}</Text>
               <View style={styles.languageButtons}>
-                {['small', 'medium', 'large'].map(sz => (
+                {['small', 'medium', 'large', 'extraLarge'].map(sz => (
                   <TouchableOpacity
                     key={sz}
                     style={[
@@ -1071,24 +1264,34 @@ export default function App() {
                       styles.languageButtonText,
                       clockDateSize === sz && styles.activeLanguageButtonText
                     ]}>
-                      {sz === 'small' ? t('label.sizeSmall') : sz === 'medium' ? t('label.sizeMedium') : t('label.sizeLarge')}
+                      {sz === 'small'
+                        ? t('label.sizeSmall')
+                        : sz === 'medium'
+                          ? t('label.sizeMedium')
+                          : sz === 'large'
+                            ? t('label.sizeLarge')
+                            : t('label.sizeExtraLarge')}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
 
-            {/* Banner Ad - settings screen */}
-            <AdBanner style={{ marginTop: 10 }} />
           </ScrollView>
+          
+          <AdBanner screenName="settings" mountToken={settingsAdMountToken} style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
         </SafeAreaView>
       </LinearGradient>
     </Modal>
-  );
+    );
+  };
+
 
   // ヘルプ画面のレンダリング
-  const renderHelp = () => (
-    <Modal visible={showHelp} animationType="slide" supportedOrientations={['portrait','portrait-upside-down','landscape','landscape-left','landscape-right']}>
+  const renderHelp = () => {
+    if (!showHelp) return null;
+    return (
+    <Modal visible animationType="slide" supportedOrientations={['portrait','portrait-upside-down','landscape','landscape-left','landscape-right']}>
       <LinearGradient
         colors={matteGradients[matteColor]}
         start={{ x: 0, y: 0 }}
@@ -1100,7 +1303,7 @@ export default function App() {
             {helpSection === 'main' ? (
               <>
                 <Text style={styles.settingsTitle}>{t('app.help')}</Text>
-                <TouchableOpacity onPress={() => setShowHelp(false)}>
+                <TouchableOpacity style={styles.closeButtonPill} onPress={() => { setShowHelp(false); setGalleryAdMountToken((p) => p + 1); }}>
                   <Text style={styles.closeButton}>{t('app.close')}</Text>
                 </TouchableOpacity>
               </>
@@ -1109,20 +1312,20 @@ export default function App() {
                 <Text style={styles.settingsTitle}>
                   {helpSection === 'privacy' ? t('help.privacyPolicy') : t('help.termsOfService')}
                 </Text>
-                <TouchableOpacity onPress={() => setHelpSection('main')}>
+                <TouchableOpacity style={styles.closeButtonPill} onPress={() => setHelpSection('main')}>
                   <Text style={styles.closeButton}>{t('help.back')}</Text>
                 </TouchableOpacity>
               </>
             )}
           </View>
           
-          <ScrollView style={styles.settingsScroll}>
+          <ScrollView style={styles.settingsScroll} contentContainerStyle={{ paddingBottom: 110 }}>
             {helpSection === 'main' ? (
               <>
                 {/* 使い方ガイド */}
                 <View style={styles.settingSection}>
                   <Text style={styles.settingLabel}>{t('help.usage')}</Text>
-                  <Text style={{ color: '#fff', fontSize: 16, lineHeight: 24, paddingHorizontal: 10 }}>
+                  <Text style={styles.helpBodyText}>
                     {t('help.usageContent')}
                   </Text>
                 </View>
@@ -1130,11 +1333,11 @@ export default function App() {
                 {/* バージョン情報 */}
                 <View style={styles.settingSection}>
                   <Text style={styles.settingLabel}>{t('help.about')}</Text>
-                  <View style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: 15, borderRadius: 10 }}>
-                    <Text style={{ color: '#fff', fontSize: 16, marginBottom: 5 }}>
+                  <View style={styles.aboutCard}>
+                    <Text style={styles.aboutTitle}>
                       {t('app.title')}
                     </Text>
-                    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>
+                    <Text style={styles.aboutMeta}>
                       {t('help.version')}: 1.0.0 (Beta)
                     </Text>
                   </View>
@@ -1160,49 +1363,41 @@ export default function App() {
                 </View>
               </>
             ) : (
-              <View style={{ padding: 15 }}>
-                <Text style={{ color: '#fff', fontSize: 16, lineHeight: 24 }}>
+              <View style={styles.legalContent}>
+                <Text style={styles.helpBodyText}>
                   {helpSection === 'privacy' ? t('help.privacyPolicyContent') : t('help.termsOfServiceContent')}
                 </Text>
                 
                 <TouchableOpacity
-                  style={{ 
-                    marginTop: 20, 
-                    padding: 12, 
-                    backgroundColor: 'rgba(255,255,255,0.2)', 
-                    borderRadius: 8, 
-                    alignItems: 'center',
-                    flexDirection: 'row',
-                    justifyContent: 'center'
-                  }}
+                  style={styles.secondaryActionButton}
                   onPress={() => {
-                    const url = helpSection === 'privacy' 
-                      ? 'https://nysnr.github.io/PhotoFrameNew/privacy.html' 
-                      : 'https://nysnr.github.io/PhotoFrameNew/terms.html';
+                    const url = helpSection === 'privacy'
+                      ? 'https://simple-photo-frame.vercel.app/en/privacy'
+                      : 'https://simple-photo-frame.vercel.app/en/terms';
                     Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
                   }}
                 >
-                  <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+                  <Text style={styles.secondaryActionButtonText}>
                     {t('help.viewOnline')} 🌐
                   </Text>
                 </TouchableOpacity>
               </View>
             )}
             
-            {/* Banner Ad - help screen */}
-            <AdBanner style={{ marginTop: 10 }} />
           </ScrollView>
+          
+          <AdBanner screenName="help" mountToken={helpAdMountToken} style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
         </SafeAreaView>
       </LinearGradient>
     </Modal>
-  );
+    );
+  };
 
   // 次のスライドに進む関数
   const nextSlide = () => {
     if (selectedPhotos.length > 1) {
       setCurrentSlideIndex(prev => {
         const nextIndex = (prev + 1) % selectedPhotos.length;
-        console.log(`Manual navigation: advancing from ${prev} to ${nextIndex}`);
         // 手動切り替え時の回転解除はiOSではスキップ
 
         return nextIndex;
@@ -1215,7 +1410,6 @@ export default function App() {
     if (selectedPhotos.length > 1) {
       setCurrentSlideIndex(prev => {
         const prevIndex = prev === 0 ? selectedPhotos.length - 1 : prev - 1;
-        console.log(`Manual navigation: going back from ${prev} to ${prevIndex}`);
         return prevIndex;
       });
     }
@@ -1230,8 +1424,6 @@ export default function App() {
     const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
     const photoAspectRatio = photo.width / photo.height;
     const screenAspectRatio = screenWidth / screenHeight;
-    
-    console.log(`Photo sizing: screen=${screenWidth}x${screenHeight} (${screenOrientation}), photo=${photo.width}x${photo.height}, ratios: screen=${screenAspectRatio.toFixed(2)}, photo=${photoAspectRatio.toFixed(2)}`);
     
     // 画面の向きと写真の向きを考慮してより適切な表示モードを選択
     if (screenOrientation === 'landscape') {
@@ -1265,8 +1457,17 @@ export default function App() {
     const currentPhoto = selectedPhotos[currentSlideIndex];
     const resizeMode = 'contain';
     const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+    const clockFontScale = getClockFontScale(
+      clockAreaHeight,
+      showClock ? styles.clockText.fontSize : 0,
+      showDate ? styles.dateText.fontSize : 0,
+      Dimensions.get('window').fontScale || 1,
+    );
     const maxW = screenOrientation === 'portrait' ? screenWidth * 0.95 : screenWidth * 0.90;
-    const maxH = screenOrientation === 'portrait' ? screenHeight * 0.85 : screenHeight * 0.90;
+    const slideshowContentHeight = Math.max(1, screenHeight - slideshowAdHeight);
+    const maxH = screenOrientation === 'portrait'
+      ? slideshowContentHeight * 0.92
+      : slideshowContentHeight * 0.96;
     let frameW = maxW;
     let frameH = maxH;
     if (currentPhoto?.width && currentPhoto?.height) {
@@ -1283,11 +1484,6 @@ export default function App() {
         onRequestClose={stopSlideshow}
         supportedOrientations={['portrait','portrait-upside-down','landscape','landscape-left','landscape-right']}
       >
-        <TouchableOpacity
-          style={styles.slideshowTouchArea}
-          onPress={handleSlideshowTouch}
-          activeOpacity={1}
-        >
           <LinearGradient
              colors={matteGradients[matteColor]}
              start={{ x: 0, y: 0 }}
@@ -1295,6 +1491,11 @@ export default function App() {
              style={styles.slideshowContainer}
              className="slideshow-container"
            >
+            <TouchableOpacity
+              style={styles.slideshowTouchArea}
+              onPress={handleSlideshowTouch}
+              activeOpacity={1}
+            >
             {showCloseButton && (
               <TouchableOpacity
                 style={styles.slideshowCloseButton}
@@ -1336,14 +1537,15 @@ export default function App() {
                 style={styles.slideshowImage}
                 resizeMode={resizeMode}
                 onError={(error) => {
-                  console.error('Slideshow image error:', error);
+                  if (DEV) {
+                    console.error('Slideshow image error:', error);
+                  } else {
+                    console.error('Slideshow image error');
+                  }
                   // エラーが発生した場合、次の画像に進む
                   if (selectedPhotos.length > 1) {
                     nextSlide();
                   }
-                }}
-                onLoad={() => {
-                  console.log('Slideshow image loaded:', currentPhoto.id);
                 }}
               />
             </View>
@@ -1363,16 +1565,31 @@ export default function App() {
 
 
           {(showClock || showDate) && (
-            <View style={styles.clockOverlay}>
-              {showClock && <Text style={styles.clockText}>{formatTime()}</Text>}
-              {showDate && <Text style={styles.dateText}>{formatDate()}</Text>}
-            </View>
+            <SafeAreaView pointerEvents="none" style={styles.clockSafeArea}>
+              <View
+                style={styles.clockMovementArea}
+                onLayout={(event) => setClockAreaHeight(event.nativeEvent.layout.height)}
+              >
+                <View style={[styles.clockOverlay, getClockPlacement(clockMovement.position)]}>
+                  {showClock && <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.3} style={[styles.clockText, { fontSize: styles.clockText.fontSize * clockFontScale }]}>{formatTime()}</Text>}
+                  {showDate && <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.3} style={[styles.dateText, { fontSize: styles.dateText.fontSize * clockFontScale }]}>{formatDate()}</Text>}
+                </View>
+              </View>
+            </SafeAreaView>
           )}
+            </TouchableOpacity>
 
-          {/* Banner Ad - slideshow screen */}
-          <AdBanner style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
+            {/* Dedicated ad footer: the slideshow never extends behind it. */}
+            <View style={[styles.slideshowAdSlot, { height: slideshowAdHeight }]}>
+              <AdBanner
+                screenName="slideshow"
+                mountToken={slideshowAdMountToken}
+                onHeightChange={(nextHeight) => {
+                  if (nextHeight > 0) setSlideshowAdHeight(nextHeight);
+                }}
+              />
+            </View>
         </LinearGradient>
-        </TouchableOpacity>
         </Modal>
     );
   };
@@ -1384,7 +1601,7 @@ export default function App() {
     return (
       <View style={styles.startupSplashContainer}>
         <StatusBar barStyle="light-content" backgroundColor="#000" />
-        <Text style={styles.startupSplashText}>PhotoFrame</Text>
+        <Text style={styles.startupSplashText}>SimplePhotoFrame</Text>
       </View>
     );
   }
@@ -1393,21 +1610,16 @@ export default function App() {
     return (
       <LinearGradient colors={matteGradients[matteColor]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
         <SafeAreaView style={styles.permissionContainer}>
-          <Text style={styles.permissionTitle}>{t('permission.title')}</Text>
-          <Text style={styles.permissionMessage}>{t('permission.message')}</Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={() => {
-              MediaLibrary.requestPermissionsAsync().then(({ status }) => {
-                setHasPermission(status === 'granted');
-                if (status === 'granted') {
-                  loadPhotos();
-                }
-              });
-            }}
-          >
-            <Text style={styles.retryButtonText}>{t('button.retry')}</Text>
-          </TouchableOpacity>
+          <View style={styles.permissionCard}>
+            <Text style={styles.permissionTitle}>{t('permission.title')}</Text>
+            <Text style={styles.permissionMessage}>{t('permission.message')}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={openAppSettings}
+            >
+              <Text style={styles.retryButtonText}>{t('button.openSettings')}</Text>
+            </TouchableOpacity>
+          </View>
         </SafeAreaView>
       </LinearGradient>
     );
@@ -1417,15 +1629,19 @@ export default function App() {
     <GestureHandlerRootView style={styles.container}>
       <LinearGradient colors={matteGradients[matteColor]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.container}>
         <SafeAreaView style={styles.container}>
-          <StatusBar barStyle="light-content" backgroundColor={matteColors[matteColor]} />
+          <StatusBar barStyle={theme.isLight ? 'dark-content' : 'light-content'} backgroundColor={matteColors[matteColor]} />
           
           {/* ヘッダー */}
           <View style={styles.header}>
-            <Text style={styles.title}>{t('Gallery')}</Text>
+            <View style={styles.headerTextGroup}>
+              <Text style={styles.headerEyebrow}>{t('app.title')}</Text>
+              <Text style={styles.title}>{t('Gallery')}</Text>
+            </View>
             <View style={styles.headerButtons}>
               <TouchableOpacity
                 style={styles.headerButton}
                 onPress={() => {
+                  setHelpAdMountToken((p) => p + 1);
                   setShowHelp(true);
                 }}
               >
@@ -1434,6 +1650,7 @@ export default function App() {
               <TouchableOpacity
                 style={styles.headerButton}
                 onPress={() => {
+                  setSettingsAdMountToken((p) => p + 1);
                   setShowSettings(true);
                 }}
               >
@@ -1444,27 +1661,46 @@ export default function App() {
           
           {/* 選択状況とスライドショーボタン */}
           <View style={styles.controlPanel}>
-            <Text style={styles.selectionText}>
-              {t('app.selectPhotos', { count: selectedPhotos.length })}
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.slideshowButton,
-                selectedPhotos.length === 0 && styles.disabledButton
-              ]}
-              onPress={startSlideshow}
-              disabled={selectedPhotos.length === 0}
-            >
-              <Text style={styles.slideshowButtonText}>
-                {t('button.startSlideshow')}
+            <View style={styles.controlTextGroup}>
+              <Text style={styles.selectionLabel}>
+                {t('app.selectPhotos', { count: selectedPhotos.length })}
               </Text>
-            </TouchableOpacity>
+              <Text style={styles.selectionText}>
+                {selectedPhotos.length === 0 ? t('SelectPhoto') : t('button.startSlideshow')}
+              </Text>
+            </View>
+            <View style={styles.controlActions}>
+              <TouchableOpacity
+                style={[
+                  styles.secondaryControlButton,
+                  !isLandscape && styles.secondaryControlButtonPortrait
+                ]}
+                onPress={reselectPhotos}
+              >
+                <Text style={styles.secondaryControlButtonText}>
+                  {t('button.reselectPhotos')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.slideshowButton,
+                  !isLandscape && styles.slideshowButtonPortrait,
+                  selectedPhotos.length === 0 && styles.disabledButton
+                ]}
+                onPress={startSlideshow}
+                disabled={selectedPhotos.length === 0}
+              >
+                <Text style={styles.slideshowButtonText}>
+                  {t('button.startSlideshow')}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
           
           {/* 写真ギャラリー */}
           {hasPermission === null ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#fff" />
+              <ActivityIndicator size="large" color={theme.accent} />
               <Text style={styles.loadingText}>{t('loading.initializing')}</Text>
             </View>
           ) : (
@@ -1475,6 +1711,7 @@ export default function App() {
               keyExtractor={(item) => item.id}
               numColumns={photoColumns}
               style={styles.photoGrid}
+              contentContainerStyle={{ paddingBottom: 110 }}
               onLayout={(event) => {
                 setPhotoGridWidth(event.nativeEvent.layout.width);
               }}
@@ -1487,7 +1724,7 @@ export default function App() {
                     setHasNextPage(true);
                     loadPhotos();
                   }}
-                  tintColor="#fff"
+                  tintColor={theme.accent}
                 />
               }
               onEndReached={() => {
@@ -1499,7 +1736,7 @@ export default function App() {
               ListFooterComponent={
                 loading && hasNextPage ? (
                   <View style={styles.loadingFooter}>
-                    <ActivityIndicator size="small" color="#fff" />
+                    <ActivityIndicator size="small" color={theme.accent} />
                     <Text style={styles.loadingText}>{t('loading.morePhotos')}</Text>
                   </View>
                 ) : null
@@ -1519,7 +1756,9 @@ export default function App() {
           )}
           
           {/* Banner Ad - gallery/selection screen */}
-          <AdBanner />
+          {!showSettings && !showHelp && !showSlideshow && (
+            <AdBanner screenName="gallery" mountToken={galleryAdMountToken} style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }} />
+          )}
           
           {renderSettings()}
           {renderHelp()}
@@ -1532,7 +1771,7 @@ export default function App() {
 }
 
   // 動的スタイル生成関数
-  const getStyles = (screenOrientation, clockDateSize) => StyleSheet.create({
+  const getStyles = (screenOrientation, clockDateSize, theme) => StyleSheet.create({
     container: {
       flex: 1,
       minHeight: '100%',
@@ -1555,90 +1794,201 @@ export default function App() {
       justifyContent: 'space-between',
       alignItems: 'center',
       paddingHorizontal: screenOrientation === 'landscape' ? 40 : 20,
-      paddingVertical: screenOrientation === 'landscape' ? 10 : 15,
+      paddingVertical: screenOrientation === 'landscape' ? 16 : 18,
       flexWrap: 'wrap',
+      marginHorizontal: screenOrientation === 'landscape' ? 18 : 14,
+      marginTop: screenOrientation === 'landscape' ? 16 : 12,
+      marginBottom: 12,
+      borderRadius: 24,
+      backgroundColor: theme.surface,
+      borderWidth: 1,
+      borderColor: theme.border,
+      shadowColor: theme.cardShadow,
+      shadowOpacity: theme.isLight ? 0.12 : 0.28,
+      shadowRadius: 24,
+      shadowOffset: { width: 0, height: 14 },
+      elevation: 10,
     },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  headerButtons: {
-    flexDirection: 'row',
-  },
-  headerButton: {
-    marginLeft: 15,
-  },
-  headerButtonText: {
-    fontSize: 20,
-    color: '#fff',
-  },
-  controlPanel: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  selectionText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  slideshowButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  disabledButton: {
-    backgroundColor: '#666',
-  },
-  slideshowButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  photoGrid: {
-    flex: 1,
-    paddingHorizontal: screenOrientation === 'landscape' ? 20 : 10,
-    paddingVertical: screenOrientation === 'landscape' ? 10 : 5,
-  },
-  photoItem: {
-    margin: 2,
-    position: 'relative',
-  },
-  selectedPhoto: {
-    borderWidth: 3,
-    borderColor: '#007AFF',
-  },
-  photoThumbnail: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 5,
-  },
-  selectedOverlay: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectedText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+    headerTextGroup: {
+      flexShrink: 1,
+      gap: 4,
+    },
+    headerEyebrow: {
+      fontSize: 12,
+      fontWeight: '700',
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+      color: theme.textMuted,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: '800',
+      color: theme.textPrimary,
+      letterSpacing: -0.5,
+    },
+    headerButtons: {
+      flexDirection: 'row',
+      gap: 10,
+    },
+    headerButton: {
+      width: 46,
+      height: 46,
+      borderRadius: 23,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.iconButtonBg,
+      borderWidth: 1,
+      borderColor: theme.iconButtonBorder,
+    },
+    headerButtonText: {
+      fontSize: 20,
+      color: theme.textPrimary,
+    },
+    controlPanel: {
+      flexDirection: screenOrientation === 'landscape' ? 'row' : 'column',
+      justifyContent: 'space-between',
+      alignItems: screenOrientation === 'landscape' ? 'center' : 'stretch',
+      paddingHorizontal: screenOrientation === 'landscape' ? 24 : 18,
+      paddingVertical: 18,
+      marginHorizontal: screenOrientation === 'landscape' ? 18 : 14,
+      marginBottom: 10,
+      borderRadius: 24,
+      backgroundColor: theme.surfaceStrong,
+      borderWidth: 1,
+      borderColor: theme.border,
+      shadowColor: theme.cardShadow,
+      shadowOpacity: theme.isLight ? 0.10 : 0.22,
+      shadowRadius: 22,
+      shadowOffset: { width: 0, height: 12 },
+      elevation: 8,
+      gap: 14,
+    },
+    controlTextGroup: {
+      flexShrink: 1,
+      gap: 4,
+    },
+    controlActions: {
+      flexDirection: screenOrientation === 'landscape' ? 'row' : 'column',
+      gap: 10,
+      alignItems: screenOrientation === 'landscape' ? 'center' : 'stretch',
+      width: screenOrientation === 'landscape' ? 'auto' : '100%',
+    },
+    selectionLabel: {
+      color: theme.textSecondary,
+      fontSize: 13,
+      fontWeight: '600',
+      letterSpacing: 0.2,
+    },
+    selectionText: {
+      color: theme.textPrimary,
+      fontSize: 20,
+      fontWeight: '800',
+      letterSpacing: -0.3,
+    },
+    slideshowButton: {
+      backgroundColor: theme.accent,
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+      borderRadius: 18,
+      minWidth: screenOrientation === 'landscape' ? 220 : 0,
+      shadowColor: theme.cardShadow,
+      shadowOpacity: theme.isLight ? 0.16 : 0.28,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 6,
+    },
+    slideshowButtonPortrait: {
+      width: '100%',
+    },
+    secondaryControlButton: {
+      paddingHorizontal: 18,
+      paddingVertical: 14,
+      borderRadius: 18,
+      backgroundColor: theme.surfaceSoft,
+      borderWidth: 1,
+      borderColor: theme.border,
+      minWidth: screenOrientation === 'landscape' ? 200 : 0,
+    },
+    secondaryControlButtonPortrait: {
+      width: '100%',
+    },
+    secondaryControlButtonText: {
+      color: theme.textPrimary,
+      fontWeight: '700',
+      textAlign: 'center',
+      letterSpacing: 0.2,
+    },
+    disabledButton: {
+      backgroundColor: theme.disabled,
+      shadowOpacity: 0,
+      elevation: 0,
+    },
+    slideshowButtonText: {
+      color: '#fff',
+      fontWeight: '700',
+      textAlign: 'center',
+      letterSpacing: 0.2,
+    },
+    photoGrid: {
+      flex: 1,
+      paddingHorizontal: screenOrientation === 'landscape' ? 16 : 10,
+      paddingVertical: screenOrientation === 'landscape' ? 6 : 4,
+    },
+    photoItem: {
+      margin: 4,
+      position: 'relative',
+      borderRadius: 22,
+      overflow: 'hidden',
+      backgroundColor: theme.surfaceSoft,
+      borderWidth: 1,
+      borderColor: theme.border,
+      shadowColor: theme.cardShadow,
+      shadowOpacity: theme.isLight ? 0.12 : 0.24,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 6,
+    },
+    selectedPhoto: {
+      borderWidth: 2,
+      borderColor: theme.accent,
+      transform: [{ scale: 0.985 }],
+      shadowOpacity: theme.isLight ? 0.18 : 0.34,
+    },
+    photoThumbnail: {
+      width: '100%',
+      height: '100%',
+      borderRadius: 22,
+    },
+    selectedOverlay: {
+      position: 'absolute',
+      top: 10,
+      right: 10,
+      backgroundColor: theme.accent,
+      borderRadius: 14,
+      width: 28,
+      height: 28,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: theme.cardShadow,
+      shadowOpacity: 0.22,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 4,
+    },
+    selectedText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '800',
+    },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 24,
   },
   loadingText: {
-    color: '#fff',
-    marginTop: 10,
+    color: theme.textSecondary,
+    marginTop: 12,
     fontSize: 16,
   },
   loadingFooter: {
@@ -1650,10 +2000,12 @@ export default function App() {
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 100,
+    paddingHorizontal: 24,
   },
   emptyText: {
-    color: '#fff',
+    color: theme.textSecondary,
     fontSize: 18,
+    textAlign: 'center',
   },
   permissionContainer: {
     flex: 1,
@@ -1661,30 +2013,46 @@ export default function App() {
     alignItems: 'center',
     paddingHorizontal: 40,
   },
+  permissionCard: {
+    width: '100%',
+    maxWidth: 480,
+    backgroundColor: theme.surfaceStrong,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: theme.border,
+    paddingHorizontal: 24,
+    paddingVertical: 28,
+    shadowColor: theme.cardShadow,
+    shadowOpacity: theme.isLight ? 0.12 : 0.28,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 16 },
+    elevation: 10,
+  },
   permissionTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '800',
+    color: theme.textPrimary,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   permissionMessage: {
     fontSize: 16,
-    color: '#fff',
+    color: theme.textSecondary,
     textAlign: 'center',
     marginBottom: 30,
     lineHeight: 24,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.accent,
     paddingHorizontal: 30,
     paddingVertical: 15,
-    borderRadius: 10,
+    borderRadius: 16,
   },
   retryButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    textAlign: 'center',
   },
   // 設定画面のスタイル
   settingsContainer: {
@@ -1692,83 +2060,109 @@ export default function App() {
   },
   settingsContent: {
     flex: 1,
+    paddingTop: 8,
   },
   settingsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: screenOrientation === 'landscape' ? 40 : 20,
-    paddingVertical: screenOrientation === 'landscape' ? 10 : 15,
+    paddingVertical: screenOrientation === 'landscape' ? 14 : 16,
     flexWrap: 'wrap',
+    marginHorizontal: screenOrientation === 'landscape' ? 18 : 14,
+    marginBottom: 12,
+    borderRadius: 24,
+    backgroundColor: theme.surfaceStrong,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   settingsTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontWeight: '800',
+    color: theme.textPrimary,
+  },
+  closeButtonPill: {
+    backgroundColor: theme.iconButtonBg,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: theme.iconButtonBorder,
   },
   closeButton: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
+    fontSize: 15,
+    color: theme.accent,
+    fontWeight: '700',
   },
   settingsScroll: {
     flex: 1,
-    paddingHorizontal: screenOrientation === 'landscape' ? 40 : 20,
+    paddingHorizontal: screenOrientation === 'landscape' ? 18 : 14,
     paddingVertical: screenOrientation === 'landscape' ? 10 : 0,
   },
   settingSection: {
-    marginBottom: screenOrientation === 'landscape' ? 20 : 30,
+    marginBottom: screenOrientation === 'landscape' ? 18 : 20,
+    borderRadius: 24,
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.border,
+    padding: 18,
   },
   settingLabel: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: '700',
+    color: theme.textPrimary,
     marginBottom: 15,
   },
   languageButtons: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: screenOrientation === 'landscape' ? 'flex-start' : 'center',
-    gap: screenOrientation === 'landscape' ? 7.5 : 5,
+    gap: screenOrientation === 'landscape' ? 8 : 8,
   },
   languageButton: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 19,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginRight: 5,
-    marginBottom: 5,
-    transform: [{ scaleX: 0.95 }],
+    backgroundColor: theme.surfaceSoft,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 18,
+    marginRight: 4,
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   activeLanguageButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.accentSoft,
+    borderColor: theme.accent,
   },
   languageButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: theme.textPrimary,
+    fontWeight: '700',
   },
   activeLanguageButtonText: {
-    color: '#fff',
+    color: theme.accentStrong,
   },
   colorGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   colorButton: {
     width: ((width - 60) / 4) * 0.95,
-    height: 60,
-    margin: 2.5,
-    borderRadius: 10,
+    height: 72,
+    marginBottom: 8,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.16)',
   },
   activeColorButton: {
     borderWidth: 3,
-    borderColor: '#007AFF',
+    borderColor: theme.accent,
+    transform: [{ scale: 0.98 }],
   },
   colorButtonText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
     textAlign: 'center',
   },
   intervalButtons: {
@@ -1776,50 +2170,83 @@ export default function App() {
     flexWrap: 'wrap',
   },
   intervalButton: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 15,
-    marginRight: 10,
-    marginBottom: 10,
+    backgroundColor: theme.surfaceSoft,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   activeIntervalButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.accentSoft,
+    borderColor: theme.accent,
   },
   intervalButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: theme.textPrimary,
+    fontWeight: '700',
   },
   activeIntervalButtonText: {
-    color: '#fff',
+    color: theme.accentStrong,
+  },
+  clockMovementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 48,
+  },
+  clockMovementBox: {
+    width: 26,
+    height: 26,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: theme.accent,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  clockMovementHint: {
+    color: theme.textPrimary,
+    fontSize: 13,
+    marginTop: 8,
   },
   // スライドショー画面のスタイル
   slideshowContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   slideshowTouchArea: {
     flex: 1,
     width: '100%',
-    height: '100%',
+    minHeight: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  slideshowAdSlot: {
+    width: '100%',
+    flexShrink: 0,
+    minHeight: 50,
+    backgroundColor: theme.surfaceStrong,
+    borderTopWidth: 1,
+    borderTopColor: theme.border,
   },
   slideshowCloseButton: {
     position: 'absolute',
     top: screenOrientation === 'landscape' ? 20 : 50,
     right: screenOrientation === 'landscape' ? 30 : 20,
     zIndex: 10,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    borderRadius: 40,
-    width: 80,
-    height: 80,
+    backgroundColor: theme.closeButtonBg,
+    borderRadius: 28,
+    width: 56,
+    height: 56,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   slideshowCloseText: {
-    color: '#fff',
-    fontSize: 40,
-    fontWeight: 'bold',
+    color: theme.closeButtonText,
+    fontSize: 26,
+    fontWeight: '700',
   },
   slideshowImage: {
     width: '100%',
@@ -1829,6 +2256,11 @@ export default function App() {
   slideshowImageFrame: {
     borderRadius: 24,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.26,
+    shadowRadius: 32,
+    shadowOffset: { width: 0, height: 18 },
+    elevation: 14,
   },
   slideshowImagePortrait: {
     maxWidth: '95%',
@@ -1856,7 +2288,7 @@ export default function App() {
   },
   slideshowIndicator: {
     position: 'absolute',
-    bottom: screenOrientation === 'landscape' ? 20 : 50,
+    bottom: screenOrientation === 'landscape' ? 70 : 50,
     backgroundColor: 'rgba(0,0,0,0.5)',
     paddingHorizontal: 15,
     paddingVertical: 8,
@@ -1884,21 +2316,32 @@ export default function App() {
     opacity: 0.8,
   },
   // 時計・日付オーバーレイのスタイル
+  clockSafeArea: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 5,
+  },
+  clockMovementArea: {
+    flex: 1,
+    marginHorizontal: 16,
+    // Keep top positions below the close button, even while controls are visible.
+    marginTop: screenOrientation === 'landscape' ? 64 : 96,
+    marginBottom: 16,
+  },
   clockOverlay: {
     position: 'absolute',
-    bottom: screenOrientation === 'landscape' ? 20 : 50,
-    left: 0,
-    right: 0,
-    backgroundColor: 'transparent',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 12,
+    maxWidth: '90%',
+    backgroundColor: theme.overlayStrong,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 22,
     zIndex: 5,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.10)',
   },
   clockText: {
     color: '#fff',
-    fontSize: (screenOrientation === 'landscape' ? 96 : 108) * (clockDateSize === 'small' ? 0.5 : clockDateSize === 'medium' ? 0.7 : 2.0),
+    fontSize: (screenOrientation === 'landscape' ? 96 : 108) * (clockDateSize === 'small' ? 0.55 : clockDateSize === 'medium' ? 0.72 : clockDateSize === 'large' ? 1.18 : 1.42),
     fontWeight: '700',
     letterSpacing: 1,
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', web: 'monospace' }),
@@ -1908,8 +2351,8 @@ export default function App() {
   },
   dateText: {
     color: '#fff',
-    fontSize: (screenOrientation === 'landscape' ? 54 : 60) * (clockDateSize === 'small' ? 0.5 : clockDateSize === 'medium' ? 0.8 : 2.0),
-    marginTop: 2,
+    fontSize: (screenOrientation === 'landscape' ? 54 : 60) * (clockDateSize === 'small' ? 0.52 : clockDateSize === 'medium' ? 0.68 : clockDateSize === 'large' ? 1.05 : 1.30),
+    marginTop: 4,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
@@ -1959,35 +2402,82 @@ export default function App() {
     paddingHorizontal: 40,
   },
   slideshowErrorText: {
-    color: '#fff',
+    color: theme.textPrimary,
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 20,
   },
   slideshowNextButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.accent,
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 12,
+    borderRadius: 16,
   },
   slideshowNextButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   // 写真情報表示のスタイル
   photoInfo: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
+    bottom: 8,
+    left: 8,
+    right: 8,
+    backgroundColor: theme.photoLabelBg,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: theme.border,
   },
   photoInfoText: {
-    color: '#fff',
-    fontSize: 10,
+    color: theme.textPrimary,
+    fontSize: 11,
     textAlign: 'center',
+    fontWeight: '600',
+  },
+  helpBodyText: {
+    color: theme.textSecondary,
+    fontSize: 15,
+    lineHeight: 24,
+    paddingHorizontal: 2,
+  },
+  aboutCard: {
+    backgroundColor: theme.surfaceSoft,
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  aboutTitle: {
+    color: theme.textPrimary,
+    fontSize: 16,
+    marginBottom: 6,
+    fontWeight: '700',
+  },
+  aboutMeta: {
+    color: theme.textSecondary,
+    fontSize: 14,
+  },
+  legalContent: {
+    padding: 2,
+  },
+  secondaryActionButton: {
+    marginTop: 20,
+    paddingVertical: 13,
+    paddingHorizontal: 14,
+    backgroundColor: theme.surfaceSoft,
+    borderRadius: 16,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  secondaryActionButtonText: {
+    color: theme.textPrimary,
+    fontSize: 15,
+    fontWeight: '700',
   },
   });
