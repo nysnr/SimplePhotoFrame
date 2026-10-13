@@ -25,8 +25,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { getLocales } from 'expo-localization';
 import { AdBanner, InterstitialManager } from './components/ads';
 import Constants from 'expo-constants';
-import { runAttFlow } from './utils/attManager';
+import { runAttFlow, initializeMobileAds } from './utils/attManager';
 import useClockMovement, { getClockPlacement, getClockFontScale } from './utils/useClockMovement';
+import { activateKeepAwake, deactivateKeepAwake } from 'expo-keep-awake';
 
 const { width, height } = Dimensions.get('window');
 const DEV = typeof __DEV__ !== 'undefined' && __DEV__;
@@ -87,6 +88,10 @@ const translations = {
     'settings.clockAndDateDisplay': 'Clock & Date Display',
     'settings.moveClockPosition': 'Move clock position',
     'settings.moveClockPositionHint': 'Move the clock and date every hour. This may reduce image retention, but cannot prevent it completely.',
+    'settings.adHeartbeatInterval': 'Banner ad refresh interval (debug)',
+    'settings.adHeartbeatHint': 'Shortening this interval requests a new banner ad more often. Useful for reducing "no ad available" gaps on iPad during long sessions. The default value is 10 minutes.',
+    'settings.secondsShort': '{{count}}s',
+    'settings.minutesShort': '{{count}}m',
 
     'label.clockOn': 'Clock On',
     'label.clockOff': 'Clock Off',
@@ -172,6 +177,10 @@ const translations = {
     'settings.clockAndDateDisplay': '時計・日付表示',
     'settings.moveClockPosition': '時間表示位置を移動させる',
     'settings.moveClockPositionHint': '時計と日付を1時間ごとに移動します。焼け付きの軽減を目的とし、完全に防ぐものではありません。',
+    'settings.adHeartbeatInterval': 'バナー広告の更新間隔（デバッグ用）',
+    'settings.adHeartbeatHint': '間隔を短くすると、より高頻度で新しいバナー広告をリクエストします。iPad長時間利用時の「広告なし」時間帯を減らすのに役立ちます。初期値は10分です。',
+    'settings.secondsShort': '{{count}}秒',
+    'settings.minutesShort': '{{count}}分',
 
     'label.clockOn': '時計オン',
     'label.clockOff': '時計オフ',
@@ -257,6 +266,10 @@ const translations = {
     'settings.clockAndDateDisplay': '时钟与日期显示',
     'settings.moveClockPosition': '移动时间显示位置',
     'settings.moveClockPositionHint': '每小时移动时钟和日期。这有助于减轻残影，但无法完全防止。',
+    'settings.adHeartbeatInterval': '横幅广告刷新间隔（调试）',
+    'settings.adHeartbeatHint': '缩短间隔会更频繁地请求新的横幅广告。有助于减少 iPad 长时间使用时出现“暂时没有广告”的时段。默认值为 10 分钟。',
+    'settings.secondsShort': '{{count}}秒',
+    'settings.minutesShort': '{{count}}分钟',
 
     'label.clockOn': '时钟开启',
     'label.clockOff': '时钟关闭',
@@ -342,6 +355,10 @@ const translations = {
     'settings.clockAndDateDisplay': 'Mostrar reloj y fecha',
     'settings.moveClockPosition': 'Mover la posición del reloj',
     'settings.moveClockPositionHint': 'Mueve el reloj y la fecha cada hora. Puede reducir la retención de imagen, pero no evitarla por completo.',
+    'settings.adHeartbeatInterval': 'Intervalo de actualización del banner (depuración)',
+    'settings.adHeartbeatHint': 'Reducir el intervalo solicita un nuevo banner con más frecuencia. Ayuda a reducir los periodos sin anuncios en iPad durante sesiones largas. El valor predeterminado es 10 minutos.',
+    'settings.secondsShort': '{{count}} s',
+    'settings.minutesShort': '{{count}} min',
 
     'label.clockOn': 'Reloj activado',
     'label.clockOff': 'Reloj desactivado',
@@ -496,7 +513,7 @@ export default function App() {
   const [galleryAdMountToken, setGalleryAdMountToken] = useState(() => Date.now());
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [matteColor, setMatteColor] = useState('dark');
-  const [slideshowInterval, setSlideshowInterval] = useState(3000);
+  const [slideshowInterval, setSlideshowInterval] = useState(1800000);
   const [refreshing, setRefreshing] = useState(false);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [endCursor, setEndCursor] = useState(null);
@@ -604,6 +621,18 @@ export default function App() {
     // 何もしない：OSの回転に任せる
   }, [showSlideshow]);
 
+  // スライドショー中は自動スリープを防止（24時間運用対応）
+  useEffect(() => {
+    if (showSlideshow) {
+      try { activateKeepAwake(); } catch (e) { devWarn('[keepAwake] activate failed', e); }
+    } else {
+      try { deactivateKeepAwake(); } catch (e) { devWarn('[keepAwake] deactivate failed', e); }
+    }
+    return () => {
+      try { deactivateKeepAwake(); } catch (e) {}
+    };
+  }, [showSlideshow]);
+
   useEffect(() => {
     let cancelled = false;
     const splashTimer = setTimeout(() => {
@@ -621,10 +650,18 @@ export default function App() {
     if (showStartupSplash) return;
     let disposed = false;
     (async () => {
+      await new Promise((r) => setTimeout(r, 800));
+      if (disposed) return;
       try {
         await runAttFlow();
       } catch (e) {
         devWarn('[ATT] flow failed', e);
+      }
+      if (disposed) return;
+      try {
+        await initializeMobileAds();
+      } catch (e) {
+        devWarn('[Ads] initialize failed', e);
       }
       if (disposed) return;
       try {
@@ -840,6 +877,11 @@ export default function App() {
         Alert.alert(t('alert.selectPhotos.title'), t('alert.selectPhotos.message'));
         return;
       }
+
+      InterstitialManager.preload().catch((e) => {
+        devWarn('[Interstitial] preload on slideshow start failed', e);
+      });
+
       
       // 選択された写真が有効なURIを持っているか確認
       const validPhotos = selectedPhotos.filter(photo => photo.uri && photo.uri.length > 0);
@@ -927,6 +969,12 @@ export default function App() {
       
       // 終了ボタンの表示状態をリセット
       setShowCloseButton(true);
+
+      setTimeout(() => {
+        InterstitialManager.showIfReady({ reason: 'slideshow-close' }).catch((e) => {
+          devWarn('[Interstitial] slideshow-close show failed', e);
+        });
+      }, 350);
     } catch (error) {
       if (DEV) {
         console.error('Error stopping slideshow:', error);
@@ -1095,14 +1143,13 @@ export default function App() {
           <View style={styles.settingsHeader}>
             <Text style={styles.settingsTitle}>{t('Settings')}</Text>
             <TouchableOpacity style={styles.closeButtonPill} onPress={() => {
-              const beforeClose = async () => {
-                try {
-                  await InterstitialManager.showIfReady({ reason: 'settings-close' });
-                } catch (e) {
+              setShowSettings(false);
+              setGalleryAdMountToken((p) => p + 1);
+              setTimeout(() => {
+                InterstitialManager.showIfReady({ reason: 'settings-close' }).catch((e) => {
                   devWarn('[Interstitial] settings-close show failed', e);
-                }
-              };
-              beforeClose().finally(() => { setShowSettings(false); setGalleryAdMountToken((p) => p + 1); });
+                });
+              }, 350);
             }}>
               <Text style={styles.closeButton}>{t('app.close')}</Text>
             </TouchableOpacity>
@@ -1652,6 +1699,9 @@ export default function App() {
                 onPress={() => {
                   setSettingsAdMountToken((p) => p + 1);
                   setShowSettings(true);
+                  InterstitialManager.preload().catch((e) => {
+                    devWarn('[Interstitial] preload on settings open failed', e);
+                  });
                 }}
               >
                 <Text style={styles.headerButtonText}>⚙️</Text>

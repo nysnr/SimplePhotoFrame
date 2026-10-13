@@ -1,55 +1,19 @@
-import { Platform, Alert } from 'react-native';
-import { getLocales } from 'expo-localization';
+import { Platform, AppState } from 'react-native';
 
-const ATT_STATUS_KEY = 'simplephotoframe.attConsentStatus';
-const ATT_PROMPTED_KEY = 'simplephotoframe.attPromptedAt';
+const ATT_STATUS_KEY = 'simplephotoframe.attConsentStatus.v2';
+const ATT_PROMPTED_KEY = 'simplephotoframe.attPromptedAt.v2';
 
 const STATUS_NOT_DETERMINED = 'notDetermined';
 const STATUS_RESTRICTED = 'restricted';
 const STATUS_DENIED = 'denied';
 const STATUS_AUTHORIZED = 'authorized';
 
-const promptLocalizations = {
-  en: {
-    title: 'Help us show better ads',
-    message:
-      'Would you like to allow personalized ads? They help keep SimplePhotoFrame free while keeping your data private. You can change this anytime in Settings.',
-    allow: 'Continue',
-    decline: 'Not Now',
-  },
-  ja: {
-    title: 'より良い広告表示のために',
-    message:
-      'パーソナライズ広告を許可しますか？SimplePhotoFrame を無料で維持する支援となります。データはプライベートに保たれます。設定からいつでも変更可能です。',
-    allow: '続ける',
-    decline: '今回はスキップ',
-  },
-  zh: {
-    title: '帮助我们展示更优质的广告',
-    message:
-      '是否允许个性化广告？这有助于 SimplePhotoFrame 保持免费，同时您的数据将保持私密。您可随时在设置中更改此选项。',
-    allow: '继续',
-    decline: '暂不',
-  },
-  es: {
-    title: 'Ayúdanos a mostrar mejores anuncios',
-    message:
-      '¿Deseas permitir anuncios personalizados? Ayudan a mantener SimplePhotoFrame gratuito mientras protegen tu privacidad. Puedes cambiarlo en cualquier momento en Ajustes.',
-    allow: 'Continuar',
-    decline: 'Ahora no',
-  },
-};
-
-const getPromptForLocale = () => {
-  try {
-    const locales = getLocales();
-    const first = locales?.[0]?.languageCode || 'en';
-    const code = first === 'zh-Hans' || first === 'zh' ? 'zh' : first;
-    return promptLocalizations[code] || promptLocalizations.en;
-  } catch {
-    return promptLocalizations.en;
-  }
-};
+const LEGACY_KEYS = [
+  'simplephotoframe.attConsentStatus',
+  'simplephotoframe.attPromptedAt',
+  'spf:att:consent:status',
+  'spf:att:prompted:at',
+];
 
 const tryAsyncStorage = async (method, key, fallback = undefined) => {
   try {
@@ -69,6 +33,25 @@ const tryAsyncStorage = async (method, key, fallback = undefined) => {
   } catch {
     return fallback;
   }
+};
+
+const purgeLegacyAttKeys = async () => {
+  try {
+    const AS =
+      globalThis.expo?.modules?.AsyncStorage ||
+      (await (async () => {
+        try {
+          const mod = await import('@react-native-async-storage/async-storage');
+          return mod.default || mod;
+        } catch {
+          return null;
+        }
+      })());
+    if (!AS) return;
+    for (const k of LEGACY_KEYS) {
+      try { await AS.removeItem(k); } catch {}
+    }
+  } catch {}
 };
 
 export const getStoredAttStatus = async () => {
@@ -92,21 +75,58 @@ export const markPromptedAt = async (ts = Date.now()) => {
   await tryAsyncStorage('setItem', ATT_PROMPTED_KEY, String(ts), null);
 };
 
+const ACTIVE_WAIT_TIMEOUT_MS = 12_000;
+const waitUntilAppActive = () => {
+  if (Platform.OS !== 'ios') return Promise.resolve();
+  if (AppState.currentState === 'active') return Promise.resolve();
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      try { subscription.remove(); } catch {}
+      clearTimeout(timer);
+      resolve();
+    };
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') finish();
+    });
+    const timer = setTimeout(finish, ACTIVE_WAIT_TIMEOUT_MS);
+    if (AppState.currentState === 'active') finish();
+  });
+};
+
+const STATUS_MAP_ETT = {
+  granted: STATUS_AUTHORIZED,
+  denied: STATUS_DENIED,
+  restricted: STATUS_RESTRICTED,
+  undetermined: STATUS_NOT_DETERMINED,
+  unavailable: STATUS_NOT_DETERMINED,
+  blocked: STATUS_RESTRICTED,
+};
+
 const requestTrackingAuthorizationNative = async () => {
+  if (Platform.OS !== 'ios') return STATUS_AUTHORIZED;
+  try {
+    const ETT = await import('expo-tracking-transparency');
+    const { status, granted } = await ETT.requestTrackingPermissionsAsync();
+    if (granted) return STATUS_AUTHORIZED;
+    if (STATUS_MAP_ETT[status]) return STATUS_MAP_ETT[status];
+    return STATUS_NOT_DETERMINED;
+  } catch {
+    return STATUS_NOT_DETERMINED;
+  }
+};
+
+export const initializeMobileAds = async () => {
   try {
     const RNGoogleMobileAds = await import('react-native-google-mobile-ads');
     const mobileAds = RNGoogleMobileAds.default?.mobileAds || RNGoogleMobileAds.mobileAds;
-    if (!mobileAds) return STATUS_NOT_DETERMINED;
-    const res = await mobileAds().requestTrackingAuthorization();
-    switch (res) {
-      case 0: return STATUS_NOT_DETERMINED;
-      case 1: return STATUS_RESTRICTED;
-      case 2: return STATUS_DENIED;
-      case 3: return STATUS_AUTHORIZED;
-      default: return STATUS_NOT_DETERMINED;
-    }
+    if (!mobileAds) return false;
+    await mobileAds().initialize();
+    return true;
   } catch {
-    return STATUS_NOT_DETERMINED;
+    return false;
   }
 };
 
@@ -122,7 +142,9 @@ export const runAttFlow = async () => {
     return { status: STATUS_AUTHORIZED, prompted: false };
   }
 
-  let existingStatus = await getStoredAttStatus();
+  await purgeLegacyAttKeys();
+
+  const existingStatus = await getStoredAttStatus();
 
   if (
     existingStatus === STATUS_AUTHORIZED ||
@@ -140,28 +162,31 @@ export const runAttFlow = async () => {
     return { status: existingStatus, prompted: false };
   }
 
-  const p = getPromptForLocale();
-
-  const shouldPrompt = await new Promise((resolve) => {
-    Alert.alert(
-      p.title,
-      p.message,
-      [
-        { text: p.decline, style: 'cancel', onPress: () => resolve(false) },
-        { text: p.allow, style: 'default', onPress: () => resolve(true) },
-      ],
-      { cancelable: false }
-    );
-  });
-
-  await markPromptedAt(now);
-
-  if (!shouldPrompt) {
-    return { status: existingStatus, prompted: true, nativeDialogShown: false };
-  }
+  await waitUntilAppActive();
 
   const nativeStatus = await requestTrackingAuthorizationNative();
-  await storeAttStatus(nativeStatus);
 
-  return { status: nativeStatus, prompted: true, nativeDialogShown: true };
+  if (nativeStatus !== STATUS_NOT_DETERMINED) {
+    await storeAttStatus(nativeStatus);
+    await markPromptedAt(now);
+    return { status: nativeStatus, prompted: true, nativeDialogShown: true };
+  }
+
+  const MAX_RETRIES = 3;
+  let attempts = 0;
+  let retriedStatus = STATUS_NOT_DETERMINED;
+
+  while (attempts < MAX_RETRIES) {
+    attempts += 1;
+    await new Promise((r) => setTimeout(r, 1200 * attempts));
+    await waitUntilAppActive();
+    retriedStatus = await requestTrackingAuthorizationNative();
+    if (retriedStatus !== STATUS_NOT_DETERMINED) {
+      await storeAttStatus(retriedStatus);
+      await markPromptedAt(Date.now());
+      return { status: retriedStatus, prompted: true, nativeDialogShown: true, retried: attempts };
+    }
+  }
+
+  return { status: STATUS_NOT_DETERMINED, prompted: false, nativeDialogShown: false, retried: attempts };
 };

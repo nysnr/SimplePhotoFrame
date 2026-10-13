@@ -13,23 +13,25 @@ web-build/
 .npm/
 
 # Native - iOS
-ios/Pods/
-ios/build/
-ios/*.xcworkspace/xcuserdata/
-ios/.xcode.env.local
-ios/*.mode1v3
-ios/*.mode2v3
-ios/*.perspectivev3
-ios/DerivedData/
+ios/
+!ios/Pods/
+!ios/build/
+!ios/*.xcworkspace/xcuserdata/
+!ios/.xcode.env.local
+!ios/*.mode1v3
+!ios/*.mode2v3
+!ios/*.perspectivev3
+!ios/DerivedData/
 *.moved-aside
 *.xccheckout
 *.xcscmblueprint
 
 # Native - Android
-android/.gradle/
-android/app/build/
-android/build/
-android/local.properties
+android/
+!android/.gradle/
+!android/app/build/
+!android/build/
+!android/local.properties
 *.iml
 .idea/
 

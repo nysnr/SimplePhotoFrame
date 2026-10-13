@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "PhotoFrameNew",
+    "name": "Simple-Photo-Frame",
     "slug": "PhotoFrameNew",
-    "version": "1.0.0",
+    "version": "1.0.9",
     "sdkVersion": "54.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -32,7 +32,8 @@
           "UIInterfaceOrientationLandscapeLeft",
           "UIInterfaceOrientationLandscapeRight"
         ],
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
       }
     },
     "android": {
@@ -56,8 +57,9 @@
   },
   "react-native-google-mobile-ads": {
     "android_app_id": "ca-app-pub-3940256099942544~3347511713",
-    "delay_app_measurement_init": true,
-    "optimize_initialization": true,
+    "ios_app_id": "ca-app-pub-3457277467592299~4295486771",
+    "delay_app_measurement_init": false,
+    "optimize_initialization": false,
     "optimize_ad_loading": true
   }
 }

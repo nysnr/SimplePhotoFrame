@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Platform, InteractionManager, AppState, useWindowDimensions } from 'react-native';
 import Constants from 'expo-constants';
 import { ENABLE_ADS, BANNER_AD_UNIT_ID } from '../../config/adsConfig';
+import { getStoredAttStatus } from '../../utils/attManager';
 
 /**
  * Reusable Google Mobile Ads banner with:
@@ -10,10 +11,12 @@ import { ENABLE_ADS, BANNER_AD_UNIT_ID } from '../../config/adsConfig';
  * - Exponential backoff retries up to 3
  * - Deferred mounting to reduce initial load
  * - Web-safe: avoids importing native module on web
+ * - Adaptive banner by default (both iPhone and iPad) for larger ad inventory
+ * - No app-side forced refresh timer; relies on SDK auto-refresh (optimizeAdLoading)
  */
 export default function AdBanner({
   height,
-  bannerSize = 'adaptive',
+  bannerSize,
   delayMs = 1200,
   style,
   screenName = 'unknown',
@@ -21,11 +24,11 @@ export default function AdBanner({
   mountToken,
 }) {
   const DEV = typeof __DEV__ !== 'undefined' && __DEV__;
+  const defaultBannerSize = 'adaptive';
   const bannerRef = useRef(null);
   const previousLayoutKeyRef = useRef(null);
   const previousMountTokenRef = useRef(mountToken);
   const retryTimeoutRef = useRef(null);
-  const heartbeatTimerRef = useRef(null);
   const lastLoadTsRef = useRef(0);
   const initialLoadDoneRef = useRef(false);
   const { width: windowWidth } = useWindowDimensions();
@@ -38,54 +41,24 @@ export default function AdBanner({
   const [adLoaded, setAdLoaded] = useState(false);
   const [adHeight, setAdHeight] = useState(null);
   const [debugStatus, setDebugStatus] = useState('init');
+  const [attAuthorized, setAttAuthorized] = useState(true);
   const isExpoGo = Constants?.executionEnvironment === 'storeClient';
   const adDebug = !!Constants?.expoConfig?.extra?.adDebug;
 
-  const HEARTBEAT_INTERVAL_MS = 600_000; // 10 minutes (600 seconds)
-  const MIN_INTERVAL_AFTER_LAST_LOAD_MS = 300_000; // 5 minutes debounce guard
+  const MIN_INTERVAL_AFTER_LAST_LOAD_MS = 30_000;
 
-  const stopHeartbeat = () => {
-    if (heartbeatTimerRef.current) {
-      clearInterval(heartbeatTimerRef.current);
-      heartbeatTimerRef.current = null;
-    }
-  };
-
-  const startHeartbeat = () => {
-    stopHeartbeat();
-    heartbeatTimerRef.current = setInterval(() => {
-      if (Platform.OS === 'web' || isExpoGo || !ENABLE_ADS || !BANNER_AD_UNIT_ID || !shouldLoad) {
-        return;
-      }
-      if (retryTimeoutRef.current) return;
-      const now = Date.now();
-      if (now - lastLoadTsRef.current < MIN_INTERVAL_AFTER_LAST_LOAD_MS) return;
-      lastLoadTsRef.current = now;
-      const ref = bannerRef.current;
-      const isReady = typeof ref?.getIsReady === 'function' ? ref.getIsReady() : true;
-      setAdLoaded(false);
-      setAdHeight(null);
-      setRetryCount(0);
-      setDebugStatus(isReady ? 'ads:heartbeat-reload' : 'ads:heartbeat-swap');
-      if (isReady && typeof ref?.load === 'function') {
-        ref.load();
-      } else {
-        setReloadKey((k) => k + 1);
-      }
-    }, HEARTBEAT_INTERVAL_MS);
-  };
   const effectiveBannerSize = useMemo(() => {
-    // Use the standard phone/tablet size on iOS to compare fill stability.
-    if (Platform.OS === 'ios') return 'banner';
-    if (bannerSize !== 'adaptive') return bannerSize;
-    // Google Mobile Ads calculates an anchored adaptive size from the actual
-    // available width.  Do not force LEADERBOARD on iPad: it is 728px wide and
-    // can fail in Split View or when a modal's available width changes.
-    return 'adaptive';
-  }, [bannerSize]);
+    if (typeof bannerSize === 'string' && bannerSize && bannerSize !== 'adaptive') return bannerSize;
+    return defaultBannerSize;
+  }, [bannerSize, defaultBannerSize]);
   const isStandardBanner = effectiveBannerSize === 'banner';
-  const requestWidth = isStandardBanner ? 320 : Math.floor(containerWidth || windowWidth);
-  // A fixed-size ad does not need to reload when only the screen width changes.
+  const isLeaderboard = effectiveBannerSize === 'leaderboard';
+  const rawWidth = Math.floor(containerWidth || windowWidth);
+  const requestWidth = isLeaderboard
+    ? 728
+    : isStandardBanner
+      ? 320
+      : Math.min(rawWidth, 728);
   const layoutKey = `${effectiveBannerSize}:${requestWidth}`;
   const resolvedHeight = useMemo(() => {
     if (effectiveBannerSize === 'banner') return 50;
@@ -94,8 +67,6 @@ export default function AdBanner({
     if (effectiveBannerSize === 'leaderboard') return 90;
     if (effectiveBannerSize === 'largeBanner') return 100;
     if (effectiveBannerSize === 'mediumRectangle') return 250;
-    // Reserve a standard banner's height until the SDK reports the adaptive
-    // height. This avoids a layout jump while never clipping a loaded ad.
     if (effectiveBannerSize === 'fullBanner') return 60;
     return 50;
   }, [adHeight, effectiveBannerSize, height]);
@@ -125,18 +96,8 @@ export default function AdBanner({
         clearTimeout(retryTimeoutRef.current);
         retryTimeoutRef.current = null;
       }
-      stopHeartbeat();
     };
   }, []);
-
-  useEffect(() => {
-    if (Platform.OS === 'web' || isExpoGo || !ENABLE_ADS || !BANNER_AD_UNIT_ID || !shouldLoad) {
-      stopHeartbeat();
-      return undefined;
-    }
-    startHeartbeat();
-    return () => stopHeartbeat();
-  }, [isExpoGo, shouldLoad, BANNER_AD_UNIT_ID, ENABLE_ADS]);
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -158,13 +119,11 @@ export default function AdBanner({
     setDebugStatus('ads:waiting-sdk');
   }, [isExpoGo]);
 
-  // Avoid importing native module on web entirely
   useEffect(() => {
     if (Platform.OS === 'web') return;
     if (isExpoGo) return;
     let mounted = true;
     try {
-      // Dynamic import to avoid bundling issues in Expo Go
       import('react-native-google-mobile-ads')
         .then(mod => {
           if (!mounted) return;
@@ -183,6 +142,17 @@ export default function AdBanner({
       if (DEV) console.log('AdMob dynamic import error:', e);
     }
     return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    getStoredAttStatus().then((status) => {
+      if (cancelled) return;
+      setAttAuthorized(status === 'authorized');
+    }).catch(() => {
+      if (!cancelled) setAttAuthorized(true);
+    });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -213,7 +183,6 @@ export default function AdBanner({
   useEffect(() => {
     const changed = previousMountTokenRef.current !== mountToken;
     previousMountTokenRef.current = mountToken;
-    // The initial mount already requests an ad; only reload on a later token.
     if (!changed || mountToken == null) return undefined;
     if (Platform.OS === 'web' || isExpoGo || !ENABLE_ADS || !BANNER_AD_UNIT_ID || !shouldLoad) return undefined;
     if (retryTimeoutRef.current) return undefined;
@@ -305,13 +274,9 @@ export default function AdBanner({
     if (retryTimeoutRef.current) {
       clearTimeout(retryTimeoutRef.current);
     }
-    stopHeartbeat();
     retryTimeoutRef.current = setTimeout(() => {
       retryTimeoutRef.current = null;
       setReloadKey((k) => k + 1);
-      if (Platform.OS !== 'web' && !isExpoGo && ENABLE_ADS && BANNER_AD_UNIT_ID && shouldLoad) {
-        startHeartbeat();
-      }
     }, backoff);
   };
 
@@ -336,12 +301,10 @@ export default function AdBanner({
     );
   }
 
-  // Keep space even if ads disabled
   if (!ENABLE_ADS) {
     return <View style={[{ height: resolvedHeight }, style]} />;
   }
 
-  // Web/ExpoGo preview: keep a placeholder without attempting to load native module
   if (Platform.OS === 'web' || isExpoGo) {
     return <View style={[{ height: resolvedHeight }, style]} />;
   }
@@ -358,7 +321,6 @@ export default function AdBanner({
     );
   }
 
-  // Map our bannerSize to library constants
   const mapSize = () => {
     if (!BannerAdSize) return null;
     switch (effectiveBannerSize) {
@@ -380,6 +342,8 @@ export default function AdBanner({
 
   const sizeConst = mapSize();
 
+  const minRequestWidth = isLeaderboard ? 728 : isStandardBanner ? 320 : 0;
+  const fixedSizeStyle = isLeaderboard || isStandardBanner;
   return (
     <View
       onLayout={(event) => {
@@ -397,15 +361,15 @@ export default function AdBanner({
           </Text>
         </View>
       )}
-      {shouldLoad && BannerAdComp && sizeConst && (!isStandardBanner || containerWidth >= 320) && (
-        <View style={{ width: isStandardBanner ? 320 : '100%', height: isStandardBanner ? 50 : undefined, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' }}>
+      {shouldLoad && BannerAdComp && sizeConst && (!fixedSizeStyle || containerWidth >= minRequestWidth) && (
+        <View style={{ width: fixedSizeStyle ? minRequestWidth : '100%', height: fixedSizeStyle ? resolvedHeight : undefined, alignSelf: 'center', alignItems: 'center', justifyContent: 'center' }}>
           <BannerAdComp
             ref={bannerRef}
             key={reloadKey}
             unitId={BANNER_AD_UNIT_ID}
             size={sizeConst}
             width={requestWidth}
-            requestOptions={{ requestNonPersonalizedAdsOnly: false }}
+            requestOptions={{ requestNonPersonalizedAdsOnly: !attAuthorized }}
             onAdLoaded={(dimensions) => {
               if (retryTimeoutRef.current) {
                 clearTimeout(retryTimeoutRef.current);

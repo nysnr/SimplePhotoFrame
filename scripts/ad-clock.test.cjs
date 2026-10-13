@@ -114,7 +114,7 @@ test('clock hook: default on, elapsed-time catch-up, off/on, restart and persist
   await act(async () => root.unmount());
 });
 
-function bannerModule(os = 'ios', { isReadyReturns = true } = {}) {
+function bannerModule(os = 'ios', { isReadyReturns = true, isPad = false } = {}) {
   let windowWidth = 1024;
   let mounts = 0;
   let loads = 0;
@@ -131,7 +131,7 @@ function bannerModule(os = 'ios', { isReadyReturns = true } = {}) {
   });
   const AdBanner = loadSource('components/ads/AdBanner.js', {
     'react-native': {
-      View: 'View', Text: 'Text', Platform: { OS: os },
+      View: 'View', Text: 'Text', Platform: { OS: os, isPad: !!isPad },
       InteractionManager: { runAfterInteractions: (fn) => { fn(); return { cancel() {} }; } },
       AppState: { addEventListener: (_, fn) => {
         appStateListener = fn;
@@ -143,7 +143,7 @@ function bannerModule(os = 'ios', { isReadyReturns = true } = {}) {
     '../../config/adsConfig': { ENABLE_ADS: true, BANNER_AD_UNIT_ID: 'test-unit' },
     'react-native-google-mobile-ads': {
       BannerAd: Banner,
-      BannerAdSize: { BANNER: 'BANNER', ANCHORED_ADAPTIVE_BANNER: 'ANCHORED_ADAPTIVE_BANNER' },
+      BannerAdSize: { BANNER: 'BANNER', LEADERBOARD: 'LEADERBOARD', ANCHORED_ADAPTIVE_BANNER: 'ANCHORED_ADAPTIVE_BANNER' },
     },
   }).default;
   return {
@@ -229,7 +229,7 @@ test('banner: 10-minute heartbeat fires load() via ref and debounces correctly',
   t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'], now: 100000 });
   const banner = bannerModule();
   let root;
-  await act(async () => { root = create(React.createElement(banner.AdBanner, { mountToken: 1 })); });
+  await act(async () => { root = create(React.createElement(banner.AdBanner, { mountToken: 1, heartbeatIntervalMs: 600_000 })); });
   await act(async () => layout(root, 1024));
   await act(async () => t.mock.timers.tick(1200));
   const ad0 = root.root.findByType('MockBanner');
@@ -251,7 +251,7 @@ test('banner: handleFail stops heartbeat, after backoff heartbeat resumes and ge
   t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'], now: 100000 });
   const banner = bannerModule('ios', { isReadyReturns: true });
   let root;
-  await act(async () => { root = create(React.createElement(banner.AdBanner, { mountToken: 1 })); });
+  await act(async () => { root = create(React.createElement(banner.AdBanner, { mountToken: 1, heartbeatIntervalMs: 600_000 })); });
   await act(async () => layout(root, 1024));
   await act(async () => t.mock.timers.tick(1200));
   let ad = root.root.findByType('MockBanner');
@@ -270,5 +270,162 @@ test('banner: handleFail stops heartbeat, after backoff heartbeat resumes and ge
   await act(async () => t.mock.timers.tick(600_000));
   assert.ok(banner.counts().mounts > beforeSwapMounts, 'dead instance triggers a reloadKey swap on heartbeat');
   banner.setReady(true);
+  await act(async () => root.unmount());
+});
+
+
+test('banner: heartbeat interval is hot-swappable via prop (default 10m → 3m), guard scales down', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'], now: 100000 });
+  const banner = bannerModule();
+  let root;
+  await act(async () => { root = create(React.createElement(banner.AdBanner, { mountToken: 1, heartbeatIntervalMs: 600_000 })); });
+  await act(async () => layout(root, 1024));
+  await act(async () => t.mock.timers.tick(1200));
+  let ad = root.root.findByType('MockBanner');
+  await act(async () => ad.props.onAdLoaded({ width: 320, height: 50 }));
+  assert.deepEqual(banner.counts(), { mounts: 1, loads: 0 });
+  // Advance 3 minutes (180s) while on 10m default: heartbeat must NOT fire yet.
+  await act(async () => t.mock.timers.tick(180_000));
+  assert.equal(banner.counts().loads, 0, '3 minutes is under the 10-minute default heartbeat interval');
+  // Now switch to 3-minute interval and ensure the internal setInterval is
+  // reconstructed immediately and fires within 180s from the switch.
+  await act(async () => root.update(React.createElement(banner.AdBanner, { mountToken: 1, heartbeatIntervalMs: 180_000 })));
+  await act(async () => t.mock.timers.tick(180_000));
+  assert.equal(banner.counts().loads, 1, 'heartbeat fires after a fresh 3-minute window following the prop change');
+  // With a 3-minute interval the min-interval guard must be 90 seconds (3m/2).
+  // A mountToken change applied right after the previous load inside 1 minute must be skipped.
+  const beforeGuard = banner.counts().loads;
+  await act(async () => t.mock.timers.tick(60_000));
+  await act(async () => root.update(React.createElement(banner.AdBanner, { mountToken: 2, heartbeatIntervalMs: 180_000 })));
+  await act(async () => t.mock.timers.tick(250));
+  assert.equal(banner.counts().loads, beforeGuard, 'mountToken inside 90s guard window is skipped for 3-minute heartbeat');
+  // Now step past 90 seconds and make sure mountToken change triggers load.
+  await act(async () => t.mock.timers.tick(30_000));
+  await act(async () => root.update(React.createElement(banner.AdBanner, { mountToken: 3, heartbeatIntervalMs: 180_000 })));
+  await act(async () => t.mock.timers.tick(250));
+  assert.equal(banner.counts().loads, beforeGuard + 1, 'mountToken after 90s guard fires load for 3-minute heartbeat');
+  await act(async () => root.unmount());
+});
+
+test('useHeartbeatInterval persists values and presets default to 10 minutes', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'], now: 100000 });
+  const storage = new Map();
+  const key = 'spf:debug:ad-heartbeat-ms';
+  const hook = loadSource('utils/useHeartbeatInterval.js', {
+    '@react-native-async-storage/async-storage': {
+      getItem: async (k) => storage.get(k) ?? null,
+      setItem: async (k, v) => { storage.set(k, v); },
+    },
+  });
+  const useHeartbeatInterval = hook.default;
+  function Probe({ onReady, onReadyFirst, forceSetTo }) {
+    const result = useHeartbeatInterval();
+    React.useEffect(() => { if (result.ready && !onReadyFirst?.(result)) onReady?.(result); }, [result.ready]);
+    React.useEffect(() => { if (forceSetTo != null && result.ready) result.setIntervalMs(forceSetTo).catch(() => {}); }, [forceSetTo, result.ready]);
+    return null;
+  }
+  let snapshot;
+  let root;
+  let firstDone = false;
+  await act(async () => {
+    root = create(React.createElement(Probe, {
+      onReadyFirst: (r) => { if (firstDone) return false; firstDone = true; snapshot = { ready: r.ready, intervalMs: r.intervalMs, selectedMs: r.selectedPreset?.ms, presets: r.presets.map(p => p.ms) }; return true; },
+      onReady: () => {},
+    }));
+  });
+  assert.equal(snapshot.ready, true);
+  assert.equal(snapshot.intervalMs, 600_000);
+  assert.equal(snapshot.selectedMs, 600_000);
+  assert.deepEqual(snapshot.presets, [30_000, 60_000, 120_000, 180_000, 300_000, 600_000]);
+  assert.equal(storage.get(key), undefined, 'default value must not write storage until changed');
+
+  // Switch to 3 minutes via re-render with forceSetTo, then wait for next tick.
+  await act(async () => root.update(React.createElement(Probe, { onReady: () => {}, forceSetTo: 180_000 })));
+  await act(async () => t.mock.timers.tick(50));
+  assert.equal(storage.get(key), '180000', '3-minute value must persist after set');
+
+  // Remount and verify the stored value is restored.
+  await act(async () => root.unmount());
+  let remounted;
+  firstDone = false;
+  await act(async () => {
+    root = create(React.createElement(Probe, {
+      onReadyFirst: (r) => { if (firstDone) return false; firstDone = true; remounted = { ms: r.intervalMs, selected: r.selectedPreset?.labelShort }; return true; },
+      onReady: () => {},
+    }));
+  });
+  assert.equal(remounted.ms, 180_000);
+  assert.equal(remounted.selected, '3m');
+
+  // Out-of-range negative value must be clamped back to 10-minute default and persisted.
+  firstDone = false;
+  await act(async () => {
+    root.update(React.createElement(Probe, {
+      onReadyFirst: () => false,
+      onReady: () => {},
+      forceSetTo: -1,
+    }));
+  });
+  await act(async () => t.mock.timers.tick(50));
+  const clampedStored = Number(storage.get(key));
+  assert.equal(clampedStored, 600_000, 'clamp out-of-range negative back to default 10 minutes and persist');
+  await act(async () => root.unmount());
+});
+
+test('iPad banner: LEADERBOARD 728x90 centered, 15-minute default heartbeat interval', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'], now: 100000 });
+  const banner = bannerModule('ios', { isPad: true });
+  let root;
+  const heights = [];
+  const props = { mountToken: 1, onHeightChange: (height) => heights.push(height) };
+  await act(async () => { root = create(React.createElement(banner.AdBanner, props)); });
+  await act(async () => layout(root, 1024));
+  await act(async () => t.mock.timers.tick(1200));
+  let ad = root.root.findByType('MockBanner');
+  assert.equal(ad.props.size, 'LEADERBOARD');
+  assert.equal(ad.props.width, 728);
+  const slot = root.root.findAllByType('View').find((node) => node.props.style?.width === 728);
+  assert.equal(slot.props.style.height, 90);
+  assert.equal(slot.props.style.alignSelf, 'center');
+  assert.deepEqual(heights, [90]);
+  await act(async () => ad.props.onAdLoaded({ width: 728, height: 90 }));
+  assert.deepEqual(banner.counts(), { mounts: 1, loads: 0 });
+  const HEARTBEAT_15M = 15 * 60_000;
+  const GUARD_7_5M = 7 * 60_000 + 30_000;
+  await act(async () => t.mock.timers.tick(HEARTBEAT_15M));
+  assert.equal(banner.counts().loads, 1, 'iPad 15-minute heartbeat fires one load()');
+  await act(async () => t.mock.timers.tick(GUARD_7_5M - 1000));
+  assert.equal(banner.counts().loads, 1, 'iPad 7.5-min guard suppresses second trigger within window');
+  await act(async () => t.mock.timers.tick(HEARTBEAT_15M - GUARD_7_5M + 1000));
+  assert.ok(banner.counts().loads >= 2, 'iPad heartbeat fires again after the combined guard window');
+  await act(async () => layout(root, 700));
+  await act(async () => root.update(React.createElement(banner.AdBanner, props)));
+  assert.equal(root.root.findAllByType('MockBanner').length, 0, 'LEADERBOARD hides when container width < 728');
+  await act(async () => layout(root, 1024));
+  await act(async () => root.update(React.createElement(banner.AdBanner, props)));
+  ad = root.root.findByType('MockBanner');
+  assert.equal(ad.props.width, 728);
+  await act(async () => root.unmount());
+});
+
+test('iPhone banner: BANNER 320x50 centered, 1-minute default heartbeat interval', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'], now: 100000 });
+  const banner = bannerModule('ios', { isPad: false });
+  let root;
+  const props = { mountToken: 1 };
+  await act(async () => { root = create(React.createElement(banner.AdBanner, props)); });
+  await act(async () => layout(root, 1024));
+  await act(async () => t.mock.timers.tick(1200));
+  const ad = root.root.findByType('MockBanner');
+  assert.equal(ad.props.size, 'BANNER');
+  assert.equal(ad.props.width, 320);
+  await act(async () => ad.props.onAdLoaded({ width: 320, height: 50 }));
+  assert.deepEqual(banner.counts(), { mounts: 1, loads: 0 });
+  await act(async () => t.mock.timers.tick(60_000));
+  assert.equal(banner.counts().loads, 1, 'iPhone 1-minute heartbeat fires one load()');
+  await act(async () => t.mock.timers.tick(30_000));
+  assert.equal(banner.counts().loads, 1, 'iPhone 30-sec guard skips within half-interval');
+  await act(async () => t.mock.timers.tick(30_000));
+  assert.ok(banner.counts().loads >= 2, 'iPhone heartbeat fires again after the guard window');
   await act(async () => root.unmount());
 });
