@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SimplePhotoFrame — 把旧 iPad/iPhone 变成可持续的照片相框 · 幻灯片和时钟</title>
-    <meta name="description" content="SimplePhotoFrame 让你把闲置的旧 iPad 或 iPhone 重新利用为可持续的数字照片相框。支持幻灯片、时钟显示、8 种边框配色、4 种语言，照片本地处理不上传服务器。延长设备寿命，减少电子垃圾。">
+    <meta name="description" content="SimplePhotoFrame 让你把闲置的旧 iPad 或 iPhone 重新利用为可持续的数字照片相框。照片绝不上传——除广告外全部功能完全离线运行。支持幻灯片、时钟显示、8 种边框配色、4 种语言与夜间自动调光。延长设备寿命，减少电子垃圾。">
     <meta name="keywords" content="可持续, 再利用, 电子垃圾, iPad再利用, 照片相框, 幻灯片, 时钟, SimplePhotoFrame, 数字相框, 旧设备利用">
     <link rel="canonical" href="https://simple-photo-frame.vercel.app/zh-Hans/index.html">
     <link rel="alternate" hreflang="ja" href="https://simple-photo-frame.vercel.app/ja/index.html">
@@ -18,14 +18,14 @@
     <meta property="og:locale:alternate" content="es_ES">
     <meta property="og:type" content="website">
     <meta property="og:title" content="SimplePhotoFrame — 把旧 iPad/iPhone 变成可持续的照片相框">
-    <meta property="og:description" content="闲置旧设备的新生命：可持续的数字相框，幻灯片、时钟、8 种配色、本地处理不上传。">
+    <meta property="og:description" content="闲置旧设备的新生命：可持续的数字相框。照片绝不上传——除广告外全部功能完全离线运行。幻灯片、时钟、8 种配色、4 种语言、夜间自动调光。">
     <meta property="og:url" content="https://simple-photo-frame.vercel.app/zh-Hans/index.html">
     <meta property="og:site_name" content="SimplePhotoFrame">
-    <meta property="og:image" content="https://simple-photo-frame.vercel.app/assets/img/og.svg">
+    <meta property="og:image" content="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Photorealistic%20cozy%20living%20room%20shelf%2C%20a%20modern%20tablet%20propped%20on%20a%20minimal%20wooden%20stand%20displaying%20a%20warm%20family%20photo%20slideshow%20with%20a%20large%20digital%20clock%20overlay%2C%20soft%20morning%20window%20light%2C%20shallow%20depth%20of%20field%2C%20interior%20lifestyle%20photography%2C%20high%20detail&amp;image_size=landscape_4_3">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="SimplePhotoFrame — 把旧 iPad/iPhone 变成可持续的照片相框">
-    <meta name="twitter:description" content="闲置旧设备的新生命：可持续的数字相框，幻灯片、时钟、8 种配色、本地处理不上传。">
-    <meta name="twitter:image" content="https://simple-photo-frame.vercel.app/assets/img/og.svg">
+    <meta name="twitter:description" content="闲置旧设备的新生命：可持续的数字相框。照片绝不上传——除广告外全部功能完全离线运行。">
+    <meta name="twitter:image" content="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Photorealistic%20cozy%20living%20room%20shelf%2C%20a%20modern%20tablet%20propped%20on%20a%20minimal%20wooden%20stand%20displaying%20a%20warm%20family%20photo%20slideshow%20with%20a%20large%20digital%20clock%20overlay%2C%20soft%20morning%20window%20light%2C%20shallow%20depth%20of%20field%2C%20interior%20lifestyle%20photography%2C%20high%20detail&amp;image_size=landscape_4_3">
     <link rel="stylesheet" href="/assets/css/styles.css">
     <script type="application/ld+json">
     {
@@ -34,8 +34,9 @@
       "name": "SimplePhotoFrame",
       "operatingSystem": "iOS 15.1+",
       "applicationCategory": "PhotographyApplication",
-      "description": "把闲置的旧 iPad/iPhone 变成可持续的数字照片相框。支持幻灯片切换、时钟/日期显示、8 种边框配色、4 种语言（日/英/西/中简）。照片本地处理，绝不上传到任何服务器。",
+      "description": "把闲置的旧 iPad/iPhone 变成可持续的数字照片相框。照片绝不上传，除广告外全部功能完全离线运行。支持幻灯片切换、时钟/日期显示、8 种边框配色、4 种语言（日/英/西/中简）。",
       "keywords": "可持续, 再利用, 电子垃圾, iPad再利用, 照片相框, 幻灯片, 时钟, SimplePhotoFrame",
+      "featureList": "照片幻灯片, 时钟与日期显示, 8 种边框配色, 4 种语言, 夜间自动调光, 设置自动保存, 离线运行, 照片本地处理",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -51,7 +52,7 @@
         "name": "nysnr"
       },
       "downloadUrl": "https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431",
-      "softwareVersion": "1.0.0"
+      "softwareVersion": "1.0.11"
     }
     </script>
     <script type="application/ld+json">
@@ -104,7 +105,7 @@
           "name": "没有网络连接时可以使用吗？",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "核心功能完全离线可用。照片显示、幻灯片播放、时钟/日期和边框设置都不需要网络连接。仅广告展示需要联网。"
+            "text": "可以。除广告外，所有功能都完全离线可用：照片显示、幻灯片播放、时钟、日期和边框配色都不需要网络。唯一需要联网的只有广告的加载与展示。"
           }
         },
         {
@@ -129,6 +130,14 @@
           "acceptedAnswer": {
             "@type": "Answer",
             "text": "SimplePhotoFrame 支持 4 种语言：日语、英语、西班牙语和简体中文。您可以在设置中随时切换。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "夜间屏幕会太刺眼吗？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "不会。夜间自动调光默认开启：在夜间（默认 22:00–06:00）屏幕会柔和变暗，早晨恢复正常亮度。您可以在设置中修改起止时间，或将其关闭。"
           }
         }
       ]
@@ -160,14 +169,53 @@
   <section class="hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <span class="hero-kicker">🌱 可持续 · 再利用 · 不上传</span>
+        <span class="hero-kicker">🌱 可持续 · 再利用 · 照片绝不上传</span>
         <h1>把旧 iPad/iPhone 变成可持续的照片相框 · 幻灯片和时钟</h1>
-        <p class="hero-sub">闲置旧设备的新生命 · 不买新硬件 · 延长使用寿命 · 减少电子垃圾</p>
+        <p class="hero-sub">闲置旧设备的新生命 · 不买新硬件 · 照片绝不上传 · 除广告外全部功能完全离线运行</p>
         <div class="hero-ctas"><a class="btn btn-primary" href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">在 App Store 免费下载</a></div>
+        <p class="hero-note">🌱 不买新设备，继续用好手边的旧设备。可持续，从设计开始。</p>
+        <div class="trust-strip">
+          <span>🔒 照片绝不上传</span>
+          <span>✈️ 除广告外全部功能完全离线</span>
+        </div>
       </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="hero-frame"><span class="clock">10:30</span><div class="photo-card"><strong>家庭回忆</strong><span>幻灯片 · 时钟 · 边框</span></div></div>
+      <div class="hero-art">
+        <div class="hero-shot">
+          <img src="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Photorealistic%20cozy%20living%20room%20shelf%2C%20a%20modern%20tablet%20propped%20on%20a%20minimal%20wooden%20stand%20displaying%20a%20warm%20family%20photo%20slideshow%20with%20a%20large%20digital%20clock%20overlay%2C%20soft%20morning%20window%20light%2C%20shallow%20depth%20of%20field%2C%20interior%20lifestyle%20photography%2C%20high%20detail&amp;image_size=landscape_4_3" alt="温馨客厅中一台立在木质支架上的平板，正在播放家庭照片幻灯片并显示大时钟" width="1200" height="900" fetchpriority="high">
+          <span class="clock">10:30</span>
+        </div>
         <div class="hero-legend"><span><i class="dot green"></i> 可持续</span><span><i class="dot blue"></i> 设备再利用</span><span><i class="dot amber"></i> 4种语言</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2b What's New (v1.0.11) -->
+  <section class="section section-whatsnew">
+    <span class="version-pill">v1.0.11 更新</span>
+    <h2>本次更新</h2>
+    <div class="section-lead">我们强化了设置体验，让您的相框用起来更顺手。</div>
+    <div class="whatsnew-grid">
+      <div class="whatsnew-card">
+        <div class="wn-icon">🌙</div>
+        <h3>夜间自动调光（默认开启）</h3>
+        <p>夜间（默认 22:00–06:00）屏幕会柔和变暗，早晨恢复正常亮度。您可以在设置中修改时间段，也可以将其关闭。</p>
+      </div>
+      <div class="whatsnew-card">
+        <div class="wn-icon">💾</div>
+        <h3>设置自动保存</h3>
+        <p>幻灯片间隔、边框配色、时钟显示、语言等设置会自动保存，下次打开应用时原样恢复。</p>
+      </div>
+      <div class="whatsnew-card">
+        <div class="wn-icon">↺</div>
+        <h3>重置设置</h3>
+        <p>设置页面顶部新增「重置设置」按钮，您可以随时把所有设置恢复到默认值。</p>
+      </div>
+    </div>
+    <div class="media-split" style="margin-top:28px;">
+      <img src="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Photorealistic%20bedroom%20nightstand%20at%20night%2C%20a%20tablet%20displaying%20a%20family%20photo%20with%20a%20softly%20dimmed%20screen%2C%20warm%20bedside%20lamp%20glow%2C%20cozy%20calm%20atmosphere%2C%20dark%20room%2C%20high%20detail&amp;image_size=landscape_4_3" alt="夜晚卧室床头柜上一台平板柔和地调暗屏幕显示家庭照片" loading="lazy" width="1200" height="900">
+      <div>
+        <h3>夜间不刺眼</h3>
+        <p>适合卧室和睡前使用，屏幕柔和不刺眼。时间段可按您的习惯调整，不需要时也可以关闭。</p>
       </div>
     </div>
   </section>
@@ -258,6 +306,10 @@
           <span class="swatch" style="background:#bf5af2" title="薰衣草">薰衣草</span>
           <span class="swatch" style="background:#a2845e" title="橡木棕">橡木棕</span>
         </div>
+        <h3>夜间自动调光</h3>
+        <p>夜间屏幕柔和变暗，起止时间可调整，也可关闭。</p>
+        <h3>设置保存 / 重置</h3>
+        <p>设置自动保存，下次打开时恢复；页面顶部按钮可一键重置全部设置。</p>
       </div>
       <div class="langs">
         <div class="lang-card"><div class="lang-main">🇯🇵</div><div><h4>日本語</h4><p>面向日本用户的完整界面翻译与日期 / 时钟格式。</p></div><span class="badge">L1</span></div>
@@ -268,11 +320,40 @@
     </div>
   </section>
 
-  <!-- 8 Privacy -->
-  <div class="privacy-box">
-    <div class="card privacy"><div class="icon">🔐</div><h3>我们绝不会将您的照片上传到服务器</h3><p>SimplePhotoFrame 访问您的相册，仅用于在相框内显示您的照片。我们郑重承诺：您的珍贵回忆永远不会离开您的设备，不会上传到我们的服务器，更不会与任何第三方共享。</p></div>
-    <div class="card privacy"><div class="icon">📴</div><h3>完全离线可用</h3><p>照片显示、幻灯片切换、时钟/日期、边框配色——所有核心功能都在设备本地完成，不需要网络连接。即使断网，您也可以尽情享受属于您的照片时光。</p></div>
-  </div>
+  <!-- 8 Privacy & Offline -->
+  <section class="section section-offline">
+    <h2>除广告外，完全离线运行</h2>
+    <p class="section-lead">担心个人照片被保存到线上？请放心。SimplePhotoFrame 唯一与外部通信的时候，就是展示广告。</p>
+
+    <div class="offline-flow">
+      <div class="flow-row">
+        <span class="flow-label">🖼️ 您的照片</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-desc">仅在设备本地读取与显示，绝不发送到外部。</span>
+        <span class="flow-tag off">仅限设备内</span>
+      </div>
+      <div class="flow-row">
+        <span class="flow-label">⚙️ 您的设置</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-desc">仅保存在您的设备内，没有云端同步。</span>
+        <span class="flow-tag off">仅限设备内</span>
+      </div>
+      <div class="flow-row">
+        <span class="flow-label">📣 广告投放</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-desc">唯一对外连接是通过 Google AdMob 获取横幅广告。</span>
+        <span class="flow-tag net">需要联网</span>
+      </div>
+    </div>
+
+    <div class="media-split">
+      <img src="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Photorealistic%20hand%20holding%20a%20smartphone%20with%20a%20glowing%20shield%20lock%20icon%20on%20screen%20in%20a%20cozy%20home%20interior%2C%20soft%20warm%20light%2C%20shallow%20depth%20of%20field%2C%20high%20detail&amp;image_size=landscape_4_3" alt="一只手握着显示发光盾牌锁图标的智能手机，表示照片在设备内受到保护" loading="lazy" width="1200" height="900">
+      <div>
+        <h3>照片只留在您的设备里</h3>
+        <p>完全没有服务器上传。即使开启飞行模式，除广告外的所有功能也都能正常工作。您的私人回忆，只存在于您自己的设备中。</p>
+      </div>
+    </div>
+  </section>
 
   <!-- 9 FAQ -->
   <div class="faq-list">
@@ -298,7 +379,7 @@
     </details>
     <details class="faq">
       <summary>Q6. 没有网络连接时可以使用吗？</summary>
-      <p>核心功能完全离线可用。照片显示、幻灯片播放、时钟/日期显示、边框配色设置——这一切都不需要网络连接。仅广告展示需要联网，即便没有广告，核心体验也不会受任何影响。</p>
+      <p>可以。除广告外，所有功能都完全离线可用：照片显示、幻灯片播放、时钟、日期和边框配色都不需要网络。唯一需要联网的只有广告的加载与展示。</p>
     </details>
     <details class="faq">
       <summary>Q7. 适合送给祖父母使用吗？</summary>
@@ -323,6 +404,10 @@
     <details class="faq">
       <summary>Q12. 如何把 iPhone 当作数码相框使用？</summary>
       <p>从 App Store 安装 SimplePhotoFrame，打开应用，选择想展示的照片并设置幻灯片播放间隔。将 iPhone 放在支架或底座上，它就会成为带有时钟和日期的数码相框，所有照片都保存在本地设备中。</p>
+    </details>
+    <details class="faq">
+      <summary>Q13. 夜间屏幕会太刺眼吗？</summary>
+      <p>不会。夜间自动调光默认开启：在夜间（默认 22:00–06:00）屏幕会柔和变暗，早晨恢复正常亮度。您可以在设置中修改起止时间，或将其关闭。</p>
     </details>
   </div>
 
@@ -350,7 +435,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <a href="/zh-Hans/index.html" class="brand"><span class="brand-badge">SP</span><span>SimplePhotoFrame</span></a>
-        <p>把闲置旧 iPad/iPhone 变成可持续的数字照片相框。本地处理、绝不云端上传、8种边框、4国语言。延长设备寿命，减少电子垃圾。</p>
+        <p>把闲置旧 iPad/iPhone 变成可持续的数字照片相框。照片绝不上传——除广告外全部功能完全离线运行。可持续的设备再利用，从此更简单。</p>
       </div>
       <div><h3>导航</h3><ul><li><a href="/zh-Hans/index.html">首页</a></li><li><a href="/zh-Hans/support.html">技术支持</a></li><li><a href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">App Store</a></li></ul></div>
       <div><h3>法律</h3><ul><li><a href="/zh-Hans/privacy.html">隐私政策</a></li><li><a href="/zh-Hans/terms.html">服务条款</a></li></ul></div>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SimplePhotoFrame - 古い端末を捨てず思い出のフォトフレームに | サステナブル iPad再活用</title>
-<meta name="description" content="SimplePhotoFrame は、眠ったままの古い iPad や iPhone を、スライドショー表示できるフォトフレームに生まれ変わらせる iOS アプリ。サステナブルな再活用で e-waste を削減。時計表示・8色マットカラー・4言語対応、写真は端末ローカル処理で安心。">
+<meta name="description" content="SimplePhotoFrame は、眠ったままの古い iPad や iPhone を、スライドショー表示できるフォトフレームに生まれ変わらせる iOS アプリ。写真はサーバーにアップロードせず、広告以外は完全オフラインで動作します。時計表示・8色マットカラー・4言語対応、夜間の自動調光にも対応。">
 <meta name="keywords" content="サステナブル, 余ったデバイス, iPad再利用, フォトフレーム, スライドショー, 時計, SimplePhotoFrame">
 
 <link rel="canonical" href="https://simple-photo-frame.vercel.app/ja/index.html">
@@ -15,8 +15,8 @@
 <link rel="alternate" hreflang="x-default" href="https://simple-photo-frame.vercel.app/index.html">
 
 <meta property="og:title" content="SimplePhotoFrame - 古い端末を捨てず思い出のフォトフレームに">
-<meta property="og:description" content="サステナブルなデバイス再活用。iPad/iPhone をフォトフレームに。スライドショー、時計表示、8色マット、4言語対応。">
-<meta property="og:image" content="https://simple-photo-frame.vercel.app/assets/img/og.svg">
+<meta property="og:description" content="サステナブルなデバイス再活用。iPad/iPhone をフォトフレームに。写真はアップロードなし、広告以外は完全オフライン。スライドショー、時計表示、8色マット、4言語対応、夜間の自動調光。">
+<meta property="og:image" content="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Photorealistic%20cozy%20living%20room%20shelf%2C%20a%20modern%20tablet%20propped%20on%20a%20minimal%20wooden%20stand%20displaying%20a%20warm%20family%20photo%20slideshow%20with%20a%20large%20digital%20clock%20overlay%2C%20soft%20morning%20window%20light%2C%20shallow%20depth%20of%20field%2C%20interior%20lifestyle%20photography%2C%20high%20detail&amp;image_size=landscape_4_3">
 <meta property="og:url" content="https://simple-photo-frame.vercel.app/ja/index.html">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ja_JP">
@@ -26,8 +26,8 @@
 <meta property="og:locale:alternate" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="SimplePhotoFrame - 古い端末を捨てず思い出のフォトフレームに">
-<meta name="twitter:description" content="サステナブルなデバイス再活用。iPad/iPhone をフォトフレームに。スライドショー、時計表示、8色マット、4言語対応。">
-<meta name="twitter:image" content="https://simple-photo-frame.vercel.app/assets/img/og.svg">
+<meta name="twitter:description" content="サステナブルなデバイス再活用。iPad/iPhone をフォトフレームに。写真はアップロードなし、広告以外は完全オフライン。">
+<meta name="twitter:image" content="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Photorealistic%20cozy%20living%20room%20shelf%2C%20a%20modern%20tablet%20propped%20on%20a%20minimal%20wooden%20stand%20displaying%20a%20warm%20family%20photo%20slideshow%20with%20a%20large%20digital%20clock%20overlay%2C%20soft%20morning%20window%20light%2C%20shallow%20depth%20of%20field%2C%20interior%20lifestyle%20photography%2C%20high%20detail&amp;image_size=landscape_4_3">
 
 <link rel="stylesheet" href="/assets/css/styles.css">
 <script src="/assets/js/main.js" defer></script>
@@ -41,8 +41,10 @@
       "name": "SimplePhotoFrame",
       "operatingSystem": "iOS 15.1+",
       "applicationCategory": "PhotographyApplication",
-      "description": "古い iPad や iPhone を再活用してフォトフレームにするアプリ。スライドショー、時計表示、8色マットカラー、4言語対応。サステナブルと再利用をコンセプトに、e-waste 削減に貢献します。",
+      "description": "古い iPad や iPhone を再活用してフォトフレームにするアプリ。スライドショー、時計表示、8色マットカラー、4言語対応、夜間の自動調光。写真はサーバーにアップロードせず、広告以外は完全オフラインで動作します。",
       "keywords": "サステナブル, 再利用, フォトフレーム, iPad再利用, スライドショー, 時計",
+      "softwareVersion": "1.0.11",
+      "featureList": "スライドショー, 時計・日付表示, 8色マットカラー, 4言語対応, 夜間の自動調光, 設定の自動保存, オフライン動作, 写真の端末内処理",
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -102,7 +104,7 @@
           "name": "オフラインで使えますか？",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "はい、基本機能はオフライン可。"
+            "text": "はい。写真表示・スライドショー・時計・日付・配色など、広告以外のすべての機能がオフラインで動作します。ネットワークを使うのは広告の取得のみです。"
           }
         },
         {
@@ -158,27 +160,59 @@
   <section class="hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <span class="hero-kicker">🌱 Sustainable · Reuse · No Upload</span>
+        <span class="hero-kicker">🌱 Sustainable · Reuse · 写真はアップロードしません</span>
         <h1>古い端末を捨てず<br>思い出のフォトフレームに</h1>
-        <p class="hero-sub">眠ったままの iPad / iPhone が、大切な写真を映すデジタルフォトフレームに生まれ変わる。</p>
+        <p class="hero-sub">眠ったままの iPad / iPhone が、大切な写真を映すデジタルフォトフレームに生まれ変わる。広告以外は完全オフラインで動きます。</p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="https://apps.apple.com/jp/app/%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB-%E3%83%95%E3%82%A9%E3%83%88%E3%83%95%E3%83%AC%E3%83%BC%E3%83%A0/id6792314431" target="_blank" rel="noopener">App Store でダウンロード</a>
         </div>
         <p class="hero-note">🌱 新しいモノを買わず、既存デバイスを長く使う。サステナブルな選択を、あなたの日常に。</p>
+        <div class="trust-strip">
+          <span>🔒 写真はアップロードしません</span>
+          <span>✈️ 広告以外は完全オフライン</span>
+        </div>
       </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="hero-frame">
+      <div class="hero-art">
+        <div class="hero-shot">
+          <img src="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Photorealistic%20cozy%20living%20room%20shelf%2C%20a%20modern%20tablet%20propped%20on%20a%20minimal%20wooden%20stand%20displaying%20a%20warm%20family%20photo%20slideshow%20with%20a%20large%20digital%20clock%20overlay%2C%20soft%20morning%20window%20light%2C%20shallow%20depth%20of%20field%2C%20interior%20lifestyle%20photography%2C%20high%20detail&amp;image_size=landscape_4_3" alt="木製スタンドに立てたタブレットが、家族写真のスライドショーと大きな時計を表示しているリビングの様子" width="1200" height="900" fetchpriority="high">
           <span class="clock">10:30</span>
-          <div class="photo-card">
-            <strong>家族の思い出</strong>
-            <span>Slideshow · Clock · Matte</span>
-          </div>
         </div>
         <div class="hero-legend">
           <span><i class="dot green"></i> Sustainable</span>
           <span><i class="dot blue"></i> Reuse Device</span>
           <span><i class="dot amber"></i> 4 Languages</span>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2b What's New (v1.0.11) -->
+  <section class="section section-whatsnew">
+    <span class="version-pill">v1.0.11 アップデート</span>
+    <h2>今回の新機能</h2>
+    <div class="section-lead">設定まわりを強化しました。フォトフレームとして、もっと快適に。</div>
+    <div class="whatsnew-grid">
+      <div class="whatsnew-card">
+        <div class="wn-icon">🌙</div>
+        <h3>夜間の自動調光（既定オン）</h3>
+        <p>夜間（既定 22:00〜6:00）は画面をやさしく暗くし、朝になると通常の明るさに戻します。時間帯の変更やオフも設定画面から行えます。</p>
+      </div>
+      <div class="whatsnew-card">
+        <div class="wn-icon">💾</div>
+        <h3>設定を自動保存</h3>
+        <p>スライド間隔・配色・時計表示・言語などの設定が自動で保存され、次回起動時にそのまま復元されます。</p>
+      </div>
+      <div class="whatsnew-card">
+        <div class="wn-icon">↺</div>
+        <h3>設定をリセット</h3>
+        <p>設定画面の最上部に「設定をリセット」ボタンを追加。すべての設定をいつでも既定値に戻せます。</p>
+      </div>
+    </div>
+    <div class="media-split" style="margin-top:28px;">
+      <img src="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Photorealistic%20bedroom%20nightstand%20at%20night%2C%20a%20tablet%20displaying%20a%20family%20photo%20with%20a%20softly%20dimmed%20screen%2C%20warm%20bedside%20lamp%20glow%2C%20cozy%20calm%20atmosphere%2C%20dark%20room%2C%20high%20detail&amp;image_size=landscape_4_3" alt="夜の寝室で、画面を控えめに暗くしたタブレットが家族写真を表示している様子" loading="lazy" width="1200" height="900">
+      <div>
+        <h3>夜はまぶしくない</h3>
+        <p>就寝前や寝室でも、まぶしさを抑えてやさしく表示。時間帯はお好みに合わせて変更でき、不要なときはオフにできます。</p>
       </div>
     </div>
   </section>
@@ -342,6 +376,10 @@
           <dd>時計・日付の表示/非表示を独立切替。時計サイズも大表示に対応。</dd>
           <dt>マットカラー 8種</dt>
           <dd>下記 8 色からお部屋に合わせて選択。</dd>
+          <dt>夜間の自動調光</dt>
+          <dd>夜間は画面をやさしく暗く。開始・終了時刻の変更やオフも可能。</dd>
+          <dt>設定の保存 / リセット</dt>
+          <dd>設定は自動保存され、次回起動時に復元。最上部のボタンで一括リセットも可能。</dd>
         </dl>
         <div class="matte-palette" aria-label="マットカラー 8色">
           <span class="swatch dark">Dark</span>
@@ -366,20 +404,37 @@
     </div>
   </section>
 
-  <!-- 8 Privacy & Local -->
-  <section class="section section-privacy-local">
-    <h2>プライバシー &amp; ローカル処理</h2>
-    <p class="section-lead">写真は端末の外に一歩も出ません。安心してお使いいただけます。</p>
-    <div class="privacy-box">
-      <div class="card">
-        <div class="icon" style="background:#d1fae5;color:#065f46;">🔒🚫☁️</div>
-        <h3>サーバーにアップロードしない</h3>
-        <p><strong>明記：</strong>本アプリは、お客様が選択した写真をサーバーにアップロードしません。端末の写真ライブラリから読み取り、端末画面に表示するだけ。プライベートな思い出は、あなたのデバイスの中にだけ存在します。</p>
+  <!-- 8 Privacy & Offline -->
+  <section class="section section-offline">
+    <h2>広告以外は、完全オフライン</h2>
+    <p class="section-lead">「大切な写真をオンラインに保存されたくない」。その心配は不要です。SimplePhotoFrame が外部と通信するのは、広告の表示のときだけです。</p>
+
+    <div class="offline-flow">
+      <div class="flow-row">
+        <span class="flow-label">🖼️ あなたの写真</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-desc">端末内で読み取り・表示するだけ。外部へ送信しません。</span>
+        <span class="flow-tag off">端末内のみ</span>
       </div>
-      <div class="card">
-        <div class="icon" style="background:#dbeafe;color:#1e3a8a;">✈️📴</div>
-        <h3>オフライン / 飛行機内でも動作</h3>
-        <p>基本機能はネットワーク接続不要。オフライン環境や飛行機モードのままでも、フォトフレームとして安心してご利用いただけます。</p>
+      <div class="flow-row">
+        <span class="flow-label">⚙️ 設定内容</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-desc">端末内にのみ保存。クラウド同期はありません。</span>
+        <span class="flow-tag off">端末内のみ</span>
+      </div>
+      <div class="flow-row">
+        <span class="flow-label">📣 広告の配信</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-desc">Google AdMob によるバナー広告の取得のみ外部と通信します。</span>
+        <span class="flow-tag net">通信あり</span>
+      </div>
+    </div>
+
+    <div class="media-split">
+      <img src="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Photorealistic%20hand%20holding%20a%20smartphone%20with%20a%20glowing%20shield%20lock%20icon%20on%20screen%20in%20a%20cozy%20home%20interior%2C%20soft%20warm%20light%2C%20shallow%20depth%20of%20field%2C%20high%20detail&amp;image_size=landscape_4_3" alt="スマートフォン画面に鍵のシールドが表示され、写真が端末内で保護されていることを示すイメージ" loading="lazy" width="1200" height="900">
+      <div>
+        <h3>写真は、あなたの端末の中だけに</h3>
+        <p>サーバーへのアップロードは一切ありません。機内モードのままでも、広告以外のすべての機能が動作します。プライベートな思い出は、あなたのデバイスの中にだけ存在します。</p>
       </div>
     </div>
   </section>
@@ -410,7 +465,7 @@
       </details>
       <details class="faq">
         <summary>Q6. オフラインで使えますか？</summary>
-        <p>はい、基本機能はオフライン可。</p>
+        <p>はい。写真表示・スライドショー・時計・日付・配色など、広告以外のすべての機能がオフラインで動作します。ネットワークを使うのは広告の取得・表示のみです。</p>
       </details>
       <details class="faq">
         <summary>Q7. 祖父母へのプレゼントに使えますか？</summary>
@@ -435,6 +490,10 @@
       <details class="faq">
         <summary>Q12. iPhone をデジタル写真立てとして使うには？</summary>
         <p>App Store から SimplePhotoFrame をインストールし、表示したい写真を選んでスライドショー間隔を設定します。iPhone をスタンドやドックに置けば、時計・日付表示付きのデジタル写真立てとして使えます。写真はすべて端末内に留まります。</p>
+      </details>
+      <details class="faq">
+        <summary>Q13. 夜間は画面がまぶしくないですか？</summary>
+        <p>はい、安心してください。SimplePhotoFrame は既定で夜間の自動調光が有効になっており、夜間（既定 22:00〜6:00）は画面をやさしく暗く、朝になると通常の明るさに戻します。開始・終了時刻は設定画面から変更でき、オフにすることもできます。</p>
       </details>
     </div>
   </section>
@@ -470,7 +529,7 @@
           <span class="brand-badge">SP</span>
           <span>SimplePhotoFrame</span>
         </a>
-        <p>眠ったままの iPad / iPhone を、思い出を映すフォトフレームに。サステナブルなデバイス再活用を、もっと身近に。</p>
+        <p>眠ったままの iPad / iPhone を、思い出を映すフォトフレームに。写真はアップロードせず、広告以外は完全オフライン。サステナブルなデバイス再活用を、もっと身近に。</p>
       </div>
       <div>
         <h3>Navigate</h3>

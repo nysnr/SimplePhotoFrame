@@ -905,6 +905,155 @@ details.faq p {
   color: #0c4a6e;
 }
 
+/* ================= Hero realistic shot ================= */
+.hero-shot {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: #e2e8f0;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+.hero-shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hero-shot .clock {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: rgba(15, 23, 42, 0.76);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  z-index: 2;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Trust strip (chips under hero) */
+.trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+.trust-strip span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: var(--r-pill);
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: var(--spf-sustainable-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+/* ================= What's New (release) ================= */
+.section-whatsnew {
+  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+}
+.version-pill {
+  display: inline-block;
+  padding: 4px 13px;
+  border-radius: var(--r-pill);
+  background: var(--spf-primary);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+.whatsnew-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap-card);
+  margin-top: 8px;
+}
+.whatsnew-card {
+  background: var(--spf-surface);
+  border: 1px solid var(--spf-border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  box-shadow: var(--e1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.whatsnew-card .wn-icon {
+  width: 46px; height: 46px;
+  border-radius: var(--r-md);
+  display: inline-grid; place-items: center;
+  font-size: 1.3rem;
+  background: #e0f2fe;
+  color: #0369a1;
+  flex-shrink: 0;
+}
+.whatsnew-card h3 { margin: 2px 0 0; font-size: 1.05rem; }
+.whatsnew-card p { color: var(--spf-muted); font-size: 0.96rem; }
+
+/* ================= Offline / privacy flow ================= */
+.section-offline {
+  background: #f0fdfa;
+  border-bottom: 1px solid #ccfbf1;
+}
+.offline-flow {
+  display: grid;
+  gap: 12px;
+  margin: 8px 0 26px;
+  max-width: 920px;
+}
+.flow-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fff;
+  border: 1px solid var(--spf-border);
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  font-size: 0.98rem;
+}
+.flow-row .flow-label {
+  font-weight: 700;
+  flex-shrink: 0;
+  min-width: 148px;
+}
+.flow-row .flow-arrow { color: #94a3b8; font-weight: 800; }
+.flow-row .flow-desc { color: var(--spf-muted); }
+.flow-tag {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 3px 13px;
+  border-radius: var(--r-pill);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.flow-tag.off { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.flow-tag.net { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+/* Media split (image + text) */
+.media-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 34px;
+  align-items: center;
+  margin-top: 8px;
+}
+.media-split img {
+  width: 100%;
+  border-radius: var(--r-lg);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+.media-split h3 { margin-bottom: 8px; }
+.media-split p { color: var(--spf-muted); }
+
 /* ================= Site Footer ================= */
 .site-footer {
   background: #0b1020;
@@ -1024,6 +1173,10 @@ summary:focus-visible,
   .steps       { grid-template-columns: 1fr; }
   .langs       { grid-template-columns: repeat(2, 1fr); }
   .privacy-box { grid-template-columns: 1fr; }
+  .whatsnew-grid { grid-template-columns: 1fr; }
+  .media-split { grid-template-columns: 1fr; gap: 22px; }
+  .flow-row { flex-wrap: wrap; }
+  .flow-row .flow-label { min-width: auto; }
   .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
   .footer-grid .footer-brand { grid-column: 1 / -1; }
   .matte-palette { grid-template-columns: repeat(4, 1fr); }
@@ -1044,6 +1197,7 @@ summary:focus-visible,
   .footer-grid .footer-brand { grid-column: 1 / -1; }
   .matte-palette { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .hero-legend { grid-template-columns: 1fr; }
+  .flow-tag { margin-left: 0; }
   .final-cta-box { padding: 36px 22px; border-radius: 22px; }
   .final-cta-box .btn { width: 100%; }
   .article { padding: 22px 18px; }
