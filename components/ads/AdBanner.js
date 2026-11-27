@@ -1,7 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Platform, InteractionManager, AppState, useWindowDimensions } from 'react-native';
 import Constants from 'expo-constants';
-import { ENABLE_ADS, BANNER_AD_UNIT_ID } from '../../config/adsConfig';
+import {
+  ENABLE_ADS,
+  BANNER_AD_UNIT_ID,
+  BANNER_APP_REFRESH_ENABLED,
+  BANNER_REFRESH_IPAD_MS,
+  BANNER_REFRESH_IPHONE_MS,
+} from '../../config/adsConfig';
 import { getStoredAttStatus } from '../../utils/attManager';
 
 /**
@@ -12,7 +18,8 @@ import { getStoredAttStatus } from '../../utils/attManager';
  * - Deferred mounting to reduce initial load
  * - Web-safe: avoids importing native module on web
  * - Adaptive banner by default (both iPhone and iPad) for larger ad inventory
- * - No app-side forced refresh timer; relies on SDK auto-refresh (optimizeAdLoading)
+ * - App-side periodic refresh (iPad 10 min / iPhone 3 min) which is the single
+ *   refresh driver when AdMob's own "auto refresh" is disabled on the ad unit.
  */
 export default function AdBanner({
   height,
@@ -31,7 +38,7 @@ export default function AdBanner({
   const retryTimeoutRef = useRef(null);
   const lastLoadTsRef = useRef(0);
   const initialLoadDoneRef = useRef(false);
-  const { width: windowWidth } = useWindowDimensions();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [containerWidth, setContainerWidth] = useState(0);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
@@ -46,6 +53,15 @@ export default function AdBanner({
   const adDebug = !!Constants?.expoConfig?.extra?.adDebug;
 
   const MIN_INTERVAL_AFTER_LAST_LOAD_MS = 30_000;
+
+  // iPad gets a much slower refresh than iPhone: large screens deplete banner
+  // inventory faster and the 30s SDK interval proved too aggressive.
+  const isTablet = useMemo(() => {
+    if (Platform.OS !== 'ios') return false;
+    if (typeof Platform.isPad === 'boolean') return Platform.isPad;
+    return Math.min(windowWidth, windowHeight) >= 768;
+  }, [windowWidth, windowHeight]);
+  const bannerRefreshIntervalMs = isTablet ? BANNER_REFRESH_IPAD_MS : BANNER_REFRESH_IPHONE_MS;
 
   const effectiveBannerSize = useMemo(() => {
     if (typeof bannerSize === 'string' && bannerSize && bannerSize !== 'adaptive') return bannerSize;
@@ -79,7 +95,7 @@ export default function AdBanner({
   );
 
   useEffect(() => {
-    onHeightChange?.(resolvedHeight);
+    onHeightChange?.(ENABLE_ADS ? resolvedHeight : 0);
   }, [onHeightChange, resolvedHeight]);
 
   const placeholderText = (() => {
@@ -122,6 +138,7 @@ export default function AdBanner({
   useEffect(() => {
     if (Platform.OS === 'web') return;
     if (isExpoGo) return;
+    if (!ENABLE_ADS) return;
     let mounted = true;
     try {
       import('react-native-google-mobile-ads')
@@ -222,6 +239,31 @@ export default function AdBanner({
     return () => subscription.remove();
   }, [isExpoGo, shouldLoad]);
 
+  // App-side periodic refresh. This is the ONLY refresh driver when AdMob's
+  // "auto refresh" is disabled on the ad unit — running it together with the
+  // SDK auto-refresh caused the over-requesting / low match-rate problem, so
+  // keep exactly one of the two enabled.
+  useEffect(() => {
+    if (Platform.OS !== 'ios' || isExpoGo || !ENABLE_ADS || !BANNER_AD_UNIT_ID || !shouldLoad) {
+      return undefined;
+    }
+    if (!BANNER_APP_REFRESH_ENABLED) return undefined;
+    const id = setInterval(() => {
+      if (retryTimeoutRef.current) return;
+      const now = Date.now();
+      if (now - lastLoadTsRef.current < MIN_INTERVAL_AFTER_LAST_LOAD_MS) return;
+      lastLoadTsRef.current = now;
+      setAdLoaded(false);
+      setDebugStatus('ads:timer-reload');
+      if (typeof bannerRef.current?.load === 'function') {
+        bannerRef.current.load();
+        return;
+      }
+      setReloadKey((k) => k + 1);
+    }, bannerRefreshIntervalMs);
+    return () => clearInterval(id);
+  }, [BANNER_APP_REFRESH_ENABLED, BANNER_AD_UNIT_ID, bannerRefreshIntervalMs, isExpoGo, shouldLoad]);
+
   useEffect(() => {
     if (Platform.OS === 'web' || isExpoGo || !ENABLE_ADS || !BANNER_AD_UNIT_ID || !shouldLoad || !BannerAdComp) {
       previousLayoutKeyRef.current = layoutKey;
@@ -302,7 +344,8 @@ export default function AdBanner({
   }
 
   if (!ENABLE_ADS) {
-    return <View style={[{ height: resolvedHeight }, style]} />;
+    // Ads disabled: collapse the slot so no empty banner strip is reserved.
+    return <View style={[{ height: 0 }, style]} />;
   }
 
   if (Platform.OS === 'web' || isExpoGo) {

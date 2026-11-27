@@ -1,4 +1,5 @@
 import { Platform, AppState } from 'react-native';
+import { AD_TEST_DEVICE_IDS } from '../config/adsConfig';
 
 const ATT_STATUS_KEY = 'simplephotoframe.attConsentStatus.v2';
 const ATT_PROMPTED_KEY = 'simplephotoframe.attPromptedAt.v2';
@@ -123,6 +124,17 @@ export const initializeMobileAds = async () => {
     const RNGoogleMobileAds = await import('react-native-google-mobile-ads');
     const mobileAds = RNGoogleMobileAds.default?.mobileAds || RNGoogleMobileAds.mobileAds;
     if (!mobileAds) return false;
+    // Pin the developer's own devices to test ads. This must be applied before
+    // initialize() so it is in effect for every request. Without it, the 24/7
+    // photo-frame devices would generate real impressions on our own ad units,
+    // which is what triggered the AdMob invalid-traffic suspension.
+    if (AD_TEST_DEVICE_IDS.length > 0) {
+      try {
+        await mobileAds().setRequestConfiguration({ testDeviceIdentifiers: AD_TEST_DEVICE_IDS });
+      } catch {
+        // Non-fatal: fall through so ads still initialise.
+      }
+    }
     await mobileAds().initialize();
     return true;
   } catch {

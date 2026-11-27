@@ -2,7 +2,7 @@
   "expo": {
     "name": "Simple-Photo-Frame",
     "slug": "PhotoFrameNew",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "sdkVersion": "54.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -52,7 +52,9 @@
     "extra": {
       "eas": {
         "projectId": "f21dcf70-be65-4d7a-b2e8-f3c73e29e65c"
-      }
+      },
+      "enableAdsMode": "true",
+      "adTestDeviceIds": []
     }
   },
   "react-native-google-mobile-ads": {

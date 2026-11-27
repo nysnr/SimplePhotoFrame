@@ -24,6 +24,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getLocales } from 'expo-localization';
 import { AdBanner, InterstitialManager } from './components/ads';
+import { ENABLE_ADS } from './config/adsConfig';
 import Constants from 'expo-constants';
 import { runAttFlow, initializeMobileAds } from './utils/attManager';
 import useClockMovement, { getClockPlacement, getClockFontScale } from './utils/useClockMovement';
@@ -530,7 +531,7 @@ export default function App() {
   const [showCloseButton, setShowCloseButton] = useState(true);
   // The adaptive banner reports its real height after it loads.  Keep this
   // separately so the slideshow content never occupies the banner's space.
-  const [slideshowAdHeight, setSlideshowAdHeight] = useState(50);
+  const [slideshowAdHeight, setSlideshowAdHeight] = useState(ENABLE_ADS ? 50 : 0);
   // 時計・日付サイズ（small | medium | large）。現在の組み合わせを「medium」とする
   const [clockDateSize, setClockDateSize] = useState('medium');
   
@@ -652,18 +653,22 @@ export default function App() {
     (async () => {
       await new Promise((r) => setTimeout(r, 800));
       if (disposed) return;
-      try {
-        await runAttFlow();
-      } catch (e) {
-        devWarn('[ATT] flow failed', e);
+      // Ads disabled: skip ATT prompt and AdMob SDK initialization entirely so
+      // the app sends no requests to Google at all.
+      if (ENABLE_ADS) {
+        try {
+          await runAttFlow();
+        } catch (e) {
+          devWarn('[ATT] flow failed', e);
+        }
+        if (disposed) return;
+        try {
+          await initializeMobileAds();
+        } catch (e) {
+          devWarn('[Ads] initialize failed', e);
+        }
+        if (disposed) return;
       }
-      if (disposed) return;
-      try {
-        await initializeMobileAds();
-      } catch (e) {
-        devWarn('[Ads] initialize failed', e);
-      }
-      if (disposed) return;
       try {
         await InterstitialManager.preload();
       } catch (e) {
@@ -1350,7 +1355,15 @@ export default function App() {
             {helpSection === 'main' ? (
               <>
                 <Text style={styles.settingsTitle}>{t('app.help')}</Text>
-                <TouchableOpacity style={styles.closeButtonPill} onPress={() => { setShowHelp(false); setGalleryAdMountToken((p) => p + 1); }}>
+                <TouchableOpacity style={styles.closeButtonPill} onPress={() => {
+                  setShowHelp(false);
+                  setGalleryAdMountToken((p) => p + 1);
+                  setTimeout(() => {
+                    InterstitialManager.showIfReady({ reason: 'help-close' }).catch((e) => {
+                      devWarn('[Interstitial] help-close show failed', e);
+                    });
+                  }, 350);
+                }}>
                   <Text style={styles.closeButton}>{t('app.close')}</Text>
                 </TouchableOpacity>
               </>
@@ -1690,6 +1703,9 @@ export default function App() {
                 onPress={() => {
                   setHelpAdMountToken((p) => p + 1);
                   setShowHelp(true);
+                  InterstitialManager.preload().catch((e) => {
+                    devWarn('[Interstitial] preload on help open failed', e);
+                  });
                 }}
               >
                 <Text style={styles.headerButtonText}>❓</Text>

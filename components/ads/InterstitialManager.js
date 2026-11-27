@@ -1,29 +1,14 @@
 import { Platform } from 'react-native';
 import { getInterstitialAdUnitId, ENABLE_ADS } from '../../config/adsConfig';
 
-const COOLDOWN_MS = 4 * 60 * 1000;
-const MAX_DAILY_SHOWS = 3;
+const COOLDOWN_MS = 60 * 1000;
 const LOAD_WAIT_TIMEOUT_MS = 4000;
 
 let interstitialAd = null;
 let adLoaded = false;
 let lastShownAt = 0;
-let dailyShowCount = 0;
-let dailyCountDate = null;
 let loadInProgress = false;
-
-function getTodayKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-}
-
-function resetDailyCountIfNeeded() {
-  const today = getTodayKey();
-  if (dailyCountDate !== today) {
-    dailyCountDate = today;
-    dailyShowCount = 0;
-  }
-}
+let isShowing = false;
 
 function log(msg, extra) {
   if (__DEV__) {
@@ -107,15 +92,14 @@ export class InterstitialManager {
       log('showIfReady: disabled');
       return false;
     }
-    resetDailyCountIfNeeded();
+    if (isShowing) {
+      log('showIfReady: already showing');
+      return false;
+    }
 
     const now = Date.now();
     if (now - lastShownAt < COOLDOWN_MS) {
       log('showIfReady: cooldown active');
-      return false;
-    }
-    if (dailyShowCount >= MAX_DAILY_SHOWS) {
-      log('showIfReady: daily cap reached');
       return false;
     }
 
@@ -155,9 +139,9 @@ export class InterstitialManager {
     try {
       if (typeof interstitialAd.show === 'function') {
         log('showIfReady: showing ad');
+        isShowing = true;
         await interstitialAd.show();
         lastShownAt = now;
-        dailyShowCount += 1;
         adLoaded = false;
         log('showIfReady: shown successfully');
         return true;
@@ -165,6 +149,8 @@ export class InterstitialManager {
     } catch (e) {
       log('showIfReady show error', e);
       adLoaded = false;
+    } finally {
+      isShowing = false;
     }
     return false;
   }
