@@ -2,7 +2,7 @@
   "expo": {
     "name": "Simple-Photo-Frame",
     "slug": "PhotoFrameNew",
-    "version": "1.0.10",
+    "version": "1.0.11",
     "sdkVersion": "54.0.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
