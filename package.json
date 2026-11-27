@@ -13,6 +13,7 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "dotenv": "^16.6.1",
     "expo": "~54.0.37",
+    "expo-brightness": "~14.0.8",
     "expo-build-properties": "~1.0.10",
     "expo-constants": "~18.0.14",
     "expo-dev-client": "~6.0.21",

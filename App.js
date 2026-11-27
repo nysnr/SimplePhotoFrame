@@ -28,6 +28,8 @@ import { ENABLE_ADS } from './config/adsConfig';
 import Constants from 'expo-constants';
 import { runAttFlow, initializeMobileAds } from './utils/attManager';
 import useClockMovement, { getClockPlacement, getClockFontScale } from './utils/useClockMovement';
+import usePersistedState from './utils/usePersistedState';
+import useNightBrightness from './utils/useNightBrightness';
 import { activateKeepAwake, deactivateKeepAwake } from 'expo-keep-awake';
 
 const { width, height } = Dimensions.get('window');
@@ -89,6 +91,8 @@ const translations = {
     'settings.clockAndDateDisplay': 'Clock & Date Display',
     'settings.moveClockPosition': 'Move clock position',
     'settings.moveClockPositionHint': 'Move the clock and date every hour. This may reduce image retention, but cannot prevent it completely.',
+    'settings.nightBrightness': 'Automatic night dimming',
+    'settings.nightBrightnessHint': 'Dims the screen between 22:00 and 06:00, and restores brightness during the day. Turning this off returns the screen to its original brightness.',
     'settings.adHeartbeatInterval': 'Banner ad refresh interval (debug)',
     'settings.adHeartbeatHint': 'Shortening this interval requests a new banner ad more often. Useful for reducing "no ad available" gaps on iPad during long sessions. The default value is 10 minutes.',
     'settings.secondsShort': '{{count}}s',
@@ -178,6 +182,8 @@ const translations = {
     'settings.clockAndDateDisplay': '時計・日付表示',
     'settings.moveClockPosition': '時間表示位置を移動させる',
     'settings.moveClockPositionHint': '時計と日付を1時間ごとに移動します。焼け付きの軽減を目的とし、完全に防ぐものではありません。',
+    'settings.nightBrightness': '夜間の明るさ自動調整',
+    'settings.nightBrightnessHint': '22:00〜6:00は画面を暗くし、日中（6:00〜22:00）は明るくします。オフにすると元の明るさに戻ります。',
     'settings.adHeartbeatInterval': 'バナー広告の更新間隔（デバッグ用）',
     'settings.adHeartbeatHint': '間隔を短くすると、より高頻度で新しいバナー広告をリクエストします。iPad長時間利用時の「広告なし」時間帯を減らすのに役立ちます。初期値は10分です。',
     'settings.secondsShort': '{{count}}秒',
@@ -267,6 +273,8 @@ const translations = {
     'settings.clockAndDateDisplay': '时钟与日期显示',
     'settings.moveClockPosition': '移动时间显示位置',
     'settings.moveClockPositionHint': '每小时移动时钟和日期。这有助于减轻残影，但无法完全防止。',
+    'settings.nightBrightness': '夜间亮度自动调整',
+    'settings.nightBrightnessHint': '22:00 至 6:00 将屏幕调暗，白天（6:00 至 22:00）调亮。关闭后将恢复原来的亮度。',
     'settings.adHeartbeatInterval': '横幅广告刷新间隔（调试）',
     'settings.adHeartbeatHint': '缩短间隔会更频繁地请求新的横幅广告。有助于减少 iPad 长时间使用时出现“暂时没有广告”的时段。默认值为 10 分钟。',
     'settings.secondsShort': '{{count}}秒',
@@ -356,6 +364,8 @@ const translations = {
     'settings.clockAndDateDisplay': 'Mostrar reloj y fecha',
     'settings.moveClockPosition': 'Mover la posición del reloj',
     'settings.moveClockPositionHint': 'Mueve el reloj y la fecha cada hora. Puede reducir la retención de imagen, pero no evitarla por completo.',
+    'settings.nightBrightness': 'Atenuación nocturna automática',
+    'settings.nightBrightnessHint': 'Atenúa la pantalla entre las 22:00 y las 6:00 y la aclara durante el día. Al desactivarlo, la pantalla vuelve a su brillo original.',
     'settings.adHeartbeatInterval': 'Intervalo de actualización del banner (depuración)',
     'settings.adHeartbeatHint': 'Reducir el intervalo solicita un nuevo banner con más frecuencia. Ayuda a reducir los periodos sin anuncios en iPad durante sesiones largas. El valor predeterminado es 10 minutos.',
     'settings.secondsShort': '{{count}} s',
@@ -500,7 +510,11 @@ export default function App() {
     return 'en';
   };
 
-  const [currentLanguage, setCurrentLanguage] = useState(getInitialLanguage());
+  const [currentLanguage, setCurrentLanguage] = usePersistedState(
+    'simplephotoframe.language',
+    getInitialLanguage(),
+    (value) => ['en', 'ja', 'zh', 'es'].includes(value)
+  );
   const [photos, setPhotos] = useState([]);
   const [selectedPhotos, setSelectedPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -513,8 +527,16 @@ export default function App() {
   const [slideshowAdMountToken, setSlideshowAdMountToken] = useState(0);
   const [galleryAdMountToken, setGalleryAdMountToken] = useState(() => Date.now());
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const [matteColor, setMatteColor] = useState('dark');
-  const [slideshowInterval, setSlideshowInterval] = useState(1800000);
+  const [matteColor, setMatteColor] = usePersistedState(
+    'simplephotoframe.matteColor',
+    'dark',
+    (value) => Object.prototype.hasOwnProperty.call(matteColors, value)
+  );
+  const [slideshowInterval, setSlideshowInterval] = usePersistedState(
+    'simplephotoframe.slideshowInterval',
+    1800000,
+    (value) => [3000, 180000, 1800000, 10800000].includes(value)
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [hasNextPage, setHasNextPage] = useState(true);
   const [endCursor, setEndCursor] = useState(null);
@@ -523,17 +545,30 @@ export default function App() {
   const [showStartupSplash, setShowStartupSplash] = useState(true);
   const [photoGridWidth, setPhotoGridWidth] = useState(width);
 
-  const [showClock, setShowClock] = useState(true);
-  const [showDate, setShowDate] = useState(true);
+  const [showClock, setShowClock] = usePersistedState(
+    'simplephotoframe.showClock',
+    true,
+    (value) => typeof value === 'boolean'
+  );
+  const [showDate, setShowDate] = usePersistedState(
+    'simplephotoframe.showDate',
+    true,
+    (value) => typeof value === 'boolean'
+  );
   const [now, setNow] = useState(new Date());
   const clockMovement = useClockMovement(showSlideshow, now.getTime());
+  const nightBrightness = useNightBrightness();
   const [clockAreaHeight, setClockAreaHeight] = useState(0);
   const [showCloseButton, setShowCloseButton] = useState(true);
   // The adaptive banner reports its real height after it loads.  Keep this
   // separately so the slideshow content never occupies the banner's space.
   const [slideshowAdHeight, setSlideshowAdHeight] = useState(ENABLE_ADS ? 50 : 0);
   // 時計・日付サイズ（small | medium | large）。現在の組み合わせを「medium」とする
-  const [clockDateSize, setClockDateSize] = useState('medium');
+  const [clockDateSize, setClockDateSize] = usePersistedState(
+    'simplephotoframe.clockDateSize',
+    'medium',
+    (value) => ['small', 'medium', 'large', 'extraLarge'].includes(value)
+  );
   
   // ヘルプ画面の表示セクション状態 ('main' | 'privacy' | 'terms')
   const [helpSection, setHelpSection] = useState('main');
@@ -1327,6 +1362,29 @@ export default function App() {
                   </TouchableOpacity>
                 ))}
               </View>
+            </View>
+
+            {/* 夜間の明るさ自動調整 */}
+            <View style={styles.settingSection}>
+              <TouchableOpacity
+                accessibilityRole="checkbox"
+                accessibilityLabel={t('settings.nightBrightness')}
+                accessibilityHint={t('settings.nightBrightnessHint')}
+                accessibilityState={{ checked: nightBrightness.enabled, disabled: !nightBrightness.ready }}
+                aria-checked={nightBrightness.enabled}
+                aria-disabled={!nightBrightness.ready}
+                disabled={!nightBrightness.ready}
+                onPress={() => nightBrightness.setEnabled((prev) => !prev)}
+                style={styles.clockMovementRow}
+              >
+                <View style={[styles.clockMovementBox, nightBrightness.enabled && styles.activeIntervalButton]}>
+                  {nightBrightness.enabled && <Text style={styles.activeIntervalButtonText}>{'\u2713'}</Text>}
+                </View>
+                <Text style={[styles.settingLabel, { flex: 1, marginBottom: 0 }]}>
+                  {t('settings.nightBrightness')}
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.clockMovementHint}>{t('settings.nightBrightnessHint')}</Text>
             </View>
 
           </ScrollView>
