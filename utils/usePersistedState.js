@@ -11,6 +11,7 @@ export default function usePersistedState(key, defaultValue, isValid = null) {
   const [value, setValue] = useState(defaultValue);
   const [ready, setReady] = useState(false);
   const valueRef = useRef(defaultValue);
+  const defaultRef = useRef(defaultValue);
   const touchedRef = useRef(false);
   const pendingWrite = useRef(Promise.resolve());
 
@@ -49,5 +50,10 @@ export default function usePersistedState(key, defaultValue, isValid = null) {
       .catch((error) => console.warn(`Setting "${key}" could not be saved`, error));
   }, [key]);
 
-  return [value, update, ready];
+  // 既定値に戻す（設定のリセット用）
+  const reset = useCallback(() => {
+    update(defaultRef.current);
+  }, [update]);
+
+  return [value, update, ready, reset];
 }

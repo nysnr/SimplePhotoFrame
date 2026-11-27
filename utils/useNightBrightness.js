@@ -3,37 +3,70 @@ import { AppState } from 'react-native';
 import * as Brightness from 'expo-brightness';
 import usePersistedState from './usePersistedState';
 
-// 夜間とみなす時間帯（22:00 〜 翌 06:00）は輝度を下げる
-export const NIGHT_START_HOUR = 22;
-export const NIGHT_END_HOUR = 6;
+// 夜間（既定では 22:00 〜 翌 06:00）は輝度を下げる
+export const DEFAULT_NIGHT_START_HOUR = 22;
+export const DEFAULT_NIGHT_END_HOUR = 6;
+export const DEFAULT_ENABLED = true;
 export const NIGHT_BRIGHTNESS = 0.2;
 export const DAY_BRIGHTNESS = 0.8;
 
 // 時間帯の境界をまたいだかを確認する間隔（1分）
 const CHECK_INTERVAL_MS = 60 * 1000;
 
-const STORAGE_KEY = 'simplephotoframe.nightBrightness';
+const STORAGE_KEY_ENABLED = 'simplephotoframe.nightBrightness';
+const STORAGE_KEY_START = 'simplephotoframe.nightBrightnessStartHour';
+const STORAGE_KEY_END = 'simplephotoframe.nightBrightnessEndHour';
 
-export function isNightTime(date = new Date()) {
+const isBoolean = (value) => typeof value === 'boolean';
+const isHour = (value) => Number.isInteger(value) && value >= 0 && value <= 23;
+
+/**
+ * 指定した時間帯かどうかを判定する。
+ * startHour === endHour のときは夜間なし（常に日中）として扱う。
+ */
+export function isNightTime(
+  date = new Date(),
+  startHour = DEFAULT_NIGHT_START_HOUR,
+  endHour = DEFAULT_NIGHT_END_HOUR
+) {
+  if (startHour === endHour) return false;
   const hour = date.getHours();
-  return hour >= NIGHT_START_HOUR || hour < NIGHT_END_HOUR;
+  if (startHour < endHour) return hour >= startHour && hour < endHour;
+  return hour >= startHour || hour < endHour;
 }
 
-export function getTargetBrightness(date = new Date()) {
-  return isNightTime(date) ? NIGHT_BRIGHTNESS : DAY_BRIGHTNESS;
+export function getTargetBrightness(
+  date = new Date(),
+  startHour = DEFAULT_NIGHT_START_HOUR,
+  endHour = DEFAULT_NIGHT_END_HOUR
+) {
+  return isNightTime(date, startHour, endHour) ? NIGHT_BRIGHTNESS : DAY_BRIGHTNESS;
 }
 
 /**
  * 時間帯に応じて画面輝度を切り替えるフック。
  * - 有効化した時点の輝度を記録し、無効化・アンマウント時に必ず元へ戻す
  * - 1分ごと、およびフォアグラウンド復帰時に時間帯を再評価する
+ * - 夜間の開始・終了時刻は設定で変更できる
  */
 export default function useNightBrightness() {
-  const [enabled, setEnabled, ready] = usePersistedState(
-    STORAGE_KEY,
-    false,
-    (value) => typeof value === 'boolean',
+  const [enabled, setEnabled, enabledReady, resetEnabled] = usePersistedState(
+    STORAGE_KEY_ENABLED,
+    DEFAULT_ENABLED,
+    isBoolean
   );
+  const [startHour, setStartHour, startReady, resetStartHour] = usePersistedState(
+    STORAGE_KEY_START,
+    DEFAULT_NIGHT_START_HOUR,
+    isHour
+  );
+  const [endHour, setEndHour, endReady, resetEndHour] = usePersistedState(
+    STORAGE_KEY_END,
+    DEFAULT_NIGHT_END_HOUR,
+    isHour
+  );
+  const ready = enabledReady && startReady && endReady;
+
   const originalRef = useRef(null);
   const appliedRef = useRef(null);
 
@@ -49,8 +82,16 @@ export default function useNightBrightness() {
     }
   }, []);
 
+  // アンマウント時は必ず元の輝度へ戻す（何も変更していなければ no-op）
+  useEffect(() => () => { restore(); }, [restore]);
+
   useEffect(() => {
-    if (!ready || !enabled) return undefined;
+    if (!ready) return undefined;
+
+    if (!enabled) {
+      restore();
+      return undefined;
+    }
 
     let disposed = false;
     let timer = null;
@@ -65,7 +106,7 @@ export default function useNightBrightness() {
         }
       }
       if (disposed) return;
-      const target = getTargetBrightness();
+      const target = getTargetBrightness(new Date(), startHour, endHour);
       if (appliedRef.current === target) return;
       try {
         await Brightness.setBrightnessAsync(target);
@@ -85,9 +126,23 @@ export default function useNightBrightness() {
       disposed = true;
       if (timer) clearInterval(timer);
       subscription.remove();
-      restore();
     };
-  }, [enabled, ready, restore]);
+  }, [enabled, ready, startHour, endHour, restore]);
 
-  return { enabled, setEnabled, ready };
+  const reset = useCallback(() => {
+    resetEnabled();
+    resetStartHour();
+    resetEndHour();
+  }, [resetEnabled, resetStartHour, resetEndHour]);
+
+  return {
+    enabled,
+    setEnabled,
+    ready,
+    startHour,
+    setStartHour,
+    endHour,
+    setEndHour,
+    reset,
+  };
 }

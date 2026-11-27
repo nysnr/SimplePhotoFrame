@@ -59,6 +59,14 @@ export default function useClockMovement(active, nowMs) {
       .catch((error) => console.warn('Clock movement preference could not be saved', error));
   }, [enabled, ready]);
 
+  const reset = useCallback(() => {
+    if (!ready) return;
+    setEnabled(true);
+    pendingWrite.current = pendingWrite.current
+      .then(() => AsyncStorage.setItem(STORAGE_KEY, 'true'))
+      .catch((error) => console.warn('Clock movement preference could not be saved', error));
+  }, [ready]);
+
   useEffect(() => {
     // Restart from bottom-center when starting a slideshow or enabling movement.
     setStartedAt(active && enabled ? Date.now() : null);
@@ -68,5 +76,5 @@ export default function useClockMovement(active, nowMs) {
     ? getClockPosition(nowMs - startedAt)
     : CLOCK_POSITIONS[0];
 
-  return { enabled, ready, toggle, position };
+  return { enabled, ready, toggle, position, reset };
 }

@@ -92,7 +92,12 @@ const translations = {
     'settings.moveClockPosition': 'Move clock position',
     'settings.moveClockPositionHint': 'Move the clock and date every hour. This may reduce image retention, but cannot prevent it completely.',
     'settings.nightBrightness': 'Automatic night dimming',
-    'settings.nightBrightnessHint': 'Dims the screen between 22:00 and 06:00, and restores brightness during the day. Turning this off returns the screen to its original brightness.',
+    'settings.nightBrightnessHint': 'Dims the screen during the hours you set (default 22:00-06:00) and brightens it during the day. Turning this off returns the screen to its original brightness.',
+    'settings.nightBrightnessStart': 'Night starts',
+    'settings.nightBrightnessEnd': 'Night ends',
+    'settings.resetSettings': 'Reset settings',
+    'settings.resetSettingsHint': 'Restores all settings on this screen to their defaults.',
+    'settings.resetSettingsConfirm': 'Reset all settings on this screen to their defaults?',
     'settings.adHeartbeatInterval': 'Banner ad refresh interval (debug)',
     'settings.adHeartbeatHint': 'Shortening this interval requests a new banner ad more often. Useful for reducing "no ad available" gaps on iPad during long sessions. The default value is 10 minutes.',
     'settings.secondsShort': '{{count}}s',
@@ -183,7 +188,12 @@ const translations = {
     'settings.moveClockPosition': '時間表示位置を移動させる',
     'settings.moveClockPositionHint': '時計と日付を1時間ごとに移動します。焼け付きの軽減を目的とし、完全に防ぐものではありません。',
     'settings.nightBrightness': '夜間の明るさ自動調整',
-    'settings.nightBrightnessHint': '22:00〜6:00は画面を暗くし、日中（6:00〜22:00）は明るくします。オフにすると元の明るさに戻ります。',
+    'settings.nightBrightnessHint': '設定した時間帯（初期値 22:00〜6:00）は画面を暗くし、それ以外は明るくします。オフにすると元の明るさに戻ります。',
+    'settings.nightBrightnessStart': '夜間の開始時刻',
+    'settings.nightBrightnessEnd': '夜間の終了時刻',
+    'settings.resetSettings': '設定をリセット',
+    'settings.resetSettingsHint': 'この画面の設定をすべて初期値に戻します。',
+    'settings.resetSettingsConfirm': 'この画面の設定をすべて初期値に戻しますか？',
     'settings.adHeartbeatInterval': 'バナー広告の更新間隔（デバッグ用）',
     'settings.adHeartbeatHint': '間隔を短くすると、より高頻度で新しいバナー広告をリクエストします。iPad長時間利用時の「広告なし」時間帯を減らすのに役立ちます。初期値は10分です。',
     'settings.secondsShort': '{{count}}秒',
@@ -274,7 +284,12 @@ const translations = {
     'settings.moveClockPosition': '移动时间显示位置',
     'settings.moveClockPositionHint': '每小时移动时钟和日期。这有助于减轻残影，但无法完全防止。',
     'settings.nightBrightness': '夜间亮度自动调整',
-    'settings.nightBrightnessHint': '22:00 至 6:00 将屏幕调暗，白天（6:00 至 22:00）调亮。关闭后将恢复原来的亮度。',
+    'settings.nightBrightnessHint': '在设定的时间段（默认 22:00〜6:00）将屏幕调暗，其余时间调亮。关闭后将恢复原来的亮度。',
+    'settings.nightBrightnessStart': '夜间开始时间',
+    'settings.nightBrightnessEnd': '夜间结束时间',
+    'settings.resetSettings': '重置设置',
+    'settings.resetSettingsHint': '将本页面的所有设置恢复为默认值。',
+    'settings.resetSettingsConfirm': '确定要将本页面的所有设置恢复为默认值吗？',
     'settings.adHeartbeatInterval': '横幅广告刷新间隔（调试）',
     'settings.adHeartbeatHint': '缩短间隔会更频繁地请求新的横幅广告。有助于减少 iPad 长时间使用时出现“暂时没有广告”的时段。默认值为 10 分钟。',
     'settings.secondsShort': '{{count}}秒',
@@ -365,7 +380,12 @@ const translations = {
     'settings.moveClockPosition': 'Mover la posición del reloj',
     'settings.moveClockPositionHint': 'Mueve el reloj y la fecha cada hora. Puede reducir la retención de imagen, pero no evitarla por completo.',
     'settings.nightBrightness': 'Atenuación nocturna automática',
-    'settings.nightBrightnessHint': 'Atenúa la pantalla entre las 22:00 y las 6:00 y la aclara durante el día. Al desactivarlo, la pantalla vuelve a su brillo original.',
+    'settings.nightBrightnessHint': 'Atenúa la pantalla durante el horario configurado (predeterminado 22:00-06:00) y la aclara durante el día. Al desactivarlo, la pantalla vuelve a su brillo original.',
+    'settings.nightBrightnessStart': 'Inicio de la noche',
+    'settings.nightBrightnessEnd': 'Fin de la noche',
+    'settings.resetSettings': 'Restablecer ajustes',
+    'settings.resetSettingsHint': 'Restaura todos los ajustes de esta pantalla a sus valores predeterminados.',
+    'settings.resetSettingsConfirm': '¿Restablecer todos los ajustes de esta pantalla a sus valores predeterminados?',
     'settings.adHeartbeatInterval': 'Intervalo de actualización del banner (depuración)',
     'settings.adHeartbeatHint': 'Reducir el intervalo solicita un nuevo banner con más frecuencia. Ayuda a reducir los periodos sin anuncios en iPad durante sesiones largas. El valor predeterminado es 10 minutos.',
     'settings.secondsShort': '{{count}} s',
@@ -510,7 +530,7 @@ export default function App() {
     return 'en';
   };
 
-  const [currentLanguage, setCurrentLanguage] = usePersistedState(
+  const [currentLanguage, setCurrentLanguage, , resetCurrentLanguage] = usePersistedState(
     'simplephotoframe.language',
     getInitialLanguage(),
     (value) => ['en', 'ja', 'zh', 'es'].includes(value)
@@ -527,12 +547,12 @@ export default function App() {
   const [slideshowAdMountToken, setSlideshowAdMountToken] = useState(0);
   const [galleryAdMountToken, setGalleryAdMountToken] = useState(() => Date.now());
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const [matteColor, setMatteColor] = usePersistedState(
+  const [matteColor, setMatteColor, , resetMatteColor] = usePersistedState(
     'simplephotoframe.matteColor',
     'dark',
     (value) => Object.prototype.hasOwnProperty.call(matteColors, value)
   );
-  const [slideshowInterval, setSlideshowInterval] = usePersistedState(
+  const [slideshowInterval, setSlideshowInterval, , resetSlideshowInterval] = usePersistedState(
     'simplephotoframe.slideshowInterval',
     1800000,
     (value) => [3000, 180000, 1800000, 10800000].includes(value)
@@ -545,12 +565,12 @@ export default function App() {
   const [showStartupSplash, setShowStartupSplash] = useState(true);
   const [photoGridWidth, setPhotoGridWidth] = useState(width);
 
-  const [showClock, setShowClock] = usePersistedState(
+  const [showClock, setShowClock, , resetShowClock] = usePersistedState(
     'simplephotoframe.showClock',
     true,
     (value) => typeof value === 'boolean'
   );
-  const [showDate, setShowDate] = usePersistedState(
+  const [showDate, setShowDate, , resetShowDate] = usePersistedState(
     'simplephotoframe.showDate',
     true,
     (value) => typeof value === 'boolean'
@@ -564,7 +584,7 @@ export default function App() {
   // separately so the slideshow content never occupies the banner's space.
   const [slideshowAdHeight, setSlideshowAdHeight] = useState(ENABLE_ADS ? 50 : 0);
   // 時計・日付サイズ（small | medium | large）。現在の組み合わせを「medium」とする
-  const [clockDateSize, setClockDateSize] = usePersistedState(
+  const [clockDateSize, setClockDateSize, , resetClockDateSize] = usePersistedState(
     'simplephotoframe.clockDateSize',
     'medium',
     (value) => ['small', 'medium', 'large', 'extraLarge'].includes(value)
@@ -1168,7 +1188,34 @@ export default function App() {
     );
   };
 
-  // 設定画面のレンダリング
+  // 時刻（0-23）を "22:00" 形式で表示する
+  const formatHour = (hour) => `${String(hour).padStart(2, '0')}:00`;
+
+  // 設定をすべて初期値に戻す
+  const resetSettings = () => {
+    Alert.alert(
+      t('settings.resetSettings'),
+      t('settings.resetSettingsConfirm'),
+      [
+        { text: t('Cancel'), style: 'cancel' },
+        {
+          text: t('settings.resetSettings'),
+          style: 'destructive',
+          onPress: () => {
+            resetCurrentLanguage();
+            resetMatteColor();
+            resetSlideshowInterval();
+            resetShowClock();
+            resetShowDate();
+            resetClockDateSize();
+            clockMovement.reset();
+            nightBrightness.reset();
+          },
+        },
+      ]
+    );
+  };
+
   const renderSettings = () => {
     if (!showSettings) return null;
     return (
@@ -1196,6 +1243,20 @@ export default function App() {
           </View>
           
           <ScrollView style={styles.settingsScroll} contentContainerStyle={{ paddingBottom: 110 }}>
+            {/* 設定のリセット */}
+            <View style={styles.settingSection}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={t('settings.resetSettings')}
+                accessibilityHint={t('settings.resetSettingsHint')}
+                onPress={resetSettings}
+                style={styles.resetButton}
+              >
+                <Text style={styles.resetButtonText}>{t('settings.resetSettings')}</Text>
+              </TouchableOpacity>
+              <Text style={styles.clockMovementHint}>{t('settings.resetSettingsHint')}</Text>
+            </View>
+
             {/* 言語設定 */}
             <View style={styles.settingSection}>
               <Text style={styles.settingLabel}>{t('settings.language')}</Text>
@@ -1385,6 +1446,58 @@ export default function App() {
                 </Text>
               </TouchableOpacity>
               <Text style={styles.clockMovementHint}>{t('settings.nightBrightnessHint')}</Text>
+              {nightBrightness.enabled && (
+                <View style={styles.nightTimeRows}>
+                  <View style={styles.nightTimeRow}>
+                    <Text style={styles.nightTimeLabel}>{t('settings.nightBrightnessStart')}</Text>
+                    <View style={styles.stepper}>
+                      <TouchableOpacity
+                        style={styles.stepperButton}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${t('settings.nightBrightnessStart')} -1`}
+                        disabled={!nightBrightness.ready}
+                        onPress={() => nightBrightness.setStartHour((h) => (h + 23) % 24)}
+                      >
+                        <Text style={styles.stepperButtonText}>{'-'}</Text>
+                      </TouchableOpacity>
+                      <Text style={styles.stepperValue}>{formatHour(nightBrightness.startHour)}</Text>
+                      <TouchableOpacity
+                        style={styles.stepperButton}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${t('settings.nightBrightnessStart')} +1`}
+                        disabled={!nightBrightness.ready}
+                        onPress={() => nightBrightness.setStartHour((h) => (h + 1) % 24)}
+                      >
+                        <Text style={styles.stepperButtonText}>{'+'}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  <View style={styles.nightTimeRow}>
+                    <Text style={styles.nightTimeLabel}>{t('settings.nightBrightnessEnd')}</Text>
+                    <View style={styles.stepper}>
+                      <TouchableOpacity
+                        style={styles.stepperButton}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${t('settings.nightBrightnessEnd')} -1`}
+                        disabled={!nightBrightness.ready}
+                        onPress={() => nightBrightness.setEndHour((h) => (h + 23) % 24)}
+                      >
+                        <Text style={styles.stepperButtonText}>{'-'}</Text>
+                      </TouchableOpacity>
+                      <Text style={styles.stepperValue}>{formatHour(nightBrightness.endHour)}</Text>
+                      <TouchableOpacity
+                        style={styles.stepperButton}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${t('settings.nightBrightnessEnd')} +1`}
+                        disabled={!nightBrightness.ready}
+                        onPress={() => nightBrightness.setEndHour((h) => (h + 1) % 24)}
+                      >
+                        <Text style={styles.stepperButtonText}>{'+'}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              )}
             </View>
 
           </ScrollView>
@@ -2333,6 +2446,62 @@ export default function App() {
     color: theme.textPrimary,
     fontSize: 13,
     marginTop: 8,
+  },
+  resetButton: {
+    backgroundColor: theme.surfaceSoft,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#D9534F',
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  resetButtonText: {
+    color: '#D9534F',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  nightTimeRows: {
+    marginTop: 12,
+  },
+  nightTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  nightTimeLabel: {
+    color: theme.textPrimary,
+    fontSize: 15,
+    fontWeight: '600',
+    flexShrink: 1,
+    marginRight: 8,
+  },
+  stepper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stepperButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.surfaceSoft,
+    borderWidth: 1,
+    borderColor: theme.border,
+  },
+  stepperButtonText: {
+    color: theme.textPrimary,
+    fontSize: 22,
+    fontWeight: '700',
+    lineHeight: 24,
+  },
+  stepperValue: {
+    color: theme.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+    minWidth: 68,
+    textAlign: 'center',
   },
   // スライドショー画面のスタイル
   slideshowContainer: {
